@@ -69,26 +69,3 @@ npm run start
 
 ---
 
-## 🔗 Git Workflow & Deployment
-
-### Switching Accounts
-If you need to switch or check your active GitHub CLI account before pushing:
-```bash
-# Check status
-gh auth status
-
-# Switch account
-gh auth switch
-```
-
-### Commits & Pushing
-```bash
-# Stage changes
-git add .
-
-# Create commit
-git commit -m "feat: your feature message"
-
-# Push to repository
-git push origin main
-```
