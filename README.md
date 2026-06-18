@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Skynet E-Commerce - Frontend Storefront
 
-## Getting Started
+A modern, high-performance, and responsive e-commerce storefront built using Next.js 16, React 19, TypeScript, and Tailwind CSS v4.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Key Features
+
+- **Next.js 16 App Router:** Optimized routing, server components, and layouts.
+- **Tailwind CSS v4:** Premium, modern styling utilizing HSL color systems and micro-animations.
+- **TypeScript:** Fully typed codebase for scalable and robust development.
+- **SEO Optimized:** Structured semantic HTML, custom metadata configurations, and high performance.
+- **Responsive Design:** Optimized for Desktop, Tablet, and Mobile layouts.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Core:** Next.js 16 (App Router), React 19, React DOM 19
+- **Styling:** Tailwind CSS v4, PostCSS, Vanilla CSS variables
+- **Language:** TypeScript
+- **Linter:** ESLint (v9)
+
+---
+
+## 📦 Project Structure
+
+```text
+├── app/                  # Next.js App Router (pages, layouts, styles)
+│   ├── favicon.ico       # Favicon
+│   ├── globals.css       # Global stylesheet (Tailwind v4 imports)
+│   ├── layout.tsx        # Main application layout
+│   └── page.tsx          # Storefront homepage template
+├── public/               # Static assets (images, SVGs, fonts)
+├── eslint.config.mjs     # ESLint configuration
+├── next.config.ts        # Next.js configuration
+├── postcss.config.mjs    # PostCSS configuration for Tailwind CSS
+├── tsconfig.json         # TypeScript configurations
+└── package.json          # Project dependencies & scripts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+Ensure you have [Node.js](https://nodejs.org/) (v18.x or later recommended) and `npm` installed.
 
-## Learn More
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Build for Production
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Start Production Server
+```bash
+npm run start
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔗 Git Workflow & Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Switching Accounts
+If you need to switch or check your active GitHub CLI account before pushing:
+```bash
+# Check status
+gh auth status
+
+# Switch account
+gh auth switch
+```
+
+### Commits & Pushing
+```bash
+# Stage changes
+git add .
+
+# Create commit
+git commit -m "feat: your feature message"
+
+# Push to repository
+git push origin main
+```
