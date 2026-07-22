@@ -1,0 +1,35 @@
+/**
+ * Admin typography tokens — aligned with Billing App-F.
+ * Primary UI size: text-sm (14px). Page titles: text-2xl font-semibold.
+ */
+export const adminType = {
+  pageTitle: "text-2xl font-semibold text-gray-800",
+  pageDescription: "text-sm text-muted-foreground",
+  viewTitle: "text-xl font-bold text-gray-800",
+  viewSubtitle: "text-sm text-gray-400",
+  sectionTitle: "text-sm font-semibold uppercase tracking-widest text-gray-400",
+  formSectionTitle: "text-xs font-semibold uppercase tracking-widest text-gray-400",
+  label: "text-sm font-medium text-gray-500",
+  value: "text-sm font-medium text-gray-800",
+  badge: "text-xs font-medium",
+  table: "w-full text-sm",
+  tableHead: "font-semibold",
+  tableCellPrimary: "font-medium text-gray-800",
+  sidebarBrand: "text-lg font-bold text-blue-900",
+  sidebarSection: "text-[11px] font-semibold text-[#7987a1] tracking-wider",
+  sidebarNav: "text-sm",
+  sidebarSubNav: "text-[12px]",
+  cardTitle: "font-heading text-base leading-snug font-medium text-gray-800",
+  cardDescription: "text-sm text-muted-foreground",
+  navSearch: "text-sm text-gray-500",
+  navUserName: "text-sm font-semibold text-gray-800",
+  navUserEmail: "text-xs text-gray-500",
+  navMenuItem: "text-sm text-gray-700",
+  navMenuItemDanger: "text-sm text-red-600",
+  backButton: "text-sm font-medium",
+  tabButton: "text-sm font-semibold",
+  emphasisTotal: "text-base font-bold text-gray-800",
+  metricLabel: "text-sm font-medium text-gray-700",
+  loading: "text-sm text-gray-400",
+  error: "text-sm text-red-400",
+} as const;

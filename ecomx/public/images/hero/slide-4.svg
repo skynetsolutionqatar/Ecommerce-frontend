@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="CCTV security">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c1929"/>
+      <stop offset="100%" stop-color="#005a94"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g transform="translate(900,220)">
+    <rect x="60" y="200" width="24" height="120" rx="4" fill="#475569"/>
+    <ellipse cx="72" cy="200" rx="80" ry="50" fill="#1e293b" stroke="#0075bb" stroke-width="4"/>
+    <circle cx="72" cy="200" r="28" fill="#0075bb" opacity="0.4"/>
+    <circle cx="72" cy="200" r="12" fill="#7ec8f2"/>
+  </g>
+  <rect x="1050" y="320" width="200" height="140" rx="8" fill="#0f172a" opacity="0.9" stroke="#0075bb" stroke-width="2"/>
+  <rect x="1070" y="350" width="160" height="80" rx="4" fill="#0075bb" opacity="0.25"/>
+  <text x="120" y="720" fill="#ffffff" font-family="system-ui,sans-serif" font-size="28" font-weight="600" opacity="0.9">Hikvision � CCTV &amp; NVR</text>
+</svg>

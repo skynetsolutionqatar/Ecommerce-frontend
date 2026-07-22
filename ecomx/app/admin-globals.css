@@ -1,0 +1,357 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-heading: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-display: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-label: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-mono: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Theme tokens on :root so portaled dialogs (outside .admin-shell) inherit shadcn colors */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
+}
+
+.admin-shell {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  .admin-shell {
+    @apply bg-background text-foreground font-sans text-sm;
+  }
+
+  .admin-shell table {
+    @apply text-sm;
+  }
+
+  .admin-shell th {
+    @apply font-semibold;
+  }
+}
+
+.admin-shell .hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-shell .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Navbar layout (Billing App-F style) ─── */
+
+.admin-shell .admin-nav-clock {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 0.375rem 0.75rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.admin-shell .admin-nav-clock-icon {
+  color: #059669;
+}
+
+.admin-shell .admin-nav-clock-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.admin-shell .admin-nav-clock-time {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #111827;
+}
+
+.admin-shell .admin-nav-clock-date {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  line-height: 1.2;
+}
+
+.admin-shell .admin-nav-clock-location {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #059669;
+}
+
+/* ─── Command search dialog (Billing App-F exact style) ─── */
+[data-slot="dialog-overlay"] {
+  z-index: 50 !important;
+  background: rgb(15 23 42 / 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+[data-slot="dialog-content"].admin-command-search-dialog {
+  z-index: 51 !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(calc(100vw - 2rem), 30rem) !important;
+  max-width: 30rem !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+.admin-command-search-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 500px !important;
+  overflow: hidden !important;
+  border-radius: 1rem !important;
+  border: 1px solid rgb(255 255 255 / 0.12) !important;
+  background: rgb(156 163 175 / 0.92) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 25px 50px -12px rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(255 255 255 / 0.08) inset !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.admin-command-search-dialog [data-slot="command-input-wrapper"] {
+  padding: 0.75rem 0.75rem 0.5rem;
+}
+
+.admin-command-search-dialog [data-slot="input-group"] {
+  height: 2.5rem !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid rgb(255 255 255 / 0.25) !important;
+  background: rgb(255 255 255 / 0.22) !important;
+  box-shadow: none !important;
+}
+
+.admin-command-search-dialog [data-slot="command-input"] {
+  color: #ffffff !important;
+  font-size: 0.875rem !important;
+}
+
+.admin-command-search-dialog [data-slot="command-input"]::placeholder {
+  color: rgb(229 231 235) !important;
+}
+
+.admin-command-search-dialog [data-slot="input-group"] svg {
+  color: rgb(229 231 235) !important;
+  opacity: 1 !important;
+}
+
+.admin-command-search-dialog [data-slot="command-list"] {
+  max-height: 22rem;
+  padding: 0 0.5rem 0.75rem;
+}
+
+.admin-command-search-dialog [cmdk-group-heading] {
+  color: rgb(209 213 219) !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 0.625rem 0.75rem 0.375rem !important;
+}
+
+.admin-command-search-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.625rem !important;
+  margin: 0 0.25rem 0.125rem !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  color: #ffffff !important;
+}
+
+.admin-command-search-item svg:not(.ml-auto) {
+  color: #ffffff !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  flex-shrink: 0;
+}
+
+.admin-command-search-item svg.ml-auto {
+  display: none !important;
+}
+
+.admin-command-search-item[data-selected="true"],
+.admin-command-search-item[aria-selected="true"] {
+  background: #ffffff !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12) !important;
+}
+
+.admin-command-search-item[data-selected="true"] svg:not(.ml-auto),
+.admin-command-search-item[aria-selected="true"] svg:not(.ml-auto) {
+  color: #111827 !important;
+}
+
+.admin-command-search-dialog [data-slot="command-empty"] {
+  color: rgb(229 231 235);
+  padding: 1.5rem 0;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* ─── List filter select ─── */
+.admin-shell .admin-filter-select {
+  height: 2.5rem;
+  min-width: 10rem;
+  appearance: none;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  padding: 0 2.25rem 0 0.875rem;
+  font-size: 0.875rem;
+  color: #374151;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.admin-shell .admin-filter-select:hover {
+  border-color: #d1d5db;
+}
+
+.admin-shell .admin-filter-select:focus {
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgb(156 163 175 / 0.25);
+}
+
+.admin-shell .admin-filter-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-shell .admin-filter-wrap svg {
+  pointer-events: none;
+  position: absolute;
+  right: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ─── List search input ─── */
+.admin-shell .admin-list-search-input {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 0 0.75rem 0 2.25rem;
+  font-size: 0.875rem;
+  color: #111827;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.admin-shell .admin-list-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.admin-shell .admin-list-search-input:hover {
+  border-color: #d1d5db;
+}
+
+.admin-shell .admin-list-search-input:focus {
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgb(156 163 175 / 0.25);
+}
+
+.admin-shell .admin-list-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 20rem;
+}
+
+.admin-shell .admin-list-search-wrap svg {
+  pointer-events: none;
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
