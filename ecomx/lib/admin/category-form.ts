@@ -10,6 +10,7 @@ export type CategoryFormValues = {
   color: string;
   imgKey: string;
   parent: string;
+  isParent: boolean;
   displayOrder: number | "";
   isActive: boolean;
 };
@@ -22,6 +23,7 @@ export const defaultCategoryFormValues: CategoryFormValues = {
   color: "#111827",
   imgKey: "",
   parent: "",
+  isParent: false,
   displayOrder: "",
   isActive: true,
 };
@@ -39,6 +41,7 @@ export const categoryValidationSchema = Yup.object({
     .matches(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: Yup.string().max(500, "Description cannot exceed 500 characters"),
   parent: Yup.string().nullable(),
+  isParent: Yup.boolean(),
   displayOrder: positiveNumberOptional,
   isActive: Yup.boolean(),
 });
@@ -66,6 +69,7 @@ export function toCategoryFormValues(category?: ApiCategory): CategoryFormValues
     color: category.color ?? "#111827",
     imgKey: category.imgKey ?? "",
     parent: resolveParentId(category),
+    isParent: category.isParent ?? false,
     displayOrder: category.displayOrder ?? "",
     isActive: category.isActive ?? true,
   };
@@ -79,7 +83,8 @@ export function toCreateCategoryPayload(values: CategoryFormValues): CreateCateg
     image: values.image.trim() || undefined,
     color: values.color.trim() || undefined,
     imgKey: values.imgKey.trim() || undefined,
-    parent: values.parent.trim() || null,
+    isParent: values.isParent,
+    parent: values.isParent ? null : (values.parent.trim() || null),
     displayOrder: values.displayOrder === "" ? undefined : Number(values.displayOrder),
     isActive: values.isActive,
   };

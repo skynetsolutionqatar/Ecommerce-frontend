@@ -118,15 +118,34 @@ function CategoryForm({
             <FormSelect
               label="Parent"
               name="parent"
-              value={values.parent}
-              placeholder={categoriesLoading ? "Loading..." : "None (root category)"}
-              disabled={categoriesLoading}
+              value={values.isParent ? "" : values.parent}
+              placeholder={
+                values.isParent
+                  ? "Disabled (Parent Category)"
+                  : categoriesLoading
+                  ? "Loading..."
+                  : "None (root category)"
+              }
+              disabled={categoriesLoading || values.isParent}
               options={parentOptions}
               error={errors.parent}
               touched={touched.parent}
               onChange={handleChange}
               onBlur={handleBlur}
             />
+            <FormCheckbox
+              label="Is Parent Category"
+              name="isParent"
+              checked={values.isParent}
+              onChange={(e) => {
+                handleChange(e);
+                if (e.target.checked) {
+                  void setFieldValue("parent", "");
+                }
+              }}
+              onBlur={handleBlur}
+            />
+
             <FormTextarea
               label="Description"
               name="description"

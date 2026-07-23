@@ -16,6 +16,7 @@ export interface ApiCategory {
   color?: string;
   imgKey?: string;
   parent?: string | ApiCategoryRef | null;
+  isParent?: boolean;
   displayOrder?: number;
   isActive?: boolean;
   children?: ApiCategory[];
@@ -33,6 +34,7 @@ export interface CreateCategoryPayload {
   color?: string;
   imgKey?: string;
   parent?: string | null;
+  isParent?: boolean;
   displayOrder?: number;
   isActive?: boolean;
 }
