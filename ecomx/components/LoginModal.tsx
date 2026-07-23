@@ -5,6 +5,7 @@ import type { StoreUser } from "@/lib/types";
 import { tw } from "@/lib/theme";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
+import { isAdminRole } from "@/lib/config";
 import { getErrorMessage } from "@/lib/utils";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
@@ -31,6 +32,8 @@ export default function LoginModal({ open, onClose, onSuccess, onLogout, user }:
   const router = useRouter();
   const { login, register } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const authUser = useAuthStore((s) => s.user);
+  const showAdminPanel = isAdminRole(authUser?.role);
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
@@ -168,9 +171,11 @@ export default function LoginModal({ open, onClose, onSuccess, onLogout, user }:
                 <button className={`${tw.btnPrimary} w-full justify-center`} onClick={onClose}>
                   ← Continue Shopping <Icons.ArrowRight />
                 </button>
-                <button className={`${tw.btnPrimary} w-full justify-center`} onClick={onAdminPanelClick}>
-                  ← Go to Admin Panel <Icons.ArrowRight />
-                </button>
+                {showAdminPanel && (
+                  <button className={`${tw.btnPrimary} w-full justify-center`} onClick={onAdminPanelClick}>
+                    ← Go to Admin Panel <Icons.ArrowRight />
+                  </button>
+                )}
                 <button
                   className={`${tw.btnOutline} w-full justify-center`}
                   onClick={() => {

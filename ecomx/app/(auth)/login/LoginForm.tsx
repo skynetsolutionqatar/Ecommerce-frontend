@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
-import { tw } from "@/lib/theme";
+import {
+  AuthError,
+  AuthFormDivider,
+  AuthFormField,
+  AuthGoToStoreLink,
+  AuthOutlineLink,
+  AuthShell,
+  AuthSubmitButton,
+  authInputClass,
+} from "@/components/auth/AuthShell";
+import * as Icons from "@/components/Icons";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -13,6 +22,7 @@ export default function LoginForm() {
   const { login, loading, error } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showPass, setShowPass] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,69 +35,63 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-8 shadow-[0_8px_32px_color-mix(in_srgb,var(--color-primary)_8%,transparent)]">
-      <div className="mb-6 text-center">
-        <h1 className="font-display text-2xl font-bold text-primary">Admin Login</h1>
-        <p className="mt-1 text-sm text-muted">Sign in to manage your store</p>
-      </div>
-
+    <AuthShell title="Admin Login" subtitle="Sign in to manage your store">
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-xs font-semibold text-muted">
-            Email
-          </label>
+        <AuthFormField label="Email Address" icon={<Icons.Mail />}>
           <input
             id="email"
             type="email"
             required
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-xl border border-border bg-bg-soft px-4 py-3 text-sm outline-none focus:border-primary"
+            className={authInputClass}
             placeholder="admin@skynetqatar.com"
+            autoComplete="email"
           />
+        </AuthFormField>
+
+        <AuthFormField label="Password" icon={<Icons.Lock />}>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPass ? "text" : "password"}
+              required
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              className={`${authInputClass} pr-11`}
+              placeholder="••••••••"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass((p) => !p)}
+              className="absolute right-3.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent text-muted transition-colors hover:text-primary"
+              aria-label={showPass ? "Hide password" : "Show password"}
+            >
+              {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
+            </button>
+          </div>
+        </AuthFormField>
+
+        {(localError || error) && <AuthError message={localError ?? error ?? "Login failed"} />}
+
+        <AuthSubmitButton loading={loading} loadingLabel="Signing in…" label="Sign In →" />
+
+        <AuthFormDivider />
+
+        <div className="space-y-3">
+          <AuthGoToStoreLink />
+          <AuthOutlineLink
+            href={
+              redirectParam
+                ? `${AUTH_ROUTES.register}?redirect=${encodeURIComponent(redirectParam)}`
+                : AUTH_ROUTES.register
+            }
+          >
+            Register →
+          </AuthOutlineLink>
         </div>
-
-        <div>
-          <label htmlFor="password" className="mb-1 block text-xs font-semibold text-muted">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={form.password}
-            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            className="w-full rounded-xl border border-border bg-bg-soft px-4 py-3 text-sm outline-none focus:border-primary"
-          />
-        </div>
-
-        {(localError || error) && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {localError ?? error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className={`${tw.btnPrimary} w-full disabled:opacity-60`}
-        >
-          {loading ? "Signing in…" : "Sign In"}
-        </button>
       </form>
-
-      <p className="mt-6 text-center text-sm text-muted">
-        Don&apos;t have an account?{" "}
-        <Link href={AUTH_ROUTES.register} className="font-semibold text-accent hover:underline">
-          Register
-        </Link>
-      </p>
-
-      <p className="mt-3 text-center">
-        <Link href="/" className="text-xs text-muted hover:text-primary">
-          ← Back to store
-        </Link>
-      </p>
-    </div>
+    </AuthShell>
   );
 }
