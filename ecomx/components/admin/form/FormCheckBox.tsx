@@ -13,14 +13,17 @@ interface FormCheckboxProps {
 function FormCheckbox({ label, name, checked, onChange, onBlur }: FormCheckboxProps) {
   return (
     <div className="flex max-w-md items-center gap-4">
-      <label className="w-28 text-sm font-medium text-gray-700">{label}</label>
+      <label htmlFor={name} className="w-28 cursor-pointer text-sm font-medium text-gray-700">
+        {label}
+      </label>
       <input
+        id={name}
         type="checkbox"
         name={name}
         checked={checked}
         onChange={onChange}
         onBlur={onBlur}
-        className="h-4 w-4 rounded border-gray-300"
+        className="h-4 w-4 cursor-pointer rounded border-gray-300"
       />
     </div>
   );

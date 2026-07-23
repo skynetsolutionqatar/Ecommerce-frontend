@@ -5,7 +5,7 @@ export const PRODUCT_FORM_ID = "product-form";
 export const CATEGORY_FORM_ID = "category-form";
 export const COUPON_FORM_ID = "coupon-form";
 
-const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:bg-green-700`;
+const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:bg-green-700 cursor-pointer disabled:cursor-not-allowed`;
 
 export function productFormFooterButtons({
   isEdit = false,
@@ -22,7 +22,7 @@ export function productFormFooterButtons({
       variant: "outline",
       disabled: isPending,
       onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
+      className: "rounded-lg px-6 py-2 cursor-pointer disabled:cursor-not-allowed",
     },
     {
       label: isPending ? "Saving..." : isEdit ? "Update Product" : "Save Product",
@@ -49,7 +49,7 @@ export function categoryFormFooterButtons({
       variant: "outline",
       disabled: isPending,
       onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
+      className: "rounded-lg px-6 py-2 cursor-pointer disabled:cursor-not-allowed",
     },
     {
       label: isPending ? "Saving..." : isEdit ? "Update Category" : "Save Category",
@@ -76,7 +76,7 @@ export function couponFormFooterButtons({
       variant: "outline",
       disabled: isPending,
       onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
+      className: "rounded-lg px-6 py-2 cursor-pointer disabled:cursor-not-allowed",
     },
     {
       label: isPending ? "Saving..." : isEdit ? "Update Coupon" : "Save Coupon",

@@ -21,13 +21,14 @@ function FormRadio({ label, name, value, options, onChange }: FormRadioProps) {
       <label className="w-28 pt-2 text-sm font-medium text-gray-700">{label}</label>
       <div className="flex gap-4">
         {options.map((option) => (
-          <label key={option.value} className="flex items-center gap-2 text-sm">
+          <label key={option.value} className="flex cursor-pointer items-center gap-2 text-sm">
             <input
               type="radio"
               name={name}
               value={option.value}
               checked={value === option.value}
               onChange={onChange}
+              className="cursor-pointer"
             />
             {option.label}
           </label>
