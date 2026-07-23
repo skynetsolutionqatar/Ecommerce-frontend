@@ -115,24 +115,6 @@ function CategoryForm({
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            <FormSelect
-              label="Parent"
-              name="parent"
-              value={values.isParent ? "" : values.parent}
-              placeholder={
-                values.isParent
-                  ? "Disabled (Parent Category)"
-                  : categoriesLoading
-                  ? "Loading..."
-                  : "None (root category)"
-              }
-              disabled={categoriesLoading || values.isParent}
-              options={parentOptions}
-              error={errors.parent}
-              touched={touched.parent}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
             <FormCheckbox
               label="Is Parent Category"
               name="isParent"
@@ -143,6 +125,25 @@ function CategoryForm({
                   void setFieldValue("parent", "");
                 }
               }}
+              onBlur={handleBlur}
+            />
+            <FormSelect
+              label="Parent"
+              name="parent"
+              required={!values.isParent}
+              value={values.isParent ? "" : values.parent}
+              placeholder={
+                values.isParent
+                  ? "Disabled (Parent Category)"
+                  : categoriesLoading
+                    ? "Loading..."
+                    : "Select parent category"
+              }
+              disabled={categoriesLoading || values.isParent}
+              options={parentOptions}
+              error={errors.parent}
+              touched={touched.parent}
+              onChange={handleChange}
               onBlur={handleBlur}
             />
 

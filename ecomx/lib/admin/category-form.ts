@@ -40,8 +40,12 @@ export const categoryValidationSchema = Yup.object({
     .lowercase("Slug must be lowercase")
     .matches(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: Yup.string().max(500, "Description cannot exceed 500 characters"),
-  parent: Yup.string().nullable(),
   isParent: Yup.boolean(),
+  parent: Yup.string().when("isParent", {
+    is: false,
+    then: (schema) => schema.required("Please select a parent category or mark as a Parent Category"),
+    otherwise: (schema) => schema.nullable().optional(),
+  }),
   displayOrder: positiveNumberOptional,
   isActive: Yup.boolean(),
 });
