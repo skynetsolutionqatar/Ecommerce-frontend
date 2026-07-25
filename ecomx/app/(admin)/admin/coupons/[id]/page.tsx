@@ -37,10 +37,14 @@ export default function AdminCouponDetailPage({
 
   const handleDelete = async () => {
     if (!coupon) return;
-    if (!window.confirm(`Delete coupon "${coupon.code}"? This cannot be undone.`)) return;
-    await remove.mutateAsync(id);
-    toast.success("Coupon deleted");
-    router.push(ADMIN_ROUTES.coupons);
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Coupon deleted");
+      router.push(ADMIN_ROUTES.coupons);
+    } catch {
+      toast.error("Failed to delete coupon");
+      throw new Error("Delete failed");
+    }
   };
 
   if (isLoading) {
@@ -63,7 +67,8 @@ export default function AdminCouponDetailPage({
     <BackPanel
       tabs={TABS}
       editPath={`${ADMIN_ROUTES.coupons}/edit/${id}`}
-      onDelete={() => void handleDelete()}
+      deleteItemName={coupon.code}
+      onDelete={handleDelete}
       deleting={remove.isPending}
     >
       <div className="space-y-6">

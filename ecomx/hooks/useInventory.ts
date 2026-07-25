@@ -6,14 +6,28 @@ import {
   fetchStockHistory,
   inventoryApi,
 } from "@/lib/api/inventory.api";
-import type { AddStockPayload, ReduceStockPayload } from "@/types/inventory.types";
+import type {
+  AddStockPayload,
+  LowStockQuery,
+  ReduceStockPayload,
+  StockHistoryQuery,
+} from "@/types/inventory.types";
 
 export const INVENTORY_KEY = "inventory";
 
-export function useLowStock() {
+export function useLowStock(params?: LowStockQuery) {
   return useQuery({
-    queryKey: [INVENTORY_KEY, "low-stock"],
-    queryFn: fetchLowStockProducts,
+    queryKey: [INVENTORY_KEY, "low-stock", params],
+    queryFn: () => fetchLowStockProducts(params),
+    staleTime: 60_000,
+    select: (data) => data.products,
+  });
+}
+
+export function useLowStockWithMeta(params?: LowStockQuery) {
+  return useQuery({
+    queryKey: [INVENTORY_KEY, "low-stock", params],
+    queryFn: () => fetchLowStockProducts(params),
     staleTime: 60_000,
   });
 }
@@ -29,10 +43,10 @@ export function useProductStock(productId: string) {
   });
 }
 
-export function useStockHistory(productId: string) {
+export function useStockHistory(productId: string, params?: StockHistoryQuery) {
   return useQuery({
-    queryKey: [INVENTORY_KEY, "history", productId],
-    queryFn: () => fetchStockHistory(productId),
+    queryKey: [INVENTORY_KEY, "history", productId, params],
+    queryFn: () => fetchStockHistory(productId, params),
     enabled: !!productId,
   });
 }

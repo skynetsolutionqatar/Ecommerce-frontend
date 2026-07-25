@@ -12,7 +12,7 @@ interface TimeRangeTabsProps {
 
 function TimeRangeTabs({ ranges, value, onChange }: TimeRangeTabsProps) {
   return (
-    <div className="inline-flex rounded-lg bg-gray-100 p-1">
+    <div className="inline-flex rounded-lg bg-muted p-1">
       {ranges.map((range) => (
         <button
           key={range.key}
@@ -20,8 +20,8 @@ function TimeRangeTabs({ ranges, value, onChange }: TimeRangeTabsProps) {
           onClick={() => onChange(range.key)}
           className={`rounded-md px-4 py-1.5 ${adminType.tabButton} transition ${
             value === range.key
-              ? "bg-emerald-900 text-white shadow-sm"
-              : "text-gray-600 hover:text-gray-800"
+              ? "bg-emerald-900 text-white shadow-sm dark:bg-emerald-700"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {range.label}

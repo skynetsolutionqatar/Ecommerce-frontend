@@ -1,21 +1,29 @@
 import { apiGet, apiPatch } from "./client";
+import type { PaginationMeta } from "@/types/api.types";
 import type {
   AddStockPayload,
   LowStockProduct,
+  LowStockQuery,
   ProductStock,
   ReduceStockPayload,
   StockHistoryEntry,
+  StockHistoryQuery,
 } from "@/types/inventory.types";
-import type { PaginationMeta } from "@/types/api.types";
 
 export const inventoryApi = {
-  getLowStock: () =>
-    apiGet<{ products: LowStockProduct[]; count: number }>("/inventory/alerts/low-stock"),
+  getLowStock: (params?: LowStockQuery) =>
+    apiGet<{ products: LowStockProduct[]; count: number }>(
+      "/inventory/alerts/low-stock",
+      params as Record<string, unknown>
+    ),
 
   getStock: (productId: string) => apiGet<ProductStock>(`/inventory/${productId}`),
 
-  getHistory: (productId: string, params?: Record<string, unknown>) =>
-    apiGet<{ logs: StockHistoryEntry[] }>(`/inventory/${productId}/history`, params),
+  getHistory: (productId: string, params?: StockHistoryQuery) =>
+    apiGet<{ logs: StockHistoryEntry[] }>(
+      `/inventory/${productId}/history`,
+      params as Record<string, unknown>
+    ),
 
   addStock: (productId: string, payload: AddStockPayload) =>
     apiPatch<{ product: { stock: number }; log: StockHistoryEntry }>(
@@ -30,9 +38,19 @@ export const inventoryApi = {
     ),
 };
 
-export async function fetchLowStockProducts(): Promise<LowStockProduct[]> {
-  const res = await inventoryApi.getLowStock();
-  return res.data.products;
+export type LowStockResult = {
+  products: LowStockProduct[];
+  count: number;
+  pagination?: PaginationMeta;
+};
+
+export async function fetchLowStockProducts(params?: LowStockQuery): Promise<LowStockResult> {
+  const res = await inventoryApi.getLowStock(params);
+  return {
+    products: res.data.products,
+    count: res.data.count,
+    pagination: res.pagination,
+  };
 }
 
 export type StockHistoryResult = {
@@ -42,7 +60,7 @@ export type StockHistoryResult = {
 
 export async function fetchStockHistory(
   productId: string,
-  params?: Record<string, unknown>
+  params?: StockHistoryQuery
 ): Promise<StockHistoryResult> {
   const res = await inventoryApi.getHistory(productId, params);
   return { logs: res.data.logs, pagination: res.pagination };

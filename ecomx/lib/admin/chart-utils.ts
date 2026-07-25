@@ -15,9 +15,9 @@ export const CHART_COLORS = {
   tertiary: "#0D9488",
   quaternary: "#7C3AED",
   quinary: "#EA580C",
-  grid: "#F1F5F9",
-  axis: "#94A3B8",
-  track: "#E2E8F0",
+  grid: "var(--chart-grid)",
+  axis: "var(--chart-axis)",
+  track: "var(--chart-track)",
 } as const;
 
 export const PIE_PALETTE = [

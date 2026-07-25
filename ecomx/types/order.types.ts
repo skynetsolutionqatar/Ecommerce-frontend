@@ -1,4 +1,5 @@
 import type { OrderStatus } from "@/lib/Constant";
+import type { PaginationParams } from "@/types/api.types";
 
 export type { OrderStatus };
 
@@ -70,14 +71,18 @@ export interface OrderStats {
   totalRevenue: number;
 }
 
-export interface OrderQueryParams {
-  page?: number;
-  limit?: number;
+export interface OrderQueryParams extends PaginationParams {
   status?: OrderStatus;
-  search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+  paymentMethod?: "stripe" | "razorpay" | "myfatoorah" | "cash_on_delivery";
+  customerId?: string;
+  couponCode?: string;
+  minTotal?: number;
+  maxTotal?: number;
+  sortBy?: "createdAt" | "totalAmount" | "status";
+  /** @deprecated use `from` */
   startDate?: string;
+  /** @deprecated use `to` */
   endDate?: string;
 }
 

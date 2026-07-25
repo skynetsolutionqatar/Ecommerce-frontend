@@ -4,6 +4,7 @@ import { HTTP_STATUS } from "@/lib/Constant";
 import { useAuthStore } from "@/store/auth.store";
 import type { ApiResponse } from "@/types/api.types";
 import type { AuthTokens } from "@/types/auth.types";
+import { toQueryParams } from "@/lib/api/query-params";
 
 const apiClient = axios.create({
   baseURL: API_CONFIG.baseURL,
@@ -23,6 +24,11 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     if (token) {
       config.headers.set("Authorization", `Bearer ${token}`);
     }
+  }
+
+  // Let the browser set multipart boundary — default json Content-Type breaks uploads
+  if (config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
   }
 
   return config;
@@ -86,7 +92,7 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 export async function apiGet<T>(url: string, params?: Record<string, unknown>) {
-  const { data } = await apiClient.get<ApiResponse<T>>(url, { params });
+  const { data } = await apiClient.get<ApiResponse<T>>(url, { params: toQueryParams(params) });
   return data;
 }
 

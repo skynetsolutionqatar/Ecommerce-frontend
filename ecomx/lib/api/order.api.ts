@@ -8,12 +8,22 @@ import type {
   UpdateOrderStatusPayload,
 } from "@/types/order.types";
 
+function toOrderQueryParams(params?: OrderQueryParams): Record<string, unknown> | undefined {
+  if (!params) return undefined;
+  const { startDate, endDate, ...rest } = params;
+  return {
+    ...rest,
+    from: rest.from ?? startDate,
+    to: rest.to ?? endDate,
+  };
+}
+
 export const orderApi = {
   place: (payload: PlaceOrderPayload) =>
     apiPost<{ order: ApiOrder }>("/orders", payload),
 
   getMyOrders: (params?: OrderQueryParams) =>
-    apiGet<{ orders: ApiOrder[] }>("/orders/my", params as Record<string, unknown>),
+    apiGet<{ orders: ApiOrder[] }>("/orders/my", toOrderQueryParams(params)),
 
   getMyOrder: (id: string) => apiGet<{ order: ApiOrder }>(`/orders/my/${id}`),
 
@@ -26,7 +36,7 @@ export const orderApi = {
   getStats: () => apiGet<OrderStats>("/orders/stats"),
 
   getAll: (params?: OrderQueryParams) =>
-    apiGet<{ orders: ApiOrder[] }>("/orders", params as Record<string, unknown>),
+    apiGet<{ orders: ApiOrder[] }>("/orders", toOrderQueryParams(params)),
 
   getById: (id: string) => apiGet<{ order: ApiOrder }>(`/orders/${id}`),
 

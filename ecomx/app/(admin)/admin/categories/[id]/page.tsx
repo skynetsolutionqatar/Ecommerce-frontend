@@ -30,10 +30,14 @@ export default function AdminCategoryDetailPage({
 
   const handleDelete = async () => {
     if (!category) return;
-    if (!window.confirm(`Delete category "${category.name}"? This cannot be undone.`)) return;
-    await remove.mutateAsync(id);
-    toast.success("Category deleted");
-    router.push(ADMIN_ROUTES.categories);
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Category deleted");
+      router.push(ADMIN_ROUTES.categories);
+    } catch {
+      toast.error("Failed to delete category");
+      throw new Error("Delete failed");
+    }
   };
 
   if (isLoading) {
@@ -56,7 +60,8 @@ export default function AdminCategoryDetailPage({
     <BackPanel
       tabs={TABS}
       editPath={`${ADMIN_ROUTES.categories}/edit/${id}`}
-      onDelete={() => void handleDelete()}
+      deleteItemName={category.name}
+      onDelete={handleDelete}
       deleting={remove.isPending}
     >
       <div className="space-y-6">

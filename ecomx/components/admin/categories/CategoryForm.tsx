@@ -22,7 +22,13 @@ import {
 } from "@/lib/admin/category-form";
 import { CATEGORY_FORM_ID } from "@/lib/admin/form-footer";
 import { slugify } from "@/lib/utils";
-import type { ApiCategory, CreateCategoryPayload, UpdateCategoryPayload } from "@/types/category.types";
+import type {
+  ApiCategory,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+} from "@/types/category.types";
+import ImageUpload from "@/components/ImageUpload";
+import { UploadedImage } from "@/lib/api/upload.api";
 
 export const CATEGORY_FORM_TABS = [
   { key: "basic", label: "Basic Info" },
@@ -37,7 +43,9 @@ interface CategoryFormProps {
   initialCategory?: ApiCategory;
   isEdit?: boolean;
   isPending?: boolean;
-  onSubmit: (payload: CreateCategoryPayload | UpdateCategoryPayload) => void | Promise<void>;
+  onSubmit: (
+    payload: CreateCategoryPayload | UpdateCategoryPayload
+  ) => void | Promise<void>;
 }
 
 function CategoryForm({
@@ -46,7 +54,8 @@ function CategoryForm({
   isPending = false,
   onSubmit,
 }: CategoryFormProps) {
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useCategories();
 
   const parentOptions = useMemo(
     () =>
@@ -57,29 +66,85 @@ function CategoryForm({
   );
 
   const formik = useFormik({
-    initialValues: initialCategory ? toCategoryFormValues(initialCategory) : defaultCategoryFormValues,
+    initialValues: initialCategory
+      ? toCategoryFormValues(initialCategory)
+      : defaultCategoryFormValues,
     validationSchema: categoryValidationSchema,
     enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
       try {
-        const payload = isEdit ? toUpdateCategoryPayload(values) : toCreateCategoryPayload(values);
+        const payload = isEdit
+          ? toUpdateCategoryPayload(values)
+          : toCreateCategoryPayload(values);
         await onSubmit(payload);
       } catch {
-        toast.error(isEdit ? "Failed to update category" : "Failed to create category");
+        toast.error(
+          isEdit ? "Failed to update category" : "Failed to create category"
+        );
       }
     },
   });
 
-  const { handleChange, handleBlur, values, errors, touched, handleSubmit, setFieldValue } =
-    formik;
+  const {
+    handleChange,
+    handleBlur,
+    values,
+    errors,
+    touched,
+    handleSubmit,
+    setFieldValue,
+    setValues,
+    submitCount,
+  } = formik;
+
+  const showParentError =
+    Boolean(errors.parent) &&
+    (touched.parent || touched.isParent || submitCount > 0);
 
   const handleNameBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
     handleBlur(event);
     if (!isEdit && !values.slug.trim() && values.name.trim()) {
       void setFieldValue("slug", slugify(values.name));
     }
+  };
+
+  const handleIsParentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    void setValues(
+      {
+        ...values,
+        isParent: checked,
+        parent: checked ? "" : values.parent,
+      },
+      true
+    );
+  };
+
+  const handleParentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const parent = event.target.value;
+    void setValues(
+      {
+        ...values,
+        parent,
+        isParent: parent ? false : values.isParent,
+      },
+      true
+    );
+  };
+
+  const handleCategoryUpload = (uploaded: UploadedImage[]) => {
+    const image = uploaded[0];
+    if (!image) return;
+
+    void setFieldValue("image", image.url);
+    void setFieldValue("imgKey", image.publicId);
+  };
+
+  const handleRemoveCategoryImage = () => {
+    void setFieldValue("image", "");
+    void setFieldValue("imgKey", "");
   };
 
   return (
@@ -115,16 +180,25 @@ function CategoryForm({
               onChange={handleChange}
               onBlur={handleBlur}
             />
+            <FormCheckbox
+              label="Is Parent Category"
+              name="isParent"
+              checked={values.isParent}
+              disabled={Boolean(values.parent)}
+              onChange={handleIsParentChange}
+              onBlur={handleBlur}
+            />
             <FormSelect
               label="Parent"
               name="parent"
               value={values.parent}
-              placeholder={categoriesLoading ? "Loading..." : "None (root category)"}
-              disabled={categoriesLoading}
+              placeholder={categoriesLoading ? "Loading..." : "Select parent category"}
+              required={!values.isParent}
+              disabled={values.isParent || categoriesLoading}
               options={parentOptions}
-              error={errors.parent}
-              touched={touched.parent}
-              onChange={handleChange}
+              error={showParentError ? errors.parent : undefined}
+              touched={showParentError}
+              onChange={handleParentChange}
               onBlur={handleBlur}
             />
             <FormTextarea
@@ -177,27 +251,36 @@ function CategoryForm({
         </FormSection>
 
         <FormSection id="media" title="Media">
-          <div className={`${formGridClass} lg:grid-cols-2`}>
-            <FormInput
-              label="Image URL"
-              name="image"
-              value={values.image}
-              placeholder="https://..."
-              error={errors.image}
-              touched={touched.image}
-              onChange={handleChange}
-              onBlur={handleBlur}
+          <div className="space-y-6">
+            <ImageUpload
+              type="category"
+              existingImages={values.image ? [values.image] : []}
+              onRemoveExisting={handleRemoveCategoryImage}
+              onUpload={handleCategoryUpload}
             />
-            <FormInput
-              label="Img Key"
-              name="imgKey"
-              value={values.imgKey}
-              placeholder="Storage key or asset id"
-              error={errors.imgKey}
-              touched={touched.imgKey}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
+
+            <div className={`${formGridClass} lg:grid-cols-2`}>
+              <FormInput
+                label="Image URL"
+                name="image"
+                value={values.image}
+                placeholder="Filled automatically after upload"
+                error={errors.image}
+                touched={touched.image}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              <FormInput
+                label="Cloudinary Public ID"
+                name="imgKey"
+                value={values.imgKey}
+                placeholder="Filled automatically after upload"
+                error={errors.imgKey}
+                touched={touched.imgKey}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
           </div>
         </FormSection>
       </form>

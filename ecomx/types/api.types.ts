@@ -21,4 +21,6 @@ export interface PaginationParams {
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  from?: string;
+  to?: string;
 }

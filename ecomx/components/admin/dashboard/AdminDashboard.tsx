@@ -21,7 +21,7 @@ const CustomerLineChart = lazyClient(() => import("./CustomerLineChart"), { ssr:
 const PerformanceMetricsCard = lazyClient(() => import("./PerformanceMetricsCard"), { ssr: false });
 
 function ChartFallback() {
-  return <div className="h-[240px] animate-pulse rounded-lg bg-gray-100" />;
+  return <div className="h-[240px] animate-pulse rounded-lg bg-muted" />;
 }
 
 function AdminDashboard() {
@@ -30,7 +30,7 @@ function AdminDashboard() {
   const data = useMemo(() => getDashboardData(timeRange), [timeRange]);
 
   return (
-    <div className="relative min-h-full bg-[#f1f3f6] p-4 md:p-6">
+    <div className="relative min-h-full bg-muted/40 p-4 md:p-6">
       <div className="mx-auto max-w-[1400px] space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

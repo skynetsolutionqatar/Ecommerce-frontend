@@ -1,17 +1,25 @@
 "use client";
 
-import { memo } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { memo, useState } from "react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import type { PerformanceMetric } from "@/lib/admin/data";
 import { CHART_COLORS } from "@/lib/admin/chart-utils";
 import { adminType } from "@/lib/admin/typography";
+import ChartContainer from "./ChartContainer";
+import { ChartExpandDialog } from "./ChartExpandDialog";
 import DashboardCard from "./DashboardCard";
 
 interface PerformanceMetricsCardProps {
   metrics: PerformanceMetric[];
 }
 
-function MetricBar({ metric }: { metric: PerformanceMetric }) {
+interface MetricBarProps {
+  metric: PerformanceMetric;
+  barHeight: number;
+  barSize: number;
+}
+
+function MetricBar({ metric, barHeight, barSize }: MetricBarProps) {
   const data = [{ label: metric.label, percent: metric.percent }];
 
   return (
@@ -20,8 +28,8 @@ function MetricBar({ metric }: { metric: PerformanceMetric }) {
         <span className={adminType.metricLabel}>{metric.label}</span>
         <span className={adminType.value}>{metric.value}</span>
       </div>
-      <div className="h-2.5 w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full" style={{ height: barHeight }}>
+        <ChartContainer height={barHeight}>
           <BarChart
             data={data}
             layout="vertical"
@@ -33,26 +41,67 @@ function MetricBar({ metric }: { metric: PerformanceMetric }) {
               dataKey="percent"
               fill={metric.color}
               radius={[4, 4, 4, 4]}
-              barSize={10}
+              barSize={barSize}
               background={{ fill: CHART_COLORS.track, radius: 4 }}
               isAnimationActive={false}
             />
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </div>
     </li>
   );
 }
 
-function PerformanceMetricsCard({ metrics }: PerformanceMetricsCardProps) {
+interface PerformanceMetricsBodyProps {
+  metrics: PerformanceMetric[];
+  spacing: string;
+  barHeight: number;
+  barSize: number;
+}
+
+function PerformanceMetricsBody({
+  metrics,
+  spacing,
+  barHeight,
+  barSize,
+}: PerformanceMetricsBodyProps) {
   return (
-    <DashboardCard title="Performance Metrics" showMenu className="h-full">
-      <ul className="space-y-6">
-        {metrics.map((metric) => (
-          <MetricBar key={metric.id} metric={metric} />
-        ))}
-      </ul>
-    </DashboardCard>
+    <ul className={spacing}>
+      {metrics.map((metric) => (
+        <MetricBar key={metric.id} metric={metric} barHeight={barHeight} barSize={barSize} />
+      ))}
+    </ul>
+  );
+}
+
+function PerformanceMetricsCard({ metrics }: PerformanceMetricsCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <>
+      <DashboardCard title="Performance Metrics" onExpand={() => setExpanded(true)} className="h-full">
+        <PerformanceMetricsBody
+          metrics={metrics}
+          spacing="space-y-6"
+          barHeight={10}
+          barSize={10}
+        />
+      </DashboardCard>
+
+      <ChartExpandDialog
+        open={expanded}
+        onOpenChange={setExpanded}
+        title="Performance Metrics"
+        description="Key performance indicators at a glance"
+      >
+        <PerformanceMetricsBody
+          metrics={metrics}
+          spacing="space-y-8"
+          barHeight={16}
+          barSize={16}
+        />
+      </ChartExpandDialog>
+    </>
   );
 }
 

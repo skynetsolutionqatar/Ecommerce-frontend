@@ -14,7 +14,9 @@ import {
 import PageHeader from "@/components/admin/utils/PageHeader";
 import { useCategories } from "@/hooks/useCategories";
 import {
+  appendImagesToField,
   defaultProductFormValues,
+  parseImagesField,
   productValidationSchema,
   toCreateProductPayload,
   toProductFormValues,
@@ -23,6 +25,7 @@ import { PRODUCT_FORM_ID } from "@/lib/admin/form-footer";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { slugify } from "@/lib/utils";
 import type { ApiProduct, CreateProductPayload } from "@/types/product.types";
+import ImageUpload from "@/components/ImageUpload";
 
 export const PRODUCT_FORM_TABS = [
   { key: "identity", label: "Identity" },
@@ -327,28 +330,49 @@ function ProductForm({
         </FormSection>
 
         <FormSection id="media" title="Media">
-          <div className={`${formGridClass} lg:grid-cols-2`}>
-            <FormInput
-              label="Thumbnail"
-              name="thumbnail"
-              value={values.thumbnail}
-              placeholder="https://..."
-              error={errors.thumbnail}
-              touched={touched.thumbnail}
-              onChange={handleChange}
-              onBlur={handleBlur}
+          <div className="space-y-6">
+            <ImageUpload
+              type="product"
+              existingImages={parseImagesField(values.images)}
+              onRemoveExisting={(url) => {
+                const next = parseImagesField(values.images).filter((item) => item !== url);
+                void setFieldValue("images", next.join("\n"));
+                if (values.thumbnail.trim() === url) {
+                  void setFieldValue("thumbnail", next[0] ?? "");
+                }
+              }}
+              onUpload={(uploaded) => {
+                const urls = uploaded.map((item) => item.url);
+                void setFieldValue("images", appendImagesToField(values.images, urls));
+                if (!values.thumbnail.trim() && urls[0]) {
+                  void setFieldValue("thumbnail", urls[0]);
+                }
+              }}
             />
-            <FormTextarea
-              label="Images"
-              name="images"
-              value={values.images}
-              placeholder="One image URL per line"
-              rows={4}
-              error={errors.images}
-              touched={touched.images}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
+
+            <div className={`${formGridClass} lg:grid-cols-2`}>
+              <FormInput
+                label="Thumbnail URL"
+                name="thumbnail"
+                value={values.thumbnail}
+                placeholder="Auto-filled from first uploaded image"
+                error={errors.thumbnail}
+                touched={touched.thumbnail}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              <FormTextarea
+                label="Image URLs"
+                name="images"
+                value={values.images}
+                placeholder="One image URL per line — filled automatically after upload"
+                rows={4}
+                error={errors.images}
+                touched={touched.images}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+            </div>
           </div>
         </FormSection>
 

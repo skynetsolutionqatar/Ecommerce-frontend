@@ -10,6 +10,7 @@ import {
   ListToolbar,
 } from "@/components/admin/shared";
 import { useCategories } from "@/hooks/useCategories";
+import { useDebounce } from "@/hooks/useDebounce";
 import { paginateClientList, LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { resolveParentName } from "@/lib/admin/category-form";
 import { ADMIN_ROUTES } from "@/lib/config";
@@ -26,22 +27,18 @@ export default function AdminCategoriesPage() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
   const [page, setPage] = useState(1);
-  const { data: categories = [], isLoading, isError } = useCategories();
+  const debouncedSearch = useDebounce(search);
 
-  const filteredCategories = useMemo(() => {
-    return categories.filter((cat) => {
-      const matchesSearch =
-        !search.trim() ||
-        cat.name.toLowerCase().includes(search.toLowerCase()) ||
-        cat.slug.toLowerCase().includes(search.toLowerCase());
+  const { data: categories = [], isLoading, isError } = useCategories({
+    search: debouncedSearch || undefined,
+    ...(activeFilter === "true"
+      ? { isActive: true }
+      : activeFilter === "false"
+        ? { isActive: false }
+        : {}),
+  });
 
-      const matchesActive =
-        activeFilter === "" ||
-        (activeFilter === "true" ? cat.isActive !== false : cat.isActive === false);
-
-      return matchesSearch && matchesActive;
-    });
-  }, [categories, search, activeFilter]);
+  const filteredCategories = useMemo(() => categories, [categories]);
 
   const pagination = paginateClientList(filteredCategories, page, LIST_PAGE_SIZE);
   const pagedCategories = pagination.items;

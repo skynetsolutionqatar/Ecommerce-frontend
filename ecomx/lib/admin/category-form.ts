@@ -9,6 +9,7 @@ export type CategoryFormValues = {
   image: string;
   color: string;
   imgKey: string;
+  isParent: boolean;
   parent: string;
   displayOrder: number | "";
   isActive: boolean;
@@ -21,6 +22,7 @@ export const defaultCategoryFormValues: CategoryFormValues = {
   image: "",
   color: "#111827",
   imgKey: "",
+  isParent: false,
   parent: "",
   displayOrder: "",
   isActive: true,
@@ -38,7 +40,22 @@ export const categoryValidationSchema = Yup.object({
     .lowercase("Slug must be lowercase")
     .matches(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: Yup.string().max(500, "Description cannot exceed 500 characters"),
-  parent: Yup.string().nullable(),
+  isParent: Yup.boolean(),
+  parent: Yup.string().when("isParent", {
+    is: true,
+    then: (schema) =>
+      schema.test(
+        "parent-empty-when-isParent",
+        "Cannot select a parent when marked as parent category",
+        (value) => !value?.trim()
+      ),
+    otherwise: (schema) =>
+      schema.test(
+        "parent-required-when-not-isParent",
+        "Select a parent category or mark as parent category",
+        (value) => Boolean(value?.trim())
+      ),
+  }),
   displayOrder: positiveNumberOptional,
   isActive: Yup.boolean(),
 });
@@ -65,13 +82,16 @@ export function toCategoryFormValues(category?: ApiCategory): CategoryFormValues
     image: category.image ?? "",
     color: category.color ?? "#111827",
     imgKey: category.imgKey ?? "",
-    parent: resolveParentId(category),
+    isParent: category.isParent ?? false,
+    parent: category.isParent ? "" : resolveParentId(category),
     displayOrder: category.displayOrder ?? "",
     isActive: category.isActive ?? true,
   };
 }
 
 export function toCreateCategoryPayload(values: CategoryFormValues): CreateCategoryPayload {
+  const isParent = values.isParent;
+
   return {
     name: values.name.trim(),
     slug: values.slug.trim().toLowerCase(),
@@ -79,7 +99,8 @@ export function toCreateCategoryPayload(values: CategoryFormValues): CreateCateg
     image: values.image.trim() || undefined,
     color: values.color.trim() || undefined,
     imgKey: values.imgKey.trim() || undefined,
-    parent: values.parent.trim() || null,
+    isParent,
+    parent: isParent ? null : values.parent.trim() || null,
     displayOrder: values.displayOrder === "" ? undefined : Number(values.displayOrder),
     isActive: values.isActive,
   };

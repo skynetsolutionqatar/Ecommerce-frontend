@@ -5,13 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
 import {
+  AuthAltActions,
   AuthError,
-  AuthFormDivider,
   AuthFormField,
   AuthGoToStoreLink,
-  AuthOutlineLink,
+  AuthPasswordField,
   AuthShell,
   AuthSubmitButton,
+  AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
 import * as Icons from "@/components/Icons";
@@ -28,7 +29,10 @@ export default function RegisterForm() {
   });
   const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [showPass, setShowPass] = useState(false);
+
+  const loginHref = redirectParam
+    ? `${AUTH_ROUTES.login}?redirect=${encodeURIComponent(redirectParam)}`
+    : AUTH_ROUTES.login;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,25 +56,21 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <AuthShell title="Account Created!" subtitle="Redirecting you to the dashboard…">
-        <div className="py-4 text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600 shadow-[0_4px_16px_rgba(34,197,94,0.25)]">
-            <Icons.Check />
-          </div>
-          <p className="mb-5 text-sm text-muted">Welcome to Skynet Management Suite.</p>
+      <AuthShell title="You're all set!" subtitle="Your account has been created successfully.">
+        <AuthSuccessState
+          title="Account created"
+          message="Redirecting you to the dashboard…"
+        />
+        <div className="mt-2">
           <AuthGoToStoreLink />
         </div>
       </AuthShell>
     );
   }
 
-  const loginHref = redirectParam
-    ? `${AUTH_ROUTES.login}?redirect=${encodeURIComponent(redirectParam)}`
-    : AUTH_ROUTES.login;
-
   return (
-    <AuthShell title="Create Account" subtitle="Register for admin store access">
-      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+    <AuthShell title="Create account" subtitle="Register to get access to the Skynet admin panel.">
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
         <AuthFormField label="Full Name" icon={<Icons.User />}>
           <input
             id="name"
@@ -97,53 +97,37 @@ export default function RegisterForm() {
           />
         </AuthFormField>
 
-        <AuthFormField label="Phone (optional)" icon={<Icons.Phone />}>
+        <AuthFormField label="Phone" icon={<Icons.Phone />}>
           <input
             id="phone"
             type="text"
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             className={authInputClass}
-            placeholder="+974 XXXX XXXX"
+            placeholder="+974 XXXX XXXX (optional)"
             autoComplete="tel"
           />
         </AuthFormField>
 
-        <AuthFormField label="Password" icon={<Icons.Lock />}>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPass ? "text" : "password"}
-              required
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className={`${authInputClass} pr-11`}
-              placeholder="••••••••"
-              autoComplete="new-password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass((p) => !p)}
-              className="absolute right-3.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent text-muted transition-colors hover:text-primary"
-              aria-label={showPass ? "Hide password" : "Show password"}
-            >
-              {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
-            </button>
-          </div>
-        </AuthFormField>
+        <AuthPasswordField
+          id="password"
+          label="Password"
+          value={form.password}
+          onChange={(password) => setForm((f) => ({ ...f, password }))}
+          placeholder="Create a strong password"
+          autoComplete="new-password"
+        />
 
         {(localError || error) && (
           <AuthError message={localError ?? error ?? "Registration failed"} />
         )}
 
-        <AuthSubmitButton loading={loading} loadingLabel="Creating account…" label="Create Account →" />
+        <AuthSubmitButton loading={loading} loadingLabel="Creating account…" label="Create Account" />
 
-        <AuthFormDivider />
-
-        <div className="space-y-3">
-          <AuthOutlineLink href={loginHref}>Sign In →</AuthOutlineLink>
-          <AuthGoToStoreLink />
-        </div>
+        <AuthAltActions
+          primary={{ href: loginHref, label: "Sign In" }}
+          secondary={{ href: "/", label: "Go to Store" }}
+        />
       </form>
     </AuthShell>
   );

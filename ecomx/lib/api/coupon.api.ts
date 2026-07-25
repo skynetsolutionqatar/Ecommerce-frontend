@@ -1,13 +1,11 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "./client";
-import type {
-  ApiCoupon,
-  CreateCouponPayload,
-  UpdateCouponPayload,
-} from "@/types/coupon.types";
+import type { CouponQueryParams, CreateCouponPayload, UpdateCouponPayload, ApiCoupon } from "@/types/coupon.types";
+import type { PaginationMeta } from "@/types/api.types";
 
 /** Requires /coupons route mounted on backend */
 export const couponApi = {
-  getAll: () => apiGet<{ coupons: ApiCoupon[] }>("/coupons"),
+  getAll: (params?: CouponQueryParams) =>
+    apiGet<{ coupons: ApiCoupon[] }>("/coupons", params as Record<string, unknown>),
 
   getById: (id: string) => apiGet<{ coupon: ApiCoupon }>(`/coupons/${id}`),
 
@@ -26,7 +24,12 @@ export const couponApi = {
   validate: (code: string) => apiPost<{ valid: boolean }>("/coupons/validate", { code }),
 };
 
-export async function fetchCoupons(): Promise<ApiCoupon[]> {
-  const res = await couponApi.getAll();
-  return res.data.coupons;
+export type CouponsResult = {
+  coupons: ApiCoupon[];
+  pagination?: PaginationMeta;
+};
+
+export async function fetchCoupons(params?: CouponQueryParams): Promise<CouponsResult> {
+  const res = await couponApi.getAll(params);
+  return { coupons: res.data.coupons, pagination: res.pagination };
 }
