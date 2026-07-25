@@ -14,6 +14,17 @@ export function useReviews(params?: ReviewQueryParams) {
     staleTime: 60_000,
     retry: false,
     placeholderData: (prev) => prev,
+    select: (data) => data.reviews,
+  });
+}
+
+export function useReviewsWithMeta(params?: ReviewQueryParams) {
+  return useQuery({
+    queryKey: [REVIEWS_KEY, params],
+    queryFn: () => fetchReviews(params),
+    staleTime: 60_000,
+    retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -21,8 +32,8 @@ export function useReview(id: string) {
   return useQuery({
     queryKey: [REVIEW_KEY, id],
     queryFn: async () => {
-      const reviews = await fetchReviews({ limit: 200 });
-      const review = reviews.find((item) => item._id === id);
+      const result = await fetchReviews({ limit: 200 });
+      const review = result.reviews.find((item) => item._id === id);
       if (!review) throw new Error("Review not found");
       return review;
     },

@@ -1,4 +1,5 @@
 import type { CouponDiscountType, CouponStatus } from "@/lib/Constant";
+import type { PaginationParams } from "@/types/api.types";
 
 export type { CouponStatus, CouponDiscountType };
 
@@ -50,9 +51,10 @@ export interface UpdateCouponPayload {
   usageLimit?: number;
 }
 
-export interface CouponQueryParams {
-  page?: number;
-  limit?: number;
+export interface CouponQueryParams extends PaginationParams {
   status?: CouponStatus;
-  search?: string;
+  type?: CouponDiscountType;
+  firstOrderOnly?: boolean;
+  expired?: boolean;
+  sortBy?: "createdAt" | "expiryDate" | "usedCount" | "code";
 }

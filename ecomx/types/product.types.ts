@@ -1,3 +1,4 @@
+import type { PaginationParams } from "@/types/api.types";
 import type { ProductStatus } from "@/lib/Constant";
 
 export type { ProductStatus };
@@ -75,19 +76,27 @@ export interface ApiProduct {
   updatedAt?: string;
 }
 
-export interface ProductQueryParams {
-  page?: number;
-  limit?: number;
-  search?: string;
+export interface ProductQueryParams extends PaginationParams {
   categoryId?: string;
   status?: ProductStatus;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
+  maxRating?: number;
+  /** Backend accepts only the string `"true"` */
   inStock?: boolean;
   isFeatured?: boolean;
+  isNew?: boolean;
+  isBestSeller?: boolean;
+  isDigital?: boolean;
+  hasVariants?: boolean;
+  isFreeShipping?: boolean;
+  trackInventory?: boolean;
+  hasDiscount?: boolean;
   brand?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sku?: string;
+  tags?: string | string[];
+  sortBy?: "price" | "name" | "createdAt" | "totalSold" | "averageRating";
 }
 
 /** POST /products/add body — keys match backend model + validation. */

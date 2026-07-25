@@ -1,6 +1,10 @@
 "use client";
 
 import React from "react";
+import {
+  adminFormInputClass,
+  adminFormLabel,
+} from "@/lib/admin/form-classes";
 
 interface FormNumberInputProps {
   label: string;
@@ -39,7 +43,7 @@ function FormNumberInput({
   disabled = false,
   blockNegative = true,
 }: FormNumberInputProps) {
-  const hasError = touched && error;
+  const hasError = Boolean(touched && error);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (blockNegative && ["-", "e", "E", "+"].includes(e.key)) {
@@ -50,7 +54,7 @@ function FormNumberInput({
 
   return (
     <div className="flex max-w-md items-start gap-4">
-      <label className="w-28 pt-2 text-sm font-medium text-gray-700">
+      <label className={adminFormLabel}>
         {required && <span className="text-red-500">*</span>} {label}
       </label>
       <div className="flex-1">
@@ -67,11 +71,7 @@ function FormNumberInput({
           onKeyDown={handleKeyDown}
           readOnly={readOnly}
           disabled={disabled}
-          className={`w-full border-b-2 bg-transparent py-2 text-sm outline-none
-            ${hasError ? "border-red-500" : "border-gray-300 focus:border-blue-600"}
-            ${readOnly ? "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500" : ""}
-            ${disabled ? "cursor-not-allowed opacity-60" : ""}
-          `}
+          className={adminFormInputClass({ hasError, readOnly, disabled })}
         />
         {hasError && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </div>

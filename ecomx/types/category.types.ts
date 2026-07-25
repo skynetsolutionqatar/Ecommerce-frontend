@@ -1,8 +1,20 @@
+import type { PaginationParams } from "@/types/api.types";
+
 /** Populated parent category reference from backend `.populate("parent")`. */
 export interface ApiCategoryRef {
   _id: string;
   name: string;
   slug: string;
+}
+
+/** GET /categories query — matches backend category.service filters. */
+export interface CategoryQuery extends PaginationParams {
+  tree?: boolean;
+  isParent?: boolean;
+  isActive?: boolean;
+  /** MongoId, or `"null"` / `"root"` for root categories */
+  parent?: string;
+  sortBy?: "displayOrder" | "name" | "createdAt";
 }
 
 /** Category document shape from SKYNET ECOMMERCE B backend. */

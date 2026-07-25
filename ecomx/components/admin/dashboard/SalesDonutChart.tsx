@@ -1,10 +1,12 @@
 "use client";
 
-import { memo, useMemo } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { memo, useMemo, useState } from "react";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import type { SalesDistributionItem } from "@/lib/admin/data";
 import { tooltipStyle } from "@/lib/admin/chart-utils";
 import { adminType } from "@/lib/admin/typography";
+import ChartContainer from "./ChartContainer";
+import { ChartExpandDialog } from "./ChartExpandDialog";
 import DashboardCard from "./DashboardCard";
 
 interface SalesDonutChartProps {
@@ -14,7 +16,93 @@ interface SalesDonutChartProps {
   items: SalesDistributionItem[];
 }
 
+interface SalesDonutBodyProps {
+  pieData: { name: string; value: number; color: string }[];
+  totalLabel: string;
+  totalValue: string;
+  items: SalesDistributionItem[];
+  pieSize: number;
+  innerRadius: number;
+  outerRadius: number;
+  layout?: "compact" | "expanded";
+}
+
+function SalesDonutBody({
+  pieData,
+  totalLabel,
+  totalValue,
+  items,
+  pieSize,
+  innerRadius,
+  outerRadius,
+  layout = "compact",
+}: SalesDonutBodyProps) {
+  const isExpanded = layout === "expanded";
+
+  return (
+    <div
+      className={
+        isExpanded
+          ? "flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center"
+          : "flex flex-col items-center gap-6"
+      }
+    >
+      <div className="relative shrink-0" style={{ width: pieSize, height: pieSize }}>
+        <ChartContainer height={pieSize}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
+              paddingAngle={2}
+              dataKey="value"
+              stroke="none"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value, _name, item) => [`${value}%`, item.payload?.name ?? ""]}
+              {...tooltipStyle}
+            />
+          </PieChart>
+        </ChartContainer>
+
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className={isExpanded ? "text-3xl font-bold text-gray-800" : adminType.emphasisTotal}>
+            {totalValue}
+          </span>
+          <span className={`${adminType.badge} text-gray-500`}>{totalLabel}</span>
+        </div>
+      </div>
+
+      <ul className={isExpanded ? "w-full max-w-md space-y-3 lg:flex-1" : "w-full space-y-2.5"}>
+        {items.map((item) => (
+          <li
+            key={item.id}
+            className={`flex items-center justify-between ${adminType.badge} ${isExpanded ? "text-sm" : ""}`}
+          >
+            <span className="flex items-center gap-2 text-gray-600">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+              {item.label}
+            </span>
+            <span className={`font-semibold ${adminType.tableCellPrimary}`}>{item.percent}%</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function SalesDonutChart({ title, totalLabel, totalValue, items }: SalesDonutChartProps) {
+  const [expanded, setExpanded] = useState(false);
+
   const pieData = useMemo(
     () =>
       items
@@ -27,55 +115,30 @@ function SalesDonutChart({ title, totalLabel, totalValue, items }: SalesDonutCha
     [items]
   );
 
+  const bodyProps = { pieData, totalLabel, totalValue, items };
+
   return (
-    <DashboardCard title={title} showMenu className="h-full">
-      <div className="flex flex-col items-center gap-6">
-        <div className="relative h-[180px] w-[180px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={58}
-                outerRadius={78}
-                paddingAngle={2}
-                dataKey="value"
-                stroke="none"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value, _name, item) => [`${value}%`, item.payload?.name ?? ""]}
-                {...tooltipStyle}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+    <>
+      <DashboardCard title={title} onExpand={() => setExpanded(true)} className="h-full">
+        <SalesDonutBody
+          {...bodyProps}
+          pieSize={180}
+          innerRadius={58}
+          outerRadius={78}
+          layout="compact"
+        />
+      </DashboardCard>
 
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className={adminType.emphasisTotal}>{totalValue}</span>
-            <span className={`${adminType.badge} text-gray-500`}>{totalLabel}</span>
-          </div>
-        </div>
-
-        <ul className="w-full space-y-2.5">
-          {items.map((item) => (
-            <li key={item.id} className={`flex items-center justify-between ${adminType.badge}`}>
-              <span className="flex items-center gap-2 text-gray-600">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
-                {item.label}
-              </span>
-              <span className={`font-semibold ${adminType.tableCellPrimary}`}>{item.percent}%</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </DashboardCard>
+      <ChartExpandDialog open={expanded} onOpenChange={setExpanded} title={title}>
+        <SalesDonutBody
+          {...bodyProps}
+          pieSize={280}
+          innerRadius={88}
+          outerRadius={120}
+          layout="expanded"
+        />
+      </ChartExpandDialog>
+    </>
   );
 }
 

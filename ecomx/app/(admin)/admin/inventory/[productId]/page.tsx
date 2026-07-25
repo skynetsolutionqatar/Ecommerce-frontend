@@ -85,7 +85,7 @@ export default function AdminInventoryProductPage({
             <p className={adminType.loading}>Loading history...</p>
           ) : (
             <div className="overflow-hidden rounded-xl border">
-              <table className="w-full text-sm">
+              <table className="admin-table w-full text-sm">
                 <thead className="bg-gray-100 text-gray-700">
                   <tr>
                     <th className="px-4 py-3 text-left">Date</th>

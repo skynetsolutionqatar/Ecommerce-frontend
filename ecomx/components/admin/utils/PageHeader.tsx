@@ -36,7 +36,7 @@ function PageHeader({
           </Button>
         )}
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       </div>

@@ -2,15 +2,28 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchCategories, fetchCategory, categoryApi } from "@/lib/api/category.api";
-import type { CreateCategoryPayload, UpdateCategoryPayload } from "@/types/category.types";
+import type {
+  CategoryQuery,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+} from "@/types/category.types";
 
 export const CATEGORIES_KEY = "categories";
 export const CATEGORY_KEY = "category";
 
-export function useCategories() {
+export function useCategories(params?: CategoryQuery) {
   return useQuery({
-    queryKey: [CATEGORIES_KEY],
-    queryFn: fetchCategories,
+    queryKey: [CATEGORIES_KEY, params],
+    queryFn: () => fetchCategories(params),
+    staleTime: 120_000,
+    select: (data) => data.categories,
+  });
+}
+
+export function useCategoriesWithMeta(params?: CategoryQuery) {
+  return useQuery({
+    queryKey: [CATEGORIES_KEY, params],
+    queryFn: () => fetchCategories(params),
     staleTime: 120_000,
   });
 }

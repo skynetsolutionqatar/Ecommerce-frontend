@@ -15,7 +15,8 @@ interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemName: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
+  loading?: boolean;
 }
 
 export default function DeleteDialog({
@@ -23,10 +24,21 @@ export default function DeleteDialog({
   onOpenChange,
   itemName,
   onConfirm,
+  loading = false,
 }: DeleteDialogProps) {
+  const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    try {
+      await onConfirm();
+      onOpenChange(false);
+    } catch {
+      // Keep dialog open — caller shows error toast
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="z-[200] sm:max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -34,9 +46,13 @@ export default function DeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">
-            Delete
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(event) => void handleConfirm(event)}
+            disabled={loading}
+            className="bg-red-600 hover:bg-red-700 disabled:opacity-60"
+          >
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

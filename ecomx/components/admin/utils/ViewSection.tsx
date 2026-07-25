@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import { adminType } from "@/lib/admin/typography";
+import { adminViewSectionClass } from "@/lib/admin/form-classes";
 
 interface Props {
   id: string;
@@ -9,14 +10,12 @@ interface Props {
   children: React.ReactNode;
 }
 
-const ViewSection = forwardRef<HTMLElement, Props>(
-  ({ id, title, children }, ref) => (
-    <section ref={ref} id={id} className="rounded-xl bg-white pb-3">
-      <h2 className={`mb-6 border-b pb-3 ${adminType.sectionTitle}`}>{title}</h2>
-      {children}
-    </section>
-  )
-);
+const ViewSection = forwardRef<HTMLElement, Props>(({ id, title, children }, ref) => (
+  <section ref={ref} id={id} className={`${adminViewSectionClass} p-6 pt-4`}>
+    <h2 className={`mb-6 border-b border-border pb-3 ${adminType.sectionTitle}`}>{title}</h2>
+    {children}
+  </section>
+));
 
 ViewSection.displayName = "ViewSection";
 

@@ -3,9 +3,14 @@ import LoginForm from "./LoginForm";
 
 function AuthLoadingFallback() {
   return (
-    <div className="overflow-hidden rounded-[28px] bg-white/10 p-12 text-center backdrop-blur-sm">
-      <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-      <p className="mt-3 text-sm text-white/60">Loading…</p>
+    <div className="animate-pulse space-y-6">
+      <div className="h-8 w-48 rounded-lg bg-border/40" />
+      <div className="h-4 w-64 rounded bg-border/30" />
+      <div className="space-y-4 pt-2">
+        <div className="h-12 rounded-xl bg-border/30" />
+        <div className="h-12 rounded-xl bg-border/30" />
+        <div className="h-12 rounded-xl bg-[#0a255d]/20" />
+      </div>
     </div>
   );
 }

@@ -1,15 +1,24 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "./client";
+import type { PaginationMeta } from "@/types/api.types";
 import type {
   ApiReview,
   CreateReviewPayload,
   ModerateReviewPayload,
+  MyReviewQuery,
+  ProductReviewQuery,
   ReviewQueryParams,
 } from "@/types/review.types";
 
 /** Requires /reviews route mounted on backend */
 export const reviewApi = {
-  getProductReviews: (productId: string) =>
-    apiGet<{ reviews: ApiReview[] }>(`/reviews/products/${productId}`),
+  getProductReviews: (productId: string, params?: ProductReviewQuery) =>
+    apiGet<{ reviews: ApiReview[] }>(
+      `/reviews/products/${productId}`,
+      params as Record<string, unknown>
+    ),
+
+  getMyReviews: (params?: MyReviewQuery) =>
+    apiGet<{ reviews: ApiReview[] }>("/reviews/my", params as Record<string, unknown>),
 
   getAll: (params?: ReviewQueryParams) =>
     apiGet<{ reviews: ApiReview[] }>("/reviews", params as Record<string, unknown>),
@@ -23,7 +32,20 @@ export const reviewApi = {
     apiPost<{ review: ApiReview }>("/reviews", payload),
 };
 
-export async function fetchReviews(params?: ReviewQueryParams): Promise<ApiReview[]> {
+export type ReviewsResult = {
+  reviews: ApiReview[];
+  pagination?: PaginationMeta;
+};
+
+export async function fetchReviews(params?: ReviewQueryParams): Promise<ReviewsResult> {
   const res = await reviewApi.getAll(params);
-  return res.data.reviews;
+  return { reviews: res.data.reviews, pagination: res.pagination };
+}
+
+export async function fetchProductReviews(
+  productId: string,
+  params?: ProductReviewQuery
+): Promise<ReviewsResult> {
+  const res = await reviewApi.getProductReviews(productId, params);
+  return { reviews: res.data.reviews, pagination: res.pagination };
 }

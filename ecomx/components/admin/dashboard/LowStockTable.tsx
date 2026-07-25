@@ -20,7 +20,7 @@ function StockBadge({ stock, threshold }: { stock: number; threshold: number }) 
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-        critical ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"
+        critical ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"
       }`}
     >
       {critical && <AlertTriangle size={12} />}
@@ -42,7 +42,7 @@ function LowStockTable({
       headerRight={
         <Link
           href={viewAllHref}
-          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline`}
+          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline dark:text-emerald-400`}
         >
           {viewAllLabel}
         </Link>
@@ -56,20 +56,20 @@ function LowStockTable({
               key={row.id}
               className={`rounded-xl border p-4 transition hover:shadow-sm ${
                 critical
-                  ? "border-red-200 bg-gradient-to-br from-red-50 to-white"
-                  : "border-amber-200 bg-gradient-to-br from-amber-50/80 to-white"
+                  ? "border-red-500/30 bg-red-500/10"
+                  : "border-amber-500/30 bg-amber-500/10"
               }`}
             >
               <div className="mb-3 flex items-start justify-between gap-2">
                 <StockBadge stock={row.stock} threshold={row.threshold} />
-                <span className={`shrink-0 ${adminType.badge} text-gray-400`}>
+                <span className={`shrink-0 ${adminType.badge} text-muted-foreground`}>
                   ≤ {row.threshold}
                 </span>
               </div>
-              <p className={`mb-1 line-clamp-2 font-semibold leading-snug text-gray-800 ${adminType.badge}`}>
+              <p className={`mb-1 line-clamp-2 font-semibold leading-snug text-foreground ${adminType.badge}`}>
                 {row.product}
               </p>
-              <p className={`font-mono ${adminType.badge} text-gray-500`}>{row.sku}</p>
+              <p className={`font-mono ${adminType.badge} text-muted-foreground`}>{row.sku}</p>
             </div>
           );
         })}

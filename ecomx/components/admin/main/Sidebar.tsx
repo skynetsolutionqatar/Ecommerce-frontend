@@ -503,7 +503,7 @@
 //                             className={`w-full flex justify-between px-2 py-2 rounded-md ${
 //                               isSubActive
 //                                 ? "bg-gray-100 text-green-600"
-//                                 : "text-gray-700 hover:bg-gray-100"
+//                                 : "text-sidebar-foreground hover:bg-sidebar-accent"
 //                             }`}
 //                           >
 //                             {!collapsed && item.name}
@@ -631,7 +631,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="bg-white h-screen flex flex-col transition-all duration-500">
+    <aside className="flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-500">
       {/* Header */}
       <div
         className={`${
@@ -639,8 +639,8 @@ export default function Sidebar() {
         } flex items-center justify-between px-4 py-3 transition-all duration-500`}
       >
         {!collapsed && (
-          <h1 className={`flex items-center gap-2 ${adminType.sidebarBrand} font-bold text-blue-900`}>
-            <span className="text-emerald-800">SKYNET™</span>
+          <h1 className={`flex items-center gap-2 ${adminType.sidebarBrand}`}>
+            <span className="text-emerald-700 dark:text-emerald-400">SKYNET™</span>
           </h1>
           // <motion.button
           //   type="button"
@@ -660,7 +660,7 @@ export default function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-600"
+          className="text-muted-foreground hover:text-foreground"
         >
           {collapsed ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -705,7 +705,7 @@ export default function Sidebar() {
                             className={`w-full flex items-center justify-between px-2 py-2 rounded-md transition ${
                               isParentActive && isExpanded
                                 ? `${colors.mainColor} text-white`
-                                : "text-gray-700 hover:bg-gray-100"
+                                : "text-sidebar-foreground hover:bg-sidebar-accent"
                             }`}
                           >
                             <span className="flex items-center gap-2">
@@ -738,7 +738,7 @@ export default function Sidebar() {
                                       className={`flex items-center gap-2 px-2 py-1 rounded-md transition ${adminType.sidebarSubNav} ${
                                         isActive
                                           ? `text-white ${colors.mainColor}`
-                                          : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                                       }`}
                                     >
                                       {sub.icon}
@@ -756,7 +756,7 @@ export default function Sidebar() {
                           className={`flex items-center gap-2 px-2 py-2 rounded-md transition ${
                             isPathActive(item.path || "")
                               ? `${colors.mainColor} text-white`
-                              : "text-gray-700 hover:bg-gray-100"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent"
                           }`}
                         >
                           {item.icon}

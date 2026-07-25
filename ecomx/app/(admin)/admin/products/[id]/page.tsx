@@ -35,10 +35,14 @@ export default function AdminProductDetailPage({
 
   const handleDelete = async () => {
     if (!product) return;
-    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
-    await remove.mutateAsync(id);
-    toast.success("Product deleted");
-    router.push(ADMIN_ROUTES.products);
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Product deleted");
+      router.push(ADMIN_ROUTES.products);
+    } catch {
+      toast.error("Failed to delete product");
+      throw new Error("Delete failed");
+    }
   };
 
   if (isLoading) {
@@ -65,7 +69,8 @@ export default function AdminProductDetailPage({
     <BackPanel
       tabs={TABS}
       editPath={`${ADMIN_ROUTES.products}/edit/${id}`}
-      onDelete={() => void handleDelete()}
+      deleteItemName={product.name}
+      onDelete={handleDelete}
       deleting={remove.isPending}
     >
       <div className="space-y-6">

@@ -66,16 +66,26 @@ export default function AdminReviewDetailPage({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this review permanently?")) return;
-    await remove.mutateAsync(id);
-    toast.success("Review deleted");
-    router.push(ADMIN_ROUTES.reviews);
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Review deleted");
+      router.push(ADMIN_ROUTES.reviews);
+    } catch {
+      toast.error("Failed to delete review");
+      throw new Error("Delete failed");
+    }
   };
+
+  const reviewLabel =
+    typeof review.productId === "object"
+      ? `review for "${review.productId.name}"`
+      : "this review";
 
   return (
     <BackPanel
       tabs={TABS}
-      onDelete={() => void handleDelete()}
+      deleteItemName={reviewLabel}
+      onDelete={handleDelete}
       deleting={remove.isPending}
     >
       <div className="space-y-6">

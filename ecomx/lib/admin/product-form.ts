@@ -142,6 +142,18 @@ function parseLineList(value: string): string[] | undefined {
   return items.length ? items : undefined;
 }
 
+export function parseImagesField(value: string): string[] {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export function appendImagesToField(current: string, urls: string[]): string {
+  const merged = [...parseImagesField(current), ...urls.filter(Boolean)];
+  return merged.join("\n");
+}
+
 function toOptionalNumber(value: number | ""): number | undefined {
   return value === "" ? undefined : Number(value);
 }

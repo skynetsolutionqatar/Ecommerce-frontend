@@ -27,7 +27,7 @@ export default function ProductMediaView({ thumbnail, images }: ProductMediaView
   const urls = useMemo(() => collectImageUrls(thumbnail, images), [thumbnail, images]);
 
   if (urls.length === 0) {
-    return <p className={`${adminType.label} text-gray-400`}>No images uploaded</p>;
+    return <p className={`${adminType.label} text-muted-foreground`}>No images uploaded</p>;
   }
 
   return (
@@ -41,9 +41,9 @@ export default function ProductMediaView({ thumbnail, images }: ProductMediaView
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition hover:border-emerald-300 hover:shadow-md"
+            className="group overflow-hidden rounded-xl border border-border bg-muted transition hover:border-emerald-500/50 hover:shadow-md"
           >
-            <div className="relative aspect-[4/3] overflow-hidden bg-white">
+            <div className="relative aspect-[4/3] overflow-hidden bg-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={url}
@@ -51,18 +51,18 @@ export default function ProductMediaView({ thumbnail, images }: ProductMediaView
                 className="h-full w-full object-contain p-2 transition group-hover:scale-[1.02]"
                 loading="lazy"
               />
-              <span className="absolute right-2 top-2 rounded-md bg-white/90 p-1 text-gray-500 opacity-0 shadow-sm transition group-hover:opacity-100">
+              <span className="absolute right-2 top-2 rounded-md bg-card/90 p-1 text-muted-foreground opacity-0 shadow-sm transition group-hover:opacity-100">
                 <ExternalLink size={14} />
               </span>
             </div>
 
-            <div className="space-y-1 border-t border-gray-100 bg-white p-3">
+            <div className="space-y-1 border-t border-border bg-card p-3">
               {isThumbnail && (
-                <span className={`inline-flex rounded-full bg-emerald-50 px-2 py-0.5 ${adminType.badge} font-medium text-emerald-700`}>
+                <span className={`inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 ${adminType.badge} font-medium text-emerald-700 dark:text-emerald-400`}>
                   Thumbnail
                 </span>
               )}
-              <p className={`break-all ${adminType.badge} text-blue-600 group-hover:underline`}>
+              <p className={`break-all ${adminType.badge} text-blue-600 group-hover:underline dark:text-blue-400`}>
                 {url}
               </p>
             </div>

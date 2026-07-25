@@ -1,18 +1,14 @@
+import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a255d] via-[#111827] to-[#1F2937] p-4 sm:p-6">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#0a255d]/40 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-white/[0.03] blur-2xl" />
+    <div className="flex min-h-screen flex-col lg:flex-row">
+      <AuthBrandPanel />
 
-      <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:48px_48px]" />
-
-      <div className="relative z-10 w-full max-w-[440px] animate-fade-up">
-        <p className="mb-5 text-center font-label text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-          Skynet Management Suite
-        </p>
-        {children}
-      </div>
+      <main className="relative flex flex-1 items-center justify-center bg-[#fafbfd] px-5 py-10 sm:px-8 lg:px-12 lg:py-16">
+        <div className="pointer-events-none absolute inset-0 lg:left-[44%] lg:max-w-none [background:radial-gradient(ellipse_at_top_right,rgba(10,37,93,0.04),transparent_55%)]" />
+        <div className="relative w-full max-w-[420px]">{children}</div>
+      </main>
     </div>
   );
 }

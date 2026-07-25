@@ -1,13 +1,15 @@
+"use client";
+
 import { memo, type ReactNode } from "react";
-import { MoreHorizontal } from "lucide-react";
 import { adminType } from "@/lib/admin/typography";
+import { ChartExpandButton } from "./ChartExpandDialog";
 
 interface DashboardCardProps {
   title?: string;
   description?: string;
   action?: ReactNode;
   headerRight?: ReactNode;
-  showMenu?: boolean;
+  onExpand?: () => void;
   className?: string;
   children: ReactNode;
 }
@@ -17,18 +19,18 @@ function DashboardCard({
   description,
   action,
   headerRight,
-  showMenu = false,
+  onExpand,
   className = "",
   children,
 }: DashboardCardProps) {
-  const hasHeader = title || description || action || headerRight || showMenu;
+  const hasHeader = title || description || action || headerRight || onExpand;
 
   return (
     <article
-      className={`rounded-xl border border-gray-100 bg-white shadow-sm ${className}`}
+      className={`rounded-xl border border-border bg-card shadow-sm ${className}`}
     >
       {hasHeader && (
-        <header className="flex items-start justify-between gap-4 border-b border-gray-50 px-5 py-4">
+        <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
           <div className="min-w-0 flex-1">
             {title && <h3 className={adminType.cardTitle}>{title}</h3>}
             {description && (
@@ -38,15 +40,7 @@ function DashboardCard({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {headerRight}
-            {showMenu && (
-              <button
-                type="button"
-                aria-label="More options"
-                className="rounded-md p-1 text-gray-400 transition hover:bg-gray-50 hover:text-gray-600"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-            )}
+            {onExpand && <ChartExpandButton onClick={onExpand} />}
           </div>
         </header>
       )}

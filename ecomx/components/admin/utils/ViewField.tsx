@@ -1,6 +1,7 @@
 "use client";
 
 import { adminType } from "@/lib/admin/typography";
+import { adminStatusBadge } from "@/lib/admin/form-classes";
 
 interface ViewFieldProps {
   label: string;
@@ -9,14 +10,6 @@ interface ViewFieldProps {
   badge?: boolean;
   badgeColor?: "green" | "red" | "yellow" | "blue" | "gray";
 }
-
-const badgeClasses = {
-  green: "bg-green-100 text-green-700",
-  red: "bg-red-100 text-red-600",
-  yellow: "bg-yellow-100 text-yellow-700",
-  blue: "bg-blue-100 text-blue-700",
-  gray: "bg-gray-100 text-gray-600",
-};
 
 export default function ViewField({
   label,
@@ -28,17 +21,15 @@ export default function ViewField({
   return (
     <div className="flex w-full items-center">
       <span className={`w-40 ${adminType.label}`}>{label}</span>
-      <span className="mr-3 text-gray-400">:</span>
+      <span className="mr-3 text-muted-foreground">:</span>
       {badge ? (
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 ${adminType.badge} ${badgeClasses[badgeColor]}`}
+          className={`inline-flex rounded-full px-2.5 py-0.5 ${adminType.badge} ${adminStatusBadge[badgeColor]}`}
         >
           {value || "—"}
         </span>
       ) : (
-        <span
-          className={`flex-1 ${adminType.value} ${capitalize ? "capitalize" : ""}`}
-        >
+        <span className={`flex-1 ${adminType.value} ${capitalize ? "capitalize" : ""}`}>
           {value || "—"}
         </span>
       )}

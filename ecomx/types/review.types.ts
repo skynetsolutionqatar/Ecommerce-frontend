@@ -1,4 +1,5 @@
 import type { ModeratableReviewStatus, ReviewStatus } from "@/lib/Constant";
+import type { PaginationParams } from "@/types/api.types";
 
 export type { ReviewStatus, ModeratableReviewStatus };
 
@@ -36,11 +37,31 @@ export interface ModerateReviewPayload {
   rejectionReason?: string;
 }
 
-export interface ReviewQueryParams {
-  page?: number;
-  limit?: number;
+export interface ReviewQueryParams extends PaginationParams {
   status?: ReviewStatus;
   productId?: string;
+  customerId?: string;
+  rating?: number;
+  minRating?: number;
+  maxRating?: number;
+  sortBy?: "createdAt" | "rating" | "helpfulCount";
+}
+
+/** GET /reviews/products/:productId */
+export interface ProductReviewQuery extends PaginationParams {
+  rating?: number;
+  minRating?: number;
+  maxRating?: number;
+  hasImages?: boolean;
+  sortBy?: "rating" | "createdAt" | "helpfulCount";
+}
+
+/** GET /reviews/my */
+export interface MyReviewQuery extends PaginationParams {
+  status?: ReviewStatus;
+  productId?: string;
+  rating?: number;
+  sortBy?: "createdAt" | "rating";
 }
 
 export function reviewBody(review: ApiReview): string {

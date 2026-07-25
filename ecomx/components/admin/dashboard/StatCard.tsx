@@ -20,13 +20,13 @@ function StatCard({ stat }: StatCardProps) {
   const TrendIcon = isUp ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <article className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-start justify-between gap-2">
         <p className={adminType.label}>{stat.label}</p>
         <button
           type="button"
           aria-label="More options"
-          className="text-gray-300 hover:text-gray-500"
+          className="text-muted-foreground/50 hover:text-muted-foreground"
         >
           ···
         </button>
@@ -34,7 +34,7 @@ function StatCard({ stat }: StatCardProps) {
 
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-2xl font-semibold leading-none text-gray-800">{stat.value}</p>
+          <p className="text-2xl font-semibold leading-none text-foreground">{stat.value}</p>
           <p className={`mt-2 flex items-center gap-0.5 ${adminType.badge} font-semibold ${trendColor}`}>
             <TrendIcon size={14} />
             {formatTrend(stat.trend.value, stat.trend.direction)}

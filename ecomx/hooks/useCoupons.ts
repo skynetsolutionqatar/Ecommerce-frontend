@@ -2,15 +2,29 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchCoupons, couponApi } from "@/lib/api/coupon.api";
-import type { CreateCouponPayload, UpdateCouponPayload } from "@/types/coupon.types";
+import type {
+  CouponQueryParams,
+  CreateCouponPayload,
+  UpdateCouponPayload,
+} from "@/types/coupon.types";
 
 export const COUPONS_KEY = "coupons";
 export const COUPON_KEY = "coupon";
 
-export function useCoupons() {
+export function useCoupons(params?: CouponQueryParams) {
   return useQuery({
-    queryKey: [COUPONS_KEY],
-    queryFn: fetchCoupons,
+    queryKey: [COUPONS_KEY, params],
+    queryFn: () => fetchCoupons(params),
+    staleTime: 60_000,
+    retry: false,
+    select: (data) => data.coupons,
+  });
+}
+
+export function useCouponsWithMeta(params?: CouponQueryParams) {
+  return useQuery({
+    queryKey: [COUPONS_KEY, params],
+    queryFn: () => fetchCoupons(params),
     staleTime: 60_000,
     retry: false,
   });

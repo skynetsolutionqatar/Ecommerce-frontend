@@ -5,11 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
 import {
+  AuthAltActions,
   AuthError,
-  AuthFormDivider,
   AuthFormField,
-  AuthGoToStoreLink,
-  AuthOutlineLink,
+  AuthPasswordField,
   AuthShell,
   AuthSubmitButton,
   authInputClass,
@@ -22,7 +21,10 @@ export default function LoginForm() {
   const { login, loading, error } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [localError, setLocalError] = useState<string | null>(null);
-  const [showPass, setShowPass] = useState(false);
+
+  const registerHref = redirectParam
+    ? `${AUTH_ROUTES.register}?redirect=${encodeURIComponent(redirectParam)}`
+    : AUTH_ROUTES.register;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +37,8 @@ export default function LoginForm() {
   };
 
   return (
-    <AuthShell title="Admin Login" subtitle="Sign in to manage your store">
-      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+    <AuthShell title="Welcome back" subtitle="Sign in to access your admin dashboard and manage your store.">
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
         <AuthFormField label="Email Address" icon={<Icons.Mail />}>
           <input
             id="email"
@@ -50,47 +52,23 @@ export default function LoginForm() {
           />
         </AuthFormField>
 
-        <AuthFormField label="Password" icon={<Icons.Lock />}>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPass ? "text" : "password"}
-              required
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className={`${authInputClass} pr-11`}
-              placeholder="••••••••"
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass((p) => !p)}
-              className="absolute right-3.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent text-muted transition-colors hover:text-primary"
-              aria-label={showPass ? "Hide password" : "Show password"}
-            >
-              {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
-            </button>
-          </div>
-        </AuthFormField>
+        <AuthPasswordField
+          id="password"
+          label="Password"
+          value={form.password}
+          onChange={(password) => setForm((f) => ({ ...f, password }))}
+          placeholder="Enter your password"
+          autoComplete="current-password"
+        />
 
         {(localError || error) && <AuthError message={localError ?? error ?? "Login failed"} />}
 
-        <AuthSubmitButton loading={loading} loadingLabel="Signing in…" label="Sign In →" />
+        <AuthSubmitButton loading={loading} loadingLabel="Signing in…" label="Sign In" />
 
-        <AuthFormDivider />
-
-        <div className="space-y-3">
-          <AuthGoToStoreLink />
-          <AuthOutlineLink
-            href={
-              redirectParam
-                ? `${AUTH_ROUTES.register}?redirect=${encodeURIComponent(redirectParam)}`
-                : AUTH_ROUTES.register
-            }
-          >
-            Register →
-          </AuthOutlineLink>
-        </div>
+        <AuthAltActions
+          primary={{ href: registerHref, label: "Create Account" }}
+          secondary={{ href: "/", label: "Go to Store" }}
+        />
       </form>
     </AuthShell>
   );

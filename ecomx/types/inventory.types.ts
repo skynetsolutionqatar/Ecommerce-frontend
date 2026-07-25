@@ -1,4 +1,5 @@
 import type { InventoryMovementType } from "@/lib/Constant";
+import type { PaginationParams } from "@/types/api.types";
 
 export type { InventoryMovementType };
 
@@ -42,4 +43,15 @@ export interface ReduceStockPayload {
   quantity: number;
   type?: InventoryMovementType;
   note?: string;
+}
+
+/** GET /inventory/alerts/low-stock */
+export interface LowStockQuery extends PaginationParams {
+  categoryId?: string;
+}
+
+/** GET /inventory/:productId/history */
+export interface StockHistoryQuery extends PaginationParams {
+  type?: InventoryMovementType;
+  sortBy?: "createdAt";
 }

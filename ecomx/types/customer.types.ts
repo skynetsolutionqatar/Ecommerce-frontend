@@ -1,4 +1,5 @@
 import type { UserRole } from "./auth.types";
+import type { PaginationParams } from "@/types/api.types";
 
 export interface CustomerAddress {
   _id?: string;
@@ -29,10 +30,9 @@ export interface ApiCustomer {
   updatedAt?: string;
 }
 
-export interface CustomerQueryParams {
-  page?: number;
-  limit?: number;
-  search?: string;
+export interface CustomerQueryParams extends PaginationParams {
   role?: UserRole;
   isActive?: boolean;
+  isEmailVerified?: boolean;
+  sortBy?: "name" | "email" | "createdAt";
 }
