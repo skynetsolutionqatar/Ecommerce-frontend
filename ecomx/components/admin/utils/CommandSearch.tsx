@@ -95,7 +95,7 @@ export default function CommandSearch({
     <>
       <div
         onClick={() => setOpen(true)}
-        className="flex w-full cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-500 hover:bg-gray-200"
+        className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
       >
         <Search size={16} />
         <span>Search menu... (Ctrl + K)</span>

@@ -109,7 +109,7 @@ export default function AdminOrdersPage() {
           />
         }
       >
-        <table className="w-full text-sm">
+        <table className="admin-table w-full text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="px-5 py-3 text-left">#</th>

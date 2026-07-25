@@ -1,6 +1,10 @@
 "use client";
 
 import React from "react";
+import {
+  adminFormLabel,
+  adminFormSelectClass,
+} from "@/lib/admin/form-classes";
 
 interface Option {
   label: string;
@@ -34,11 +38,11 @@ function FormSelect({
   onChange,
   onBlur,
 }: FormSelectProps) {
-  const hasError = touched && error;
+  const hasError = Boolean(touched && error);
 
   return (
     <div className="flex max-w-md items-start gap-4">
-      <label className="w-28 pt-2 text-sm font-medium text-gray-700">
+      <label className={adminFormLabel}>
         {required && <span className="text-red-500">*</span>} {label}
       </label>
       <div className="flex-1">
@@ -48,10 +52,7 @@ function FormSelect({
           onChange={onChange}
           onBlur={onBlur}
           disabled={disabled}
-          className={`w-full border-b-2 bg-transparent py-2 text-sm outline-none
-            ${hasError ? "border-red-500" : "border-gray-300 focus:border-blue-600"}
-            ${disabled ? "cursor-not-allowed opacity-60" : ""}
-          `}
+          className={adminFormSelectClass({ hasError, disabled })}
         >
           <option value="">{placeholder}</option>
           {options.map((option) => (

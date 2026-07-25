@@ -21,7 +21,7 @@ export default function ListPageShell({
     return (
       <BackPanel showBack={false}>
         <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-gray-400">{loadingMessage}</p>
+          <p className="text-sm text-muted-foreground">{loadingMessage}</p>
         </div>
       </BackPanel>
     );

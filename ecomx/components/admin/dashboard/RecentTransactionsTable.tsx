@@ -14,9 +14,9 @@ interface RecentTransactionsTableProps {
 }
 
 const STATUS_STYLES: Record<TransactionStatus, string> = {
-  [TRANSACTION_STATUS.COMPLETED]: "bg-emerald-50 text-emerald-700",
-  [TRANSACTION_STATUS.PENDING]: "bg-amber-50 text-amber-700",
-  [TRANSACTION_STATUS.FAILED]: "bg-red-50 text-red-600",
+  [TRANSACTION_STATUS.COMPLETED]: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400",
+  [TRANSACTION_STATUS.PENDING]: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
+  [TRANSACTION_STATUS.FAILED]: "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400",
 };
 
 function StatusBadge({ status }: { status: TransactionStatus }) {
@@ -42,7 +42,7 @@ function RecentTransactionsTable({
       headerRight={
         <Link
           href={viewAllHref}
-          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline`}
+          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline dark:text-emerald-400`}
         >
           {viewAllLabel}
         </Link>
@@ -50,9 +50,9 @@ function RecentTransactionsTable({
       className="h-full"
     >
       <div className="overflow-x-auto">
-        <table className={`min-w-[520px] text-left ${adminType.table}`}>
+        <table className={`admin-table min-w-[520px] text-left ${adminType.table}`}>
           <thead>
-            <tr className="border-b border-gray-100 text-gray-500">
+            <tr className="border-b border-border text-muted-foreground">
               {columns.map((col) => (
                 <th key={col.key} className={`pb-3 pr-4 last:pr-0 ${adminType.tableHead}`}>
                   {col.label}
@@ -64,14 +64,14 @@ function RecentTransactionsTable({
             {rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60"
+                className="border-b border-border last:border-0 hover:bg-accent/50"
               >
                 <td className={`py-3.5 pr-4 font-mono ${adminType.badge} ${adminType.tableCellPrimary}`}>
                   {row.id}
                 </td>
                 <td className={`py-3.5 pr-4 ${adminType.tableCellPrimary}`}>{row.client}</td>
                 <td className={`py-3.5 pr-4 ${adminType.label}`}>{row.date}</td>
-                <td className={`py-3.5 pr-4 font-semibold text-gray-800`}>{row.amount}</td>
+                <td className="py-3.5 pr-4 font-semibold text-foreground">{row.amount}</td>
                 <td className="py-3.5">
                   <StatusBadge status={row.status} />
                 </td>

@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface FormPasswordInputProps {
   label: string;
@@ -30,11 +31,11 @@ function FormPasswordInput({
   onChange,
   onBlur,
 }: FormPasswordInputProps) {
-  const hasError = touched && error;
+  const hasError = Boolean(touched && error);
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
+      <label className="mb-1 block text-sm font-medium text-muted-foreground">
         {required && <span className="text-red-500">*</span>} {label}
       </label>
       <div className="relative">
@@ -45,16 +46,17 @@ function FormPasswordInput({
           placeholder={placeholder}
           onChange={onChange}
           onBlur={onBlur}
-          className={`w-full rounded-lg border px-4 py-2 pr-10 focus:outline-none focus:ring-2 ${
+          className={cn(
+            "w-full rounded-lg border bg-transparent px-4 py-2 pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2",
             hasError
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:ring-blue-500"
-          }`}
+              ? "border-destructive focus:ring-destructive/30"
+              : "border-border focus:border-emerald-600 focus:ring-emerald-600/20"
+          )}
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+          className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
         >
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>

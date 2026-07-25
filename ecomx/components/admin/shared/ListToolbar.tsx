@@ -32,7 +32,7 @@ export default function ListToolbar({
   if (!showSearch && filters.length === 0 && !children) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-white p-4 shadow-sm">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
       {showSearch && (
         <ListSearchBar
           value={search ?? ""}

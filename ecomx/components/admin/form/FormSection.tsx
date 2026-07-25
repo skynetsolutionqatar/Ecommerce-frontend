@@ -1,6 +1,10 @@
 "use client";
 
 import { forwardRef } from "react";
+import {
+  adminFormSectionClass,
+  adminFormSectionTitle,
+} from "@/lib/admin/form-classes";
 
 interface FormSectionProps {
   id: string;
@@ -12,14 +16,8 @@ interface FormSectionProps {
 /** Billing-style form section — matches PurchaseINVForm card sections. */
 const FormSection = forwardRef<HTMLElement, FormSectionProps>(
   ({ id, title, children, className = "" }, ref) => (
-    <section
-      ref={ref}
-      id={id}
-      className={`scroll-mt-28 rounded-xl bg-white p-6 shadow-sm ${className}`}
-    >
-      <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-gray-400">
-        {title}
-      </h3>
+    <section ref={ref} id={id} className={`${adminFormSectionClass} ${className}`}>
+      <h3 className={adminFormSectionTitle}>{title}</h3>
       {children}
     </section>
   )

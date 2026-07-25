@@ -117,6 +117,80 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Smooth cross-fade when switching light / dark theme */
+html.admin-theme-transition,
+html.admin-theme-transition *,
+html.admin-theme-transition *::before,
+html.admin-theme-transition *::after,
+.admin-shell.admin-theme-transition,
+.admin-shell.admin-theme-transition *,
+.admin-shell.admin-theme-transition *::before,
+.admin-shell.admin-theme-transition *::after {
+  transition-property: background-color, color, border-color, outline-color, fill, stroke, box-shadow;
+  transition-duration: 380ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.admin-theme-transition,
+  html.admin-theme-transition *,
+  html.admin-theme-transition *::before,
+  html.admin-theme-transition *::after,
+  .admin-shell.admin-theme-transition,
+  .admin-shell.admin-theme-transition *,
+  .admin-shell.admin-theme-transition *::before,
+  .admin-shell.admin-theme-transition *::after {
+    transition-duration: 0.01ms !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+html.admin-theme-transition svg *,
+html.admin-theme-transition [class*="animate-"],
+html.admin-theme-transition [data-slot="chart"] *,
+.admin-shell.admin-theme-transition svg.recharts-surface *,
+.admin-shell.admin-theme-transition .recharts-layer {
+  transition: none !important;
+}
+
+@supports (view-transition-name: root) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: admin-theme-fade-out;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: admin-theme-fade-in;
+  }
+}
+
+@keyframes admin-theme-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes admin-theme-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @layer base {
   .admin-shell {
     @apply bg-background text-foreground font-sans text-sm;
@@ -455,4 +529,110 @@
 
 .dark .admin-shell .bg-gray-50 {
   background-color: var(--muted);
+}
+
+/* ─── Admin tables ─── */
+.admin-shell .admin-table {
+  color: var(--foreground);
+}
+
+.admin-shell .admin-table thead {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.admin-shell .admin-table thead th {
+  font-weight: 600;
+}
+
+.admin-shell .admin-table tbody tr {
+  border-color: var(--border);
+}
+
+.admin-shell .admin-table tbody tr:hover {
+  background-color: color-mix(in oklch, var(--accent) 55%, transparent);
+}
+
+.admin-shell table thead.bg-gray-100 {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+}
+
+.admin-shell table tbody tr.border-t {
+  border-color: var(--border);
+}
+
+.admin-shell table tbody tr.hover\:bg-gray-50:hover,
+.admin-shell table tbody tr[class*="hover:bg-gray-50"]:hover {
+  background-color: color-mix(in oklch, var(--accent) 55%, transparent) !important;
+}
+
+/* ─── Admin form fields ─── */
+.admin-shell.dark {
+  color-scheme: dark;
+}
+
+.admin-shell .admin-form-input:focus {
+  border-color: oklch(0.59 0.15 160);
+}
+
+.admin-shell select option {
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.admin-shell .admin-form-readonly {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+/* ─── Status badges in dark mode ─── */
+.dark .admin-shell .bg-green-100 {
+  background-color: oklch(0.32 0.08 145);
+}
+
+.dark .admin-shell .text-green-700 {
+  color: oklch(0.78 0.14 145);
+}
+
+.dark .admin-shell .bg-red-100 {
+  background-color: oklch(0.32 0.08 25);
+}
+
+.dark .admin-shell .text-red-600,
+.dark .admin-shell .text-red-700 {
+  color: oklch(0.75 0.14 25);
+}
+
+.dark .admin-shell .bg-orange-100 {
+  background-color: oklch(0.34 0.08 55);
+}
+
+.dark .admin-shell .text-orange-700 {
+  color: oklch(0.78 0.14 55);
+}
+
+.dark .admin-shell .bg-yellow-100 {
+  background-color: oklch(0.34 0.08 85);
+}
+
+.dark .admin-shell .text-yellow-700 {
+  color: oklch(0.82 0.14 85);
+}
+
+.dark .admin-shell .bg-blue-100 {
+  background-color: oklch(0.32 0.08 250);
+}
+
+.dark .admin-shell .text-blue-700 {
+  color: oklch(0.78 0.12 250);
+}
+
+.dark .admin-shell .border-t {
+  border-color: var(--border);
+}
+
+.dark .admin-shell .hover\:bg-gray-50:hover,
+.dark .admin-shell [class*="hover:bg-gray-50"]:hover {
+  background-color: color-mix(in oklch, var(--accent) 55%, transparent);
 }

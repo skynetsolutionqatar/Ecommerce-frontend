@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAdminTheme } from "@/hooks/useAdminTheme";
+import { applyAdminThemeOnDocument } from "@/lib/admin/theme-transition";
 
 interface AdminThemeProviderProps {
   children: React.ReactNode;
@@ -12,18 +13,14 @@ export default function AdminThemeProvider({ children }: AdminThemeProviderProps
   const isDark = theme === "dark";
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (isDark) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    return () => {
-      root.classList.remove("dark");
-    };
+    applyAdminThemeOnDocument(isDark);
   }, [isDark]);
+
+  useEffect(() => {
+    return () => {
+      document.documentElement.classList.remove("dark", "admin-theme-transition");
+    };
+  }, []);
 
   return (
     <div
