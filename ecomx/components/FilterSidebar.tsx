@@ -9,6 +9,7 @@ interface FilterSidebarProps {
   onChange: (f: FilterState) => void;
   onClear: () => void;
   resultCount: number;
+  categories?: { id: string; name: string; count?: number }[];
   mobile?: boolean;
 }
 
@@ -21,7 +22,7 @@ const PRICE_PRESETS: { min: number; max: number; label: string }[] = [
 
 const BRANDS = ["Honeywell", "Zebra", "Datalogic", "ZKTeco", "PowerGuard", "atACC", "SecureVision", "Synology", "PartnerTech", "Star Micronics"];
 
-export default function FilterSidebar({ filters, onChange, onClear, resultCount, mobile }: FilterSidebarProps) {
+export default function FilterSidebar({ filters, onChange, onClear, resultCount, categories, mobile }: FilterSidebarProps) {
   const [sections, setSections] = useState({ categories: true, brand: true, price: true, availability: true, rating: true });
 
   const toggle = (key: keyof typeof sections) =>
@@ -61,13 +62,16 @@ export default function FilterSidebar({ filters, onChange, onClear, resultCount,
 
       {/* Categories */}
       <FilterSection title="Categories" open={sections.categories} onToggle={() => toggle("categories")}>
-        {SHOP_CATEGORIES.map(cat => (
+        {(categories ?? SHOP_CATEGORIES.map((name) => ({ id: name, name, count: getCategoryCount(name) }))).map((cat) => (
           <FilterCheckbox
-            key={cat}
-            label={cat}
-            count={getCategoryCount(cat)}
-            checked={filters.categories.includes(cat)}
-            onChange={() => toggleArr("categories", cat)}
+            key={cat.id}
+            label={cat.name}
+            count={cat.count}
+            checked={filters.categories.includes(cat.id)}
+            onChange={() => {
+              const next = filters.categories.includes(cat.id) ? [] : [cat.id];
+              onChange({ ...filters, categories: next });
+            }}
           />
         ))}
       </FilterSection>

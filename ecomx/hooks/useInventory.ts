@@ -29,6 +29,7 @@ export function useLowStockWithMeta(params?: LowStockQuery) {
     queryKey: [INVENTORY_KEY, "low-stock", params],
     queryFn: () => fetchLowStockProducts(params),
     staleTime: 60_000,
+    placeholderData: (prev) => prev,
   });
 }
 

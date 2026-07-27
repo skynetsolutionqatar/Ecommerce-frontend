@@ -54,13 +54,20 @@ function CategoryForm({
   isPending = false,
   onSubmit,
 }: CategoryFormProps) {
-  const { data: categories = [], isLoading: categoriesLoading } =
-    useCategories();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories({
+    limit: 100,
+    sortBy: "name",
+    sortOrder: "asc",
+  });
 
   const parentOptions = useMemo(
     () =>
       categories
-        .filter((cat) => cat._id !== initialCategory?._id)
+        .filter(
+          (cat) =>
+            cat._id !== initialCategory?._id &&
+            cat.isParent === true
+        )
         .map((cat) => ({ label: cat.name, value: cat._id })),
     [categories, initialCategory?._id]
   );
@@ -184,7 +191,6 @@ function CategoryForm({
               label="Is Parent Category"
               name="isParent"
               checked={values.isParent}
-              disabled={Boolean(values.parent)}
               onChange={handleIsParentChange}
               onBlur={handleBlur}
             />

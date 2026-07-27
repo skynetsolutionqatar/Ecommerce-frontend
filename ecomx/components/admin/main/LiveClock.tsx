@@ -1,26 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Clock3 } from "lucide-react";
 import {
   formatClockDate,
   formatClockOffset,
   formatClockTime,
-  getBrowserTimezone,
   getFixedClockTimezone,
+  resolveClockTimezone,
   resolveTimezoneLabel,
 } from "@/lib/admin/timezone";
 
+function subscribeNoop() {
+  return () => {};
+}
+
+function getServerTimeZone() {
+  return getFixedClockTimezone() ?? "UTC";
+}
+
 export default function LiveClock() {
   const [now, setNow] = useState(() => new Date());
-  const [timeZone, setTimeZone] = useState(getFixedClockTimezone() ?? "UTC");
-  const [locationLabel, setLocationLabel] = useState("");
 
-  useEffect(() => {
-    const tz = getFixedClockTimezone() ?? getBrowserTimezone();
-    setTimeZone(tz);
-    setLocationLabel(resolveTimezoneLabel(tz));
-  }, []);
+  const timeZone = useSyncExternalStore(
+    subscribeNoop,
+    resolveClockTimezone,
+    getServerTimeZone
+  );
+
+  const locationLabel = useSyncExternalStore(
+    subscribeNoop,
+    () => resolveTimezoneLabel(resolveClockTimezone()),
+    () => resolveTimezoneLabel(getServerTimeZone())
+  );
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);

@@ -11,10 +11,11 @@ import {
 } from "@/components/admin/shared";
 import { REVIEW_STATUS } from "@/lib/Constant";
 import { ADMIN_ROUTES } from "@/lib/config";
-import { useReviews, useReviewMutations } from "@/hooks/useReviews";
-import { paginateClientList, LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
+import { useReviewsWithMeta, useReviewMutations } from "@/hooks/useReviews";
+import { useDebounce } from "@/hooks/useDebounce";
+import { LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { formatDate } from "@/lib/utils";
-import { reviewBody, type ApiReview } from "@/types/review.types";
+import { reviewBody, type ApiReview, type ReviewStatus } from "@/types/review.types";
 
 const STATUS_OPTIONS = [
   { label: "Pending", value: REVIEW_STATUS.PENDING },
@@ -27,31 +28,22 @@ export default function AdminReviewsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
-  const { data: reviews, isLoading, isError, error } = useReviews({
-    limit: 50,
-    ...(statusFilter ? { status: statusFilter as ApiReview["status"] } : {}),
+  const debouncedSearch = useDebounce(search);
+
+  const { data, isLoading, isError, error } = useReviewsWithMeta({
+    search: debouncedSearch || undefined,
+    status: statusFilter ? (statusFilter as ReviewStatus) : undefined,
+    page,
+    limit: LIST_PAGE_SIZE,
+    sortBy: "createdAt",
+    sortOrder: "desc",
   });
   const { moderate } = useReviewMutations();
 
-  const filteredReviews = useMemo(() => {
-    const list = reviews ?? [];
-    if (!search.trim()) return list;
-    const q = search.toLowerCase();
-    return list.filter((review) => {
-      const productName =
-        typeof review.productId === "object" ? review.productId.name : "";
-      const customerName =
-        typeof review.customerId === "object" ? review.customerId.name : "";
-      return (
-        productName.toLowerCase().includes(q) ||
-        customerName.toLowerCase().includes(q) ||
-        reviewBody(review).toLowerCase().includes(q)
-      );
-    });
-  }, [reviews, search]);
-
-  const pagination = paginateClientList(filteredReviews, page, LIST_PAGE_SIZE);
-  const pagedReviews = pagination.items;
+  const reviews = data?.reviews ?? [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages ?? 1;
+  const total = pagination?.total ?? reviews.length;
 
   const handlers = useMemo(
     () => ({
@@ -99,12 +91,12 @@ export default function AdminReviewsPage() {
       <ListTableCard
         footer={
           <ListPagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            showing={pagedReviews.length}
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            showing={reviews.length}
             onPageChange={setPage}
-            hasNext={pagination.hasNext}
+            hasNext={pagination?.hasNextPage}
           />
         }
       >
@@ -122,14 +114,14 @@ export default function AdminReviewsPage() {
             </tr>
           </thead>
           <tbody>
-            {pagedReviews.length > 0 ? (
-              pagedReviews.map((review: ApiReview, index: number) => (
+            {reviews.length > 0 ? (
+              reviews.map((review: ApiReview, index: number) => (
                 <tr key={review._id} className="border-t hover:bg-gray-50">
                   <td
                     className="cursor-pointer px-5 py-4 text-gray-400"
                     onClick={() => router.push(ADMIN_ROUTES.review(review._id))}
                   >
-                    {(pagination.page - 1) * LIST_PAGE_SIZE + index + 1}
+                    {(page - 1) * LIST_PAGE_SIZE + index + 1}
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4"

@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="relative z-[100] h-16 shrink-0 border-b border-border bg-card shadow-sm">
               <Navbar />
             </div>
-            <main className="flex-1 overflow-y-auto bg-muted/40 p-2">{children}</main>
+            <main className="flex-1 overflow-y-auto bg-background p-2">{children}</main>
           </div>
         </div>
         <AdminToaster />

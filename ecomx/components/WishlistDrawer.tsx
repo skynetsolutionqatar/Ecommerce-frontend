@@ -8,7 +8,7 @@ interface WishlistDrawerProps {
   wishlist: WishlistItem[];
   open: boolean;
   onClose: () => void;
-  onRemove: (id: number) => void;
+  onRemove: (id: string) => void;
   onAddToCart: (item: WishlistItem) => void;
 }
 

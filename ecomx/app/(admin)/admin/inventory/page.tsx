@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/admin/utils/PageHeader";
 import {
@@ -9,8 +9,9 @@ import {
   ListTableCard,
   ListToolbar,
 } from "@/components/admin/shared";
-import { useLowStock } from "@/hooks/useInventory";
-import { paginateClientList, LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
+import { useLowStockWithMeta } from "@/hooks/useInventory";
+import { useDebounce } from "@/hooks/useDebounce";
+import { LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { ADMIN_ROUTES } from "@/lib/config";
 import type { LowStockProduct } from "@/types/inventory.types";
 
@@ -18,21 +19,18 @@ export default function AdminInventoryPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const { data: lowStock, isLoading, isError } = useLowStock();
+  const debouncedSearch = useDebounce(search);
 
-  const filteredProducts = useMemo(() => {
-    const list = lowStock ?? [];
-    if (!search.trim()) return list;
-    const q = search.toLowerCase();
-    return list.filter(
-      (row) =>
-        row.name.toLowerCase().includes(q) ||
-        (row.sku ?? "").toLowerCase().includes(q)
-    );
-  }, [lowStock, search]);
+  const { data, isLoading, isError } = useLowStockWithMeta({
+    search: debouncedSearch || undefined,
+    page,
+    limit: LIST_PAGE_SIZE,
+  });
 
-  const pagination = paginateClientList(filteredProducts, page, LIST_PAGE_SIZE);
-  const pagedProducts = pagination.items;
+  const products = data?.products ?? [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages ?? 1;
+  const total = pagination?.total ?? products.length;
 
   return (
     <ListPageShell
@@ -58,12 +56,12 @@ export default function AdminInventoryPage() {
       <ListTableCard
         footer={
           <ListPagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            showing={pagedProducts.length}
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            showing={products.length}
             onPageChange={setPage}
-            hasNext={pagination.hasNext}
+            hasNext={pagination?.hasNextPage}
           />
         }
       >
@@ -78,15 +76,15 @@ export default function AdminInventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {pagedProducts.length > 0 ? (
-              pagedProducts.map((row: LowStockProduct, index: number) => (
+            {products.length > 0 ? (
+              products.map((row: LowStockProduct, index: number) => (
                 <tr
                   key={row._id}
                   onClick={() => router.push(ADMIN_ROUTES.inventoryProduct(row._id))}
                   className="cursor-pointer border-t hover:bg-gray-50"
                 >
                   <td className="px-5 py-4 text-gray-400">
-                    {(pagination.page - 1) * LIST_PAGE_SIZE + index + 1}
+                    {(page - 1) * LIST_PAGE_SIZE + index + 1}
                   </td>
                   <td className="px-5 py-4 font-medium">{row.name}</td>
                   <td className="px-5 py-4 text-gray-500">{row.sku ?? "—"}</td>

@@ -30,7 +30,7 @@ function AdminDashboard() {
   const data = useMemo(() => getDashboardData(timeRange), [timeRange]);
 
   return (
-    <div className="relative min-h-full bg-muted/40 p-4 md:p-6">
+    <div className="relative min-h-full p-4 md:p-6">
       <div className="mx-auto max-w-[1400px] space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

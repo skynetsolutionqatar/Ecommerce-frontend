@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchProducts,
   fetchProduct,
+  fetchProductBySlug,
   productApi,
 } from "@/lib/api/product.api";
 import type {
@@ -29,6 +30,15 @@ export function useProduct(id: string, enabled = true) {
     queryKey: [PRODUCT_KEY, id],
     queryFn: () => fetchProduct(id),
     enabled: !!id && enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useProductBySlug(slug: string, enabled = true) {
+  return useQuery({
+    queryKey: [PRODUCT_KEY, "slug", slug],
+    queryFn: () => fetchProductBySlug(slug),
+    enabled: !!slug && enabled,
     staleTime: 60_000,
   });
 }

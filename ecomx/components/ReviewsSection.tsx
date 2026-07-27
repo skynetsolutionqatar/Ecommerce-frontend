@@ -7,7 +7,7 @@ import Avatar from "./Avatar";
 import * as Icons from "./Icons";
 
 interface ReviewsSectionProps {
-  productId: number;
+  productId: string;
   rating: number;
   reviewCount: number;
 }

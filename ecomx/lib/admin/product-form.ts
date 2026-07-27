@@ -122,8 +122,57 @@ function formatListField(values?: string[]): string {
   return values?.join(", ") ?? "";
 }
 
-function formatImagesField(values?: string[]): string {
-  return values?.join("\n") ?? "";
+function resolveImageUrl(value: unknown): string | null {
+  if (value == null) return null;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    if (typeof record.url === "string") return resolveImageUrl(record.url);
+  }
+
+  return null;
+}
+
+function collectImageUrls(thumbnail?: unknown, images?: unknown): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  const add = (value: unknown) => {
+    const url = resolveImageUrl(value);
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    urls.push(url);
+  };
+
+  add(thumbnail);
+
+  if (Array.isArray(images)) {
+    for (const item of images) add(item);
+  } else if (typeof images === "string") {
+    for (const part of images.split(/[\n,]+/)) add(part);
+  }
+
+  return urls;
+}
+
+export function sameImageUrl(a: string, b: string): boolean {
+  const left = resolveImageUrl(a);
+  const right = resolveImageUrl(b);
+  return Boolean(left && right && left === right);
+}
+
+function formatImagesField(values?: unknown): string {
+  if (!values) return "";
+  if (Array.isArray(values)) {
+    return collectImageUrls(undefined, values).join("\n");
+  }
+  if (typeof values === "string") return values;
+  return "";
 }
 
 function parseCommaList(value: string): string[] | undefined {
@@ -134,12 +183,8 @@ function parseCommaList(value: string): string[] | undefined {
   return items.length ? items : undefined;
 }
 
-function parseLineList(value: string): string[] | undefined {
-  const items = value
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-  return items.length ? items : undefined;
+export function productMediaUrls(thumbnail?: unknown, images?: unknown): string[] {
+  return collectImageUrls(thumbnail, images);
 }
 
 export function parseImagesField(value: string): string[] {
@@ -151,7 +196,17 @@ export function parseImagesField(value: string): string[] {
 
 export function appendImagesToField(current: string, urls: string[]): string {
   const merged = [...parseImagesField(current), ...urls.filter(Boolean)];
-  return merged.join("\n");
+  const unique: string[] = [];
+  const seen = new Set<string>();
+
+  for (const url of merged) {
+    const resolved = resolveImageUrl(url) ?? url;
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
+    unique.push(resolved);
+  }
+
+  return unique.join("\n");
 }
 
 function toOptionalNumber(value: number | ""): number | undefined {
@@ -177,7 +232,7 @@ export function toProductFormValues(product?: ApiProduct): ProductFormValues {
     taxPercent: product.taxPercent ?? "",
     badge: product.badge ?? "",
     badgeColor: product.badgeColor ?? "",
-    thumbnail: product.thumbnail ?? "",
+    thumbnail: resolveImageUrl(product.thumbnail) ?? "",
     images: formatImagesField(product.images),
     stock: product.stock ?? "",
     lowStockAlert: product.lowStockAlert ?? "",
@@ -210,6 +265,9 @@ export function toCreateProductPayload(values: ProductFormValues): CreateProduct
         }
       : undefined;
 
+  const imageUrls = parseImagesField(values.images);
+  const thumbnail = values.thumbnail.trim();
+
   return {
     name: values.name.trim(),
     slug: values.slug.trim().toLowerCase(),
@@ -226,8 +284,8 @@ export function toCreateProductPayload(values: ProductFormValues): CreateProduct
     taxPercent: toOptionalNumber(values.taxPercent),
     badge: values.badge.trim() || undefined,
     badgeColor: values.badgeColor.trim() || undefined,
-    thumbnail: values.thumbnail.trim() || undefined,
-    images: parseLineList(values.images),
+    thumbnail: thumbnail || imageUrls[0] || "",
+    images: imageUrls,
     stock: toOptionalNumber(values.stock),
     lowStockAlert: toOptionalNumber(values.lowStockAlert),
     trackInventory: values.trackInventory,

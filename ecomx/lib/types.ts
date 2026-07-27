@@ -7,7 +7,7 @@ export interface StoreUser {
 
 export interface Review {
   id: number;
-  productId: number;
+  productId: string;
   name: string;
   location: string;
   rating: number;
@@ -36,7 +36,7 @@ export interface ProductColor {
 }
 
 export interface Product {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   brand: string;
@@ -63,7 +63,7 @@ export interface Product {
 
 export interface CartItem {
   id: string; // unique: productId + color + size
-  productId: number;
+  productId: string;
   name: string;
   brand: string;
   price: number;
@@ -74,7 +74,7 @@ export interface CartItem {
 }
 
 export interface WishlistItem {
-  id: number;
+  id: string;
   name: string;
   brand: string;
   price: number;
