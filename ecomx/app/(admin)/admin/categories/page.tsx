@@ -9,9 +9,9 @@ import {
   ListTableCard,
   ListToolbar,
 } from "@/components/admin/shared";
-import { useCategories } from "@/hooks/useCategories";
+import { useCategoriesWithMeta } from "@/hooks/useCategories";
 import { useDebounce } from "@/hooks/useDebounce";
-import { paginateClientList, LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
+import { LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { resolveParentName } from "@/lib/admin/category-form";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
@@ -29,8 +29,12 @@ export default function AdminCategoriesPage() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
-  const { data: categories = [], isLoading, isError } = useCategories({
+  const { data, isLoading, isError } = useCategoriesWithMeta({
     search: debouncedSearch || undefined,
+    page,
+    limit: LIST_PAGE_SIZE,
+    sortBy: "createdAt",
+    sortOrder: "desc",
     ...(activeFilter === "true"
       ? { isActive: true }
       : activeFilter === "false"
@@ -38,10 +42,10 @@ export default function AdminCategoriesPage() {
         : {}),
   });
 
-  const filteredCategories = useMemo(() => categories, [categories]);
-
-  const pagination = paginateClientList(filteredCategories, page, LIST_PAGE_SIZE);
-  const pagedCategories = pagination.items;
+  const categories = data?.categories ?? [];
+  const pagination = data?.pagination;
+  const totalPages = pagination?.totalPages ?? 1;
+  const total = pagination?.total ?? categories.length;
 
   const handlers = useMemo(
     () => ({
@@ -90,12 +94,12 @@ export default function AdminCategoriesPage() {
       <ListTableCard
         footer={
           <ListPagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            showing={pagedCategories.length}
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            showing={categories.length}
             onPageChange={setPage}
-            hasNext={pagination.hasNext}
+            hasNext={pagination?.hasNextPage}
           />
         }
       >
@@ -111,15 +115,15 @@ export default function AdminCategoriesPage() {
             </tr>
           </thead>
           <tbody>
-            {pagedCategories.length > 0 ? (
-              pagedCategories.map((cat: ApiCategory, index: number) => (
+            {categories.length > 0 ? (
+              categories.map((cat: ApiCategory, index: number) => (
                 <tr
                   key={cat._id}
                   onClick={() => router.push(ADMIN_ROUTES.category(cat._id))}
                   className="cursor-pointer border-t hover:bg-gray-50"
                 >
                   <td className="px-5 py-4 text-gray-400">
-                    {(pagination.page - 1) * LIST_PAGE_SIZE + index + 1}
+                    {(page - 1) * LIST_PAGE_SIZE + index + 1}
                   </td>
                   <td className="px-5 py-4">
                     <p className="font-medium text-gray-800">{cat.name}</p>

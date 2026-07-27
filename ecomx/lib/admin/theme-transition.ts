@@ -34,7 +34,12 @@ export function runAdminThemeTransition(update: () => void) {
   };
 
   if (typeof doc.startViewTransition === "function") {
-    doc.startViewTransition(update).finished.finally(finish);
+    const transition = doc.startViewTransition(update);
+    if (transition?.finished) {
+      transition.finished.finally(finish);
+    } else {
+      finish();
+    }
     return;
   }
 

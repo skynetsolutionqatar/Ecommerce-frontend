@@ -6,7 +6,7 @@ import { heroImage, categoryImage, productImages, productImage } from "./images"
 // ─── PRODUCTS: POS Systems & IT Hardware ──────────────────────────────────────
 export const PRODUCTS: Product[] = [
   {
-    id: 33,
+    id: "33",
     discountPct: 18,
     slug: "honeywell-pc42t-label-printer",
     name: "Honeywell PC42t Desktop Label Printer",
@@ -31,7 +31,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 34,
+    id: "34",
     discountPct: 12,
     slug: "zebra-tc22-mobile-computer",
     name: "Zebra TC22 Mobile Computer",
@@ -56,7 +56,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 35,
+    id: "35",
     discountPct: 15,
     slug: "datalogic-magellan-3450vsi",
     name: "Datalogic Magellan 3450VSi",
@@ -81,7 +81,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 36,
+    id: "36",
     discountPct: 10,
     slug: "zkteco-f18-attendance",
     name: "ZKTeco F18 Access Control Terminal",
@@ -106,7 +106,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 37,
+    id: "37",
     discountPct: 20,
     slug: "ups-1500va-online",
     name: "PowerGuard 1500VA Online UPS",
@@ -131,7 +131,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 38,
+    id: "38",
     discountPct: 22,
     slug: "atacc-restaurant-pos",
     name: "atACC Restaurant POS Professional",
@@ -156,7 +156,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 39,
+    id: "39",
     discountPct: 14,
     slug: "cctv-kit-8-channel",
     name: "SecureVision 8 Channel CCTV Kit",
@@ -181,7 +181,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 40,
+    id: "40",
     discountPct: 16,
     slug: "synology-ds223-nas",
     name: "Synology DS223 NAS Storage",
@@ -206,7 +206,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 41,
+    id: "41",
     discountPct: 11,
     slug: "partnertech-cd7220-display",
     name: "PartnerTech CD7220 Customer Display",
@@ -231,7 +231,7 @@ export const PRODUCTS: Product[] = [
   },
 
   {
-    id: 42,
+    id: "42",
     discountPct: 13,
     slug: "star-micronics-mc-print3",
     name: "Star Micronics mC-Print3",
@@ -491,37 +491,37 @@ export const TESTIMONIALS: Testimonial[] = [
 // ─── REVIEWS ─────────────────────────────────────────────────────────────────
 export const REVIEWS: Review[] = [
   {
-    id: 1, productId: 38, name: "Ahmed Al-Mansoori", location: "Doha, Qatar", rating: 5,
+    id: 1, productId: "38", name: "Ahmed Al-Mansoori", location: "Doha, Qatar", rating: 5,
     title: "Best POS system we've used", date: "Jan 15, 2025", variant: "Space Black · 15\"",
     text: "Installed across 3 locations. The 15\" touch screen is super responsive, and atACC integration was plug-and-play. VAT reports are automatic.",
     helpful: 84, verified: true,
   },
   {
-    id: 2, productId: 38, name: "Kaveh S.", location: "West Bay, Qatar", rating: 5,
+    id: 2, productId: "38", name: "Kaveh S.", location: "West Bay, Qatar", rating: 5,
     title: "Fanless and silent — perfect for quiet cafes", date: "Dec 28, 2024", variant: "Silver · 15\"",
     text: "The fanless design is a game-changer for our upscale cafe. No noise, no overheating after 12-hour days, and the display looks premium on our counter.",
     helpful: 62, verified: true,
   },
   {
-    id: 3, productId: 38, name: "Layla M.", location: "Al Wakra, Qatar", rating: 4,
+    id: 3, productId: "38", name: "Layla M.", location: "Al Wakra, Qatar", rating: 4,
     title: "Great hardware, setup took time", date: "Nov 30, 2024", variant: "Space Black · 15\"",
     text: "The hardware is excellent quality. Initial atACC configuration took a day with Skynet's tech team, but since then it has been flawless.",
     helpful: 41, verified: true,
   },
   {
-    id: 4, productId: 42, name: "Sarah K.", location: "The Pearl, Qatar", rating: 5,
+    id: 4, productId: "42", name: "Sarah K.", location: "The Pearl, Qatar", rating: 5,
     title: "300mm/s is blazing fast", date: "Jan 2, 2025", variant: "White · 80mm",
     text: "We print 400+ receipts daily. Zero jams in 3 months. Auto-cut is smooth and the Wi-Fi connection has been rock solid throughout.",
     helpful: 98, verified: true,
   },
   {
-    id: 5, productId: 38, name: "Rajesh P.", location: "Lusail, Qatar", rating: 5,
+    id: 5, productId: "38", name: "Rajesh P.", location: "Lusail, Qatar", rating: 5,
     title: "Best ERP for Qatar SMEs", date: "Jan 10, 2025", variant: "1 Store License",
     text: "We switched from a manual system to atACC ERP 6 months ago. VAT filing takes 10 minutes instead of 2 days. Cloud backup is automatic. Worth every riyal.",
     helpful: 234, verified: true,
   },
   {
-    id: 6, productId: 33, name: "Fatima H.", location: "Doha, Qatar", rating: 5,
+    id: 6, productId: "33", name: "Fatima H.", location: "Doha, Qatar", rating: 5,
     title: "Reliable label printing for warehouse", date: "Dec 15, 2024", variant: "4 Inch · USB",
     text: "Runs 10+ hours daily in our warehouse. Labels are crisp at 203 DPI and setup with Skynet was same-day. Support answered every question quickly.",
     helpful: 187, verified: true,

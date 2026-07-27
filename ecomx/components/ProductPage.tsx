@@ -605,12 +605,12 @@ export default function ProductPage({
             <div className="text-[13.5px] leading-relaxed text-gray-700">
               {tab === "Description" && (
                 <>
-                  <p className="font-medium text-gray-800 mb-2">
+                  {/* <p className="font-medium text-gray-800 mb-2">
                     Compact desktop barcode and label printer designed for
                     warehouses and retail inventory management.
-                  </p>
-                  <p>{product.description}</p>
-                  <p className="mt-3">
+                  </p> */}
+                  <p className="font-medium text-gray-800 mb-2">{product.description}</p>
+                  {/* <p className="mt-3">
                     The Honeywell PC42t is a reliable thermal transfer printer
                     delivering fast, high-quality printing at 203 DPI. It
                     supports a wide range of label sizes and media types, making
@@ -623,7 +623,7 @@ export default function ProductPage({
                     configuration, staff training, and priority technical
                     support. All products are Qatar VAT compliant and integrate
                     seamlessly with atACC ERP.
-                  </p>
+                  </p> */}
                 </>
               )}
               {tab === "Specifications" && (

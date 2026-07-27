@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
 import {
@@ -18,6 +18,9 @@ import {
   defaultProductFormValues,
   parseImagesField,
   productValidationSchema,
+  resolveCategoryId,
+  resolveCategoryName,
+  sameImageUrl,
   toCreateProductPayload,
   toProductFormValues,
 } from "@/lib/admin/product-form";
@@ -25,6 +28,7 @@ import { PRODUCT_FORM_ID } from "@/lib/admin/form-footer";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { slugify } from "@/lib/utils";
 import type { ApiProduct, CreateProductPayload } from "@/types/product.types";
+import type { UploadedImage } from "@/lib/api/upload.api";
 import ImageUpload from "@/components/ImageUpload";
 
 export const PRODUCT_FORM_TABS = [
@@ -53,12 +57,25 @@ function ProductForm({
   isPending = false,
   onSubmit,
 }: ProductFormProps) {
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories({
+    limit: 100,
+    sortBy: "name",
+    sortOrder: "asc",
+  });
 
-  const categoryOptions = useMemo(
-    () => categories.map((cat) => ({ label: cat.name, value: cat._id })),
-    [categories]
-  );
+  const categoryOptions = useMemo(() => {
+    const options = categories.map((cat) => ({ label: cat.name, value: cat._id }));
+    const currentId = initialProduct ? resolveCategoryId(initialProduct) : "";
+
+    if (currentId && !options.some((option) => option.value === currentId)) {
+      options.unshift({
+        label: resolveCategoryName(initialProduct),
+        value: currentId,
+      });
+    }
+
+    return options;
+  }, [categories, initialProduct]);
 
   const statusOptions = useMemo(
     () =>
@@ -86,6 +103,38 @@ function ProductForm({
 
   const { handleChange, handleBlur, values, errors, touched, handleSubmit, setFieldValue } =
     formik;
+
+  const imageUrls = useMemo(() => parseImagesField(values.images), [values.images]);
+
+  const syncImages = useCallback(
+    (nextImages: string[]) => {
+      void setFieldValue("images", nextImages.join("\n"));
+
+      const currentThumb = values.thumbnail.trim();
+      const thumbStillValid =
+        currentThumb && nextImages.some((url) => sameImageUrl(url, currentThumb));
+      void setFieldValue("thumbnail", thumbStillValid ? currentThumb : (nextImages[0] ?? ""));
+    },
+    [setFieldValue, values.thumbnail]
+  );
+
+  const handleRemoveImage = useCallback(
+    (url: string) => {
+      syncImages(parseImagesField(values.images).filter((item) => !sameImageUrl(item, url)));
+    },
+    [syncImages, values.images]
+  );
+
+  const handleUploadImages = useCallback(
+    (uploaded: UploadedImage[]) => {
+      const nextField = appendImagesToField(
+        values.images,
+        uploaded.map((item) => item.url)
+      );
+      syncImages(parseImagesField(nextField));
+    },
+    [syncImages, values.images]
+  );
 
   const handleNameBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
     handleBlur(event);
@@ -333,21 +382,10 @@ function ProductForm({
           <div className="space-y-6">
             <ImageUpload
               type="product"
-              existingImages={parseImagesField(values.images)}
-              onRemoveExisting={(url) => {
-                const next = parseImagesField(values.images).filter((item) => item !== url);
-                void setFieldValue("images", next.join("\n"));
-                if (values.thumbnail.trim() === url) {
-                  void setFieldValue("thumbnail", next[0] ?? "");
-                }
-              }}
-              onUpload={(uploaded) => {
-                const urls = uploaded.map((item) => item.url);
-                void setFieldValue("images", appendImagesToField(values.images, urls));
-                if (!values.thumbnail.trim() && urls[0]) {
-                  void setFieldValue("thumbnail", urls[0]);
-                }
-              }}
+              existingImages={imageUrls}
+              onRemoveExisting={handleRemoveImage}
+              onRemoveUploaded={handleRemoveImage}
+              onUpload={handleUploadImages}
             />
 
             <div className={`${formGridClass} lg:grid-cols-2`}>

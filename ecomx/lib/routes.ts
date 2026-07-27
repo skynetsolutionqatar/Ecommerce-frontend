@@ -4,7 +4,7 @@ import type { Product } from "@/lib/types";
 export type StorePage =
   | { type: "home" }
   | { type: "shop"; category?: string }
-  | { type: "product"; product: Product }
+  | { type: "product"; slug: string; product?: Product }
   | { type: "orders" }
   | { type: "checkout" };
 
@@ -26,7 +26,7 @@ export function pageToPath(page: StorePage): string {
         ? `${ROUTES.shop}?category=${encodeURIComponent(page.category)}`
         : ROUTES.shop;
     case "product":
-      return ROUTES.product(page.product.slug ?? String(page.product.id));
+      return ROUTES.product(page.slug ?? page.product?.slug ?? String(page.product?.id ?? ""));
     case "orders":
       return ROUTES.orders;
     case "checkout":
@@ -51,9 +51,9 @@ export function pathToPage(pathname: string, searchParams: URLSearchParams): Sto
   if (productMatch) {
     const slug = decodeURIComponent(productMatch[1]);
     const product =
-      PRODUCTS.find(p => p.slug === slug) ??
-      PRODUCTS.find(p => String(p.id) === slug);
-    if (product) return { type: "product", product };
+      PRODUCTS.find((p) => p.slug === slug) ??
+      PRODUCTS.find((p) => String(p.id) === slug);
+    return { type: "product", slug, product };
   }
 
   return { type: "home" };

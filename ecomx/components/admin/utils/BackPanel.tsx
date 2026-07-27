@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft, SquarePen, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { adminType } from "@/lib/admin/typography";
 import { cn } from "@/lib/utils";
@@ -47,20 +47,20 @@ export default function BackPanel({
   buttons = [],
 }: BackPanelProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(tabs?.[0]?.key ?? "");
+  const firstTabKey = tabs?.[0]?.key ?? "";
+  const [activeTab, setActiveTab] = useState(firstTabKey);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const hasTabs = !!tabs && tabs.length > 0;
   const canDelete = Boolean(onDelete && deleteItemName);
 
+  const resolvedActiveTab =
+    hasTabs && tabs.some((tab) => tab.key === activeTab) ? activeTab : firstTabKey;
+
   const scrollTo = (key: string) => {
     setActiveTab(key);
     document.getElementById(key)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  useEffect(() => {
-    if (tabs && tabs.length > 0) setActiveTab(tabs[0].key);
-  }, [tabs]);
 
   const footerButtons: FooterButton[] = [];
 
@@ -90,7 +90,7 @@ export default function BackPanel({
   footerButtons.push(...buttons);
 
   return (
-    <div className="h-full bg-muted/50 p-3">
+    <div className="h-full p-3">
       <div className="mx-auto flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex-1 overflow-y-auto">
           {showBack && (
@@ -118,7 +118,7 @@ export default function BackPanel({
                         type="button"
                         onClick={() => scrollTo(tab.key)}
                         className={`whitespace-nowrap rounded-md px-3 py-2 ${adminType.tabButton} cursor-pointer transition-all duration-200 ${
-                          activeTab === tab.key
+                          resolvedActiveTab === tab.key
                             ? "bg-card text-foreground shadow-md"
                             : "text-white/90 hover:bg-white/20"
                         }`}

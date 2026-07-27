@@ -14,7 +14,7 @@ import { tw, type } from "@/lib/theme";
 import { PRODUCTS } from "@/lib/data";
 
 const ShopPage = lazyClient(() => import("@/components/ShopPage"));
-const ProductPage = lazyClient(() => import("@/components/ProductPage"));
+const ProductRouteView = lazyClient(() => import("@/components/store/ProductRouteView"));
 const OrdersPage = lazyClient(() => import("@/components/Orders"));
 const CheckoutPage = lazyClient(() => import("@/components/CheckoutPage"));
 const PromoBannerStrip = lazyClient(() => import("@/components/PromoBannerStrip"));
@@ -54,7 +54,11 @@ export default function NestStore() {
   } = useStore();
 
   const openProduct = (product: Product) => {
-    navigate({ type: "product", product });
+    navigate({
+      type: "product",
+      slug: product.slug ?? String(product.id),
+      product,
+    });
   };
 
   const renderPage = () => {
@@ -76,15 +80,13 @@ export default function NestStore() {
       case "product":
         return (
           <Suspense fallback={null}>
-            <ProductPage
-              key={page.product.id}
-              product={page.product}
+            <ProductRouteView
+              page={page}
               onAddToCart={addToCart}
               onWishlistToggle={toggleWishlist}
-              isWishlisted={wishlist.some((w) => w.id === page.product.id)}
+              wishlist={wishlist}
               onBack={goBack}
               onProductClick={openProduct}
-              wishlist={wishlist}
             />
           </Suspense>
         );
@@ -129,6 +131,7 @@ export default function NestStore() {
         page={pageType}
         setPage={handleSetPage}
         onNavigateHome={() => navigate({ type: "home" })}
+        onCategorySelect={(category) => navigate({ type: "shop", category: category._id })}
       />
 
       <main className="">{renderPage()}</main>
@@ -202,7 +205,8 @@ function HomePage({
   wishlist: WishlistItem[];
   navigate: (page: StorePage) => void;
 }) {
-  const openProduct = (product: Product) => navigate({ type: "product", product });
+  const openProduct = (product: Product) =>
+    navigate({ type: "product", slug: product.slug ?? String(product.id), product });
   const goShop = () => navigate({ type: "shop" });
 
   const bestSellers = PRODUCTS.filter((p) => p.isBestSeller);
@@ -267,7 +271,7 @@ function HomePage({
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
               <CategoriesSection
-                onCategoryClick={(cat) => navigate({ type: "shop", category: cat })}
+                onCategoryClick={(categoryId) => navigate({ type: "shop", category: categoryId })}
                 onViewAll={goShop}
               />
             </Suspense>

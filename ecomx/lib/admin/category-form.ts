@@ -43,18 +43,9 @@ export const categoryValidationSchema = Yup.object({
   isParent: Yup.boolean(),
   parent: Yup.string().when("isParent", {
     is: true,
-    then: (schema) =>
-      schema.test(
-        "parent-empty-when-isParent",
-        "Cannot select a parent when marked as parent category",
-        (value) => !value?.trim()
-      ),
+    then: (schema) => schema.notRequired(),
     otherwise: (schema) =>
-      schema.test(
-        "parent-required-when-not-isParent",
-        "Select a parent category or mark as parent category",
-        (value) => Boolean(value?.trim())
-      ),
+      schema.required("Select a parent category or mark as parent category"),
   }),
   displayOrder: positiveNumberOptional,
   isActive: Yup.boolean(),
@@ -90,20 +81,23 @@ export function toCategoryFormValues(category?: ApiCategory): CategoryFormValues
 }
 
 export function toCreateCategoryPayload(values: CategoryFormValues): CreateCategoryPayload {
-  const isParent = values.isParent;
-
-  return {
+  const payload: CreateCategoryPayload = {
     name: values.name.trim(),
     slug: values.slug.trim().toLowerCase(),
     description: values.description.trim() || undefined,
     image: values.image.trim() || undefined,
     color: values.color.trim() || undefined,
     imgKey: values.imgKey.trim() || undefined,
-    isParent,
-    parent: isParent ? null : values.parent.trim() || null,
+    isParent: values.isParent,
     displayOrder: values.displayOrder === "" ? undefined : Number(values.displayOrder),
     isActive: values.isActive,
   };
+
+  if (!values.isParent && values.parent.trim()) {
+    payload.parent = values.parent.trim();
+  }
+
+  return payload;
 }
 
 export function toUpdateCategoryPayload(values: CategoryFormValues): UpdateCategoryPayload {

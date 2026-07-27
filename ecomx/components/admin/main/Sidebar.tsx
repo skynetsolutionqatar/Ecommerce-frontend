@@ -565,15 +565,13 @@
 // }
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { X, Menu, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { adminSections } from "../utils/SideSection";
+import { adminSections, type AdminMenuItem } from "../utils/SideSection";
 import { adminType } from "@/lib/admin/typography";
-import { Colors } from "@/lib/theme";
 import { colors } from "../utils/Colors";
 
 export const skynetClient = {
@@ -600,7 +598,9 @@ export const skynetClient = {
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [menuToggle, setMenuToggle] = useState<{ path: string; menu: string | null } | null>(
+    null
+  );
 
   const pathname = usePathname();
 
@@ -611,23 +611,36 @@ export default function Sidebar() {
     return pathname === basePath || pathname.startsWith(basePath + "/");
   };
 
-  const isSubMenuActive = (subMenu: any[]) => {
+  const isSubMenuActive = (subMenu: NonNullable<AdminMenuItem["subMenu"]>) => {
     return subMenu.some((sub) => isPathActive(sub.path));
   };
 
-  // ✅ Auto open menu on refresh / route change
-  useEffect(() => {
-    adminSections.forEach((section) => {
-      section.items.forEach((item) => {
-        if (item.subMenu && isSubMenuActive(item.subMenu)) {
-          setOpenMenu(item.name);
+  const routeOpenMenu = useMemo(() => {
+    for (const section of adminSections) {
+      for (const item of section.items) {
+        if (
+          item.subMenu?.some(
+            (sub) => pathname === sub.path || pathname.startsWith(`${sub.path}/`)
+          )
+        ) {
+          return item.name;
         }
-      });
-    });
+      }
+    }
+    return null;
   }, [pathname]);
 
+  const openMenu =
+    menuToggle?.path === pathname ? menuToggle.menu : routeOpenMenu;
+
   const toggleMenu = (menuName: string) => {
-    setOpenMenu((prev) => (prev === menuName ? null : menuName));
+    setMenuToggle((prev) => {
+      const current = prev?.path === pathname ? prev.menu : routeOpenMenu;
+      return {
+        path: pathname,
+        menu: current === menuName ? null : menuName,
+      };
+    });
   };
 
   return (

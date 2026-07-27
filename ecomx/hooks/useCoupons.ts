@@ -27,6 +27,7 @@ export function useCouponsWithMeta(params?: CouponQueryParams) {
     queryFn: () => fetchCoupons(params),
     staleTime: 60_000,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

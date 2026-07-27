@@ -25,6 +25,7 @@ export function useCategoriesWithMeta(params?: CategoryQuery) {
     queryKey: [CATEGORIES_KEY, params],
     queryFn: () => fetchCategories(params),
     staleTime: 120_000,
+    placeholderData: (prev) => prev,
   });
 }
 
