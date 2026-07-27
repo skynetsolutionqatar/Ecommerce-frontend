@@ -6,5 +6,6 @@ export function authUserToStoreUser(user: AuthUser): StoreUser {
     name: user.name,
     email: user.email,
     avatarUrl: user.avatar,
+    role: user.role,
   };
 }

@@ -2,6 +2,7 @@ export interface StoreUser {
   name: string;
   email: string;
   avatarUrl?: string;
+  role?: string;
 }
 
 export interface Review {

@@ -25,7 +25,7 @@ const inputClass =
   "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-all placeholder:text-gray-400 focus:border-[#0a255d] focus:shadow-[0_0_0_4px_rgba(10,37,93,0.12)]";
 
 const primaryBtnClass =
-  "group mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#1d4ed8] px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(10,37,93,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(10,37,93,0.55)] disabled:translate-y-0 disabled:opacity-70";
+  "group mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#1d4ed8] px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(10,37,93,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(10,37,93,0.55)] disabled:translate-y-0 disabled:opacity-70 cursor-pointer";
 
 const outlineBtnClass =
   "flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-all hover:border-[#0a255d]/40 hover:bg-gray-50 hover:text-[#0a255d]";
@@ -41,7 +41,7 @@ export default function LoginModal({
   const { login, register } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
-  const showAdminPanel = isAdminRole(authUser?.role);
+  const showAdminPanel = isAdminRole(authUser?.role || user?.role);
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
@@ -211,11 +211,10 @@ export default function LoginModal({
                       setMode(tab);
                       setError(null);
                     }}
-                    className={`flex-1 rounded-lg py-2 text-xs font-bold uppercase tracking-wide transition-all ${
-                      mode === tab
+                    className={`flex-1 rounded-lg py-2 text-xs font-bold uppercase tracking-wide transition-all ${mode === tab
                         ? "bg-white text-[#0a255d] shadow-md"
                         : "text-white/70 hover:text-white"
-                    }`}
+                      }`}
                   >
                     {tab === "login" ? "Sign In" : "Register"}
                   </button>

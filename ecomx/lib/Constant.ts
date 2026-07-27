@@ -15,7 +15,9 @@ export type UserRole = (typeof ROLE)[keyof typeof ROLE];
 export const ADMIN_ROLES = [ROLE.ADMIN, ROLE.SUPERADMIN] as const;
 
 export function isAdminRole(role?: string): boolean {
-  return role === ROLE.ADMIN || role === ROLE.SUPERADMIN;
+  if (!role) return false;
+  const r = role.toLowerCase().trim();
+  return r === ROLE.ADMIN || r === ROLE.SUPERADMIN;
 }
 
 /** Role display labels */
