@@ -1,4 +1,5 @@
-/** URL anchor for App Router — UI rendered by NestStore in layout */
+import StoreHomePage from "@/components/store/StoreHomePage";
+
 export default function HomePage() {
-  return null;
+  return <StoreHomePage />;
 }

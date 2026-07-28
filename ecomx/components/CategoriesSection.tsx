@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useStoreCategories } from "@/hooks/useStoreCategories";
-import StoreImage from "./StoreImage";
+import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
+import { resolveCategoryIcon } from "@/lib/store/category-icons";
 
 interface CategoriesSectionProps {
   onCategoryClick?: (categoryId: string) => void;
@@ -10,7 +10,8 @@ interface CategoriesSectionProps {
 }
 
 export default function CategoriesSection({ onCategoryClick, onViewAll }: CategoriesSectionProps) {
-  const { data: categories = [], isLoading } = useStoreCategories();
+  const { data, isLoading } = useCategories(STORE_CATEGORY_QUERY);
+  const categories = data?.categories ?? [];
 
   return (
     <section className="rounded-2xl border border-gray-100 bg-white px-4 pb-4 shadow-sm sm:px-5 md:px-6">
@@ -61,18 +62,10 @@ export default function CategoriesSection({ onCategoryClick, onViewAll }: Catego
               }}
               whileTap={{ scale: 0.96 }}
             >
-              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-gray-50 p-1.5 transition-all group-hover:scale-105">
-                {cat.image ? (
-                  <StoreImage
-                    src={cat.image}
-                    alt={cat.name}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <span className="text-lg font-bold text-gray-400">
-                    {cat.name.charAt(0)}
-                  </span>
-                )}
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-all group-hover:scale-105 group-hover:text-blue-600">
+                <span className="flex h-8 w-8 items-center justify-center [&_svg]:h-8 [&_svg]:w-8">
+                  {resolveCategoryIcon(cat.name)}
+                </span>
               </div>
 
               <div>

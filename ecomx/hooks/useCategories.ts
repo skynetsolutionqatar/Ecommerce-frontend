@@ -11,16 +11,16 @@ import type {
 export const CATEGORIES_KEY = "categories";
 export const CATEGORY_KEY = "category";
 
-export function useCategories(params?: CategoryQuery) {
-  return useQuery({
-    queryKey: [CATEGORIES_KEY, params],
-    queryFn: () => fetchCategories(params),
-    staleTime: 120_000,
-    select: (data) => data.categories,
-  });
-}
+/** Default query for store header, shop filters, and category strips. */
+export const STORE_CATEGORY_QUERY: CategoryQuery = {
+  isParent: false,
+  isActive: true,
+  limit: 50,
+  sortBy: "displayOrder",
+  sortOrder: "asc",
+};
 
-export function useCategoriesWithMeta(params?: CategoryQuery) {
+export function useCategories(params?: CategoryQuery) {
   return useQuery({
     queryKey: [CATEGORIES_KEY, params],
     queryFn: () => fetchCategories(params),

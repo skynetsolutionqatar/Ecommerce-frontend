@@ -57,11 +57,12 @@ function ProductForm({
   isPending = false,
   onSubmit,
 }: ProductFormProps) {
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories({
+  const { data: categoryData, isLoading: categoriesLoading } = useCategories({
     limit: 100,
     sortBy: "name",
     sortOrder: "asc",
   });
+  const categories = categoryData?.categories ?? [];
 
   const categoryOptions = useMemo(() => {
     const options = categories.map((cat) => ({ label: cat.name, value: cat._id }));

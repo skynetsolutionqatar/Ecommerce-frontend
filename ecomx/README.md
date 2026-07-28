@@ -1,4 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) App Router ecommerce frontend.
+
+## Architecture (read this first)
+
+```
+app/(store)/          → Customer shop (standard Next.js pages)
+app/(admin)/admin/    → Admin dashboard (standard Next.js pages)
+app/(auth)/           → Login & register
+hooks/                → React Query hooks (call lib/api)
+lib/api/              → Backend API calls
+components/           → UI components
+types/                → API response TypeScript types
+```
+
+**Store:** Each URL renders its own page (`/shop`, `/product/[slug]`, etc.). Shared cart, wishlist, and modals live in `StoreProvider` + `StoreShell`.
+
+**Admin:** Each list/detail/form is a normal page under `app/(admin)/admin/`. Data comes from `hooks/use*.ts` → `lib/api/*.api.ts`.
+
+**Products:** Shop uses the API. Homepage hero/flash-sale sections still use demo data in `lib/data.ts` (to be migrated later).
+
+**Cart:** Local state in `StoreProvider` (not synced to backend yet).
 
 ## Getting Started
 

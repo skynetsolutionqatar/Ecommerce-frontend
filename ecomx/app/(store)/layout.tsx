@@ -1,13 +1,12 @@
 import { Suspense } from "react";
 import StoreProvider from "@/components/StoreProvider";
-import NestStore from "@/components/NestStore";
+import StoreShell from "@/components/store/StoreShell";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={null}>
       <StoreProvider>
-        <NestStore />
-        {children}
+        <StoreShell>{children}</StoreShell>
       </StoreProvider>
     </Suspense>
   );

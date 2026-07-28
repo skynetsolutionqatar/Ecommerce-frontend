@@ -1,10 +1,8 @@
 import * as Yup from "yup";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { positiveNumber, positiveNumberOptional } from "@/components/admin/utils/Validations";
-import { slugify } from "@/lib/utils";
+import { resolveRefId, resolveRefName } from "@/lib/api/populated-ref";
 import type { ApiProduct, CreateProductPayload } from "@/types/product.types";
-
-export { slugify };
 
 export type ProductFormValues = {
   name: string;
@@ -107,15 +105,11 @@ export const productValidationSchema = Yup.object({
 });
 
 export function resolveCategoryId(product?: ApiProduct): string {
-  if (!product?.categoryId) return "";
-  if (typeof product.categoryId === "object") return product.categoryId._id;
-  return product.categoryId;
+  return resolveRefId(product?.categoryId);
 }
 
 export function resolveCategoryName(product?: ApiProduct): string {
-  if (!product?.categoryId) return "—";
-  if (typeof product.categoryId === "object") return product.categoryId.name;
-  return product.categoryId;
+  return resolveRefName(product?.categoryId);
 }
 
 function formatListField(values?: string[]): string {

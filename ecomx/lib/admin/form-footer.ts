@@ -6,12 +6,17 @@ export const CATEGORY_FORM_ID = "category-form";
 export const COUPON_FORM_ID = "coupon-form";
 
 const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:bg-green-700`;
+const cancelBtn = "rounded-lg px-6 py-2";
 
-export function productFormFooterButtons({
+export function createFormFooterButtons({
+  formId,
+  entityLabel,
   isEdit = false,
   isPending = false,
   onCancel,
 }: {
+  formId: string;
+  entityLabel: string;
   isEdit?: boolean;
   isPending?: boolean;
   onCancel: () => void;
@@ -22,68 +27,23 @@ export function productFormFooterButtons({
       variant: "outline",
       disabled: isPending,
       onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
+      className: cancelBtn,
     },
     {
-      label: isPending ? "Saving..." : isEdit ? "Update Product" : "Save Product",
+      label: isPending ? "Saving..." : isEdit ? `Update ${entityLabel}` : `Save ${entityLabel}`,
       type: "submit",
-      form: PRODUCT_FORM_ID,
+      form: formId,
       disabled: isPending,
       className: primaryBtn,
     },
   ];
 }
 
-export function categoryFormFooterButtons({
-  isEdit = false,
-  isPending = false,
-  onCancel,
-}: {
-  isEdit?: boolean;
-  isPending?: boolean;
-  onCancel: () => void;
-}): FooterButton[] {
-  return [
-    {
-      label: "Cancel",
-      variant: "outline",
-      disabled: isPending,
-      onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
-    },
-    {
-      label: isPending ? "Saving..." : isEdit ? "Update Category" : "Save Category",
-      type: "submit",
-      form: CATEGORY_FORM_ID,
-      disabled: isPending,
-      className: primaryBtn,
-    },
-  ];
-}
+export const productFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
+  createFormFooterButtons({ ...opts, formId: PRODUCT_FORM_ID, entityLabel: "Product" });
 
-export function couponFormFooterButtons({
-  isEdit = false,
-  isPending = false,
-  onCancel,
-}: {
-  isEdit?: boolean;
-  isPending?: boolean;
-  onCancel: () => void;
-}): FooterButton[] {
-  return [
-    {
-      label: "Cancel",
-      variant: "outline",
-      disabled: isPending,
-      onClick: onCancel,
-      className: "rounded-lg px-6 py-2",
-    },
-    {
-      label: isPending ? "Saving..." : isEdit ? "Update Coupon" : "Save Coupon",
-      type: "submit",
-      form: COUPON_FORM_ID,
-      disabled: isPending,
-      className: primaryBtn,
-    },
-  ];
-}
+export const categoryFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
+  createFormFooterButtons({ ...opts, formId: CATEGORY_FORM_ID, entityLabel: "Category" });
+
+export const couponFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
+  createFormFooterButtons({ ...opts, formId: COUPON_FORM_ID, entityLabel: "Coupon" });

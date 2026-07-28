@@ -1,5 +1,6 @@
 import * as Yup from "yup";
 import { positiveNumberOptional } from "@/components/admin/utils/Validations";
+import { resolveRefId, resolveRefName } from "@/lib/api/populated-ref";
 import type { ApiCategory, CreateCategoryPayload, UpdateCategoryPayload } from "@/types/category.types";
 
 export type CategoryFormValues = {
@@ -52,15 +53,11 @@ export const categoryValidationSchema = Yup.object({
 });
 
 export function resolveParentId(category?: ApiCategory): string {
-  if (!category?.parent) return "";
-  if (typeof category.parent === "object") return category.parent._id;
-  return category.parent;
+  return resolveRefId(category?.parent);
 }
 
 export function resolveParentName(category?: ApiCategory): string {
-  if (!category?.parent) return "—";
-  if (typeof category.parent === "object") return category.parent.name;
-  return category.parent;
+  return resolveRefName(category?.parent);
 }
 
 export function toCategoryFormValues(category?: ApiCategory): CategoryFormValues {

@@ -1,16 +1,13 @@
 import type { Product } from "@/lib/types";
 import type { ApiProduct } from "@/types/product.types";
+import { resolveRefId, resolveRefName } from "@/lib/api/populated-ref";
 
 export function resolveApiCategoryName(product: ApiProduct): string {
-  if (!product.categoryId) return "";
-  if (typeof product.categoryId === "object") return product.categoryId.name;
-  return "";
+  return resolveRefName(product.categoryId, "");
 }
 
 export function resolveApiCategoryId(product: ApiProduct): string {
-  if (!product.categoryId) return "";
-  if (typeof product.categoryId === "object") return product.categoryId._id;
-  return product.categoryId;
+  return resolveRefId(product.categoryId);
 }
 
 export function apiProductToStoreProduct(product: ApiProduct): Product {

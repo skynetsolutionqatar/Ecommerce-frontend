@@ -9,7 +9,7 @@ import {
   ListTableCard,
   ListToolbar,
 } from "@/components/admin/shared";
-import { useCategoriesWithMeta } from "@/hooks/useCategories";
+import { useCategories } from "@/hooks/useCategories";
 import { useDebounce } from "@/hooks/useDebounce";
 import { LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { resolveParentName } from "@/lib/admin/category-form";
@@ -29,7 +29,7 @@ export default function AdminCategoriesPage() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
-  const { data, isLoading, isError } = useCategoriesWithMeta({
+  const { data, isLoading, isError } = useCategories({
     search: debouncedSearch || undefined,
     page,
     limit: LIST_PAGE_SIZE,

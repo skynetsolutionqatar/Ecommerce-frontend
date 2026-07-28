@@ -130,6 +130,7 @@ export const STORAGE_KEYS = {
   AUTH: "skynet-auth",
   ACCESS_TOKEN: "skynet_access_token",
   REFRESH_TOKEN: "skynet_refresh_token",
+  GUEST_WISHLIST: "skynet_guest_wishlist",
 } as const;
 
 /** Route prefixes */
