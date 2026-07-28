@@ -108,11 +108,12 @@ export default function FlipkartProductRow({
               : null;
 
             return (
-              <motion.button
+              <motion.div
                 key={product.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => onProductClick(product)}
-                className="group flex shrink-0 flex-col text-left"
+                className="group flex shrink-0 cursor-pointer flex-col text-left"
                 style={{
                   width: "clamp(145px, 21vw, 188px)",
                   background: "#fff",
@@ -218,7 +219,7 @@ export default function FlipkartProductRow({
                     </div>
                   )}
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>
