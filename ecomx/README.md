@@ -54,3 +54,38 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+whishList
+
+GUEST (not logged in)
+────────────────────────────────────
+Click ♡ on any product
+      ↓
+productId saved to localStorage
+      ↓
+Heart turns red immediately
+      ↓
+Refresh page → still red ✅ (localStorage persists)
+
+AFTER LOGIN
+────────────────────────────────────
+Login happens
+      ↓
+useWishlist hook detects isLoggedIn = true
+      ↓
+Calls POST /wishlist/merge with localStorage IDs
+      ↓
+Backend adds them to their account
+      ↓
+Fetches full wishlist with product details
+      ↓
+Store updated — same heart states ✅
+
+LOGGED IN — NORMAL USAGE
+────────────────────────────────────
+Click ♡ → optimistic update (instant UI)
+      ↓
+API call in background
+      ↓
+Confirm/revert based on response

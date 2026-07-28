@@ -1,12 +1,15 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 import FlashSaleSection from "@/components/FlashSaleSection";
 import LazyMount from "@/components/LazyMount";
 import { useStore } from "@/components/StoreProvider";
-import { PRODUCTS } from "@/lib/data";
+import { useProducts } from "@/hooks/useProducts";
+import { PRODUCT_STATUS } from "@/lib/Constant";
+import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
 import { tw, type } from "@/lib/theme";
+import type { ApiProduct } from "@/types/product.types";
 import dynamic from "next/dynamic";
 
 const PromoBannerStrip = dynamic(() => import("@/components/PromoBannerStrip"));
@@ -17,9 +20,53 @@ const NewsletterSection = dynamic(() => import("@/components/NewsletterSection")
 export default function StoreHomePage() {
   const { openProduct, goToShop, toggleWishlist, isWishlisted } = useStore();
 
-  const bestSellers = PRODUCTS.filter((p) => p.isBestSeller);
-  const newArrivals = PRODUCTS.filter((p) => p.isNew);
-  const allProducts = PRODUCTS;
+  const { data: dealData, isLoading: dealsLoading } = useProducts({
+    status: PRODUCT_STATUS.ACTIVE,
+    hasDiscount: true,
+    limit: 8,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  const { data: bestSellerData, isLoading: bestLoading } = useProducts({
+    status: PRODUCT_STATUS.ACTIVE,
+    isBestSeller: true,
+    limit: 12,
+    sortBy: "totalSold",
+    sortOrder: "desc",
+  });
+
+  const { data: newArrivalData, isLoading: newLoading } = useProducts({
+    status: PRODUCT_STATUS.ACTIVE,
+    isNew: true,
+    limit: 12,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  const { data: fallbackData, isLoading: fallbackLoading } = useProducts({
+    status: PRODUCT_STATUS.ACTIVE,
+    limit: 12,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  const deals = dealData?.products ?? [];
+  const bestSellers = bestSellerData?.products ?? [];
+  const newArrivals = newArrivalData?.products ?? [];
+  const fallbackProducts = fallbackData?.products ?? [];
+
+  const bestSellerProducts =
+    bestSellers.length > 0 ? bestSellers : fallbackProducts.slice(0, 12);
+  const newArrivalProducts =
+    newArrivals.length > 0 ? newArrivals : fallbackProducts.slice(4, 16);
+
+  const handleProductClick = useCallback(
+    (product: ApiProduct) => {
+      openProduct(apiProductToStoreProduct(product));
+    },
+    [openProduct]
+  );
 
   useEffect(() => {
     void import("@/components/ShopPage");
@@ -35,7 +82,9 @@ export default function StoreHomePage() {
 
         <div className="mb-2 bg-white">
           <FlashSaleSection
-            onProductClick={openProduct}
+            products={deals}
+            isLoading={dealsLoading}
+            onProductClick={handleProductClick}
             onViewAll={() => goToShop()}
             onWishlistToggle={toggleWishlist}
             isWishlisted={isWishlisted}
@@ -56,8 +105,9 @@ export default function StoreHomePage() {
               <FlipkartProductRow
                 title="Best Sellers"
                 subtitle="Top-rated products by Skynet customers"
-                products={bestSellers.length > 0 ? bestSellers : allProducts}
-                onProductClick={openProduct}
+                products={bestSellerProducts}
+                isLoading={bestLoading || (bestSellers.length === 0 && fallbackLoading)}
+                onProductClick={handleProductClick}
                 onViewAll={() => goToShop()}
                 onWishlistToggle={toggleWishlist}
                 isWishlisted={isWishlisted}
@@ -84,8 +134,9 @@ export default function StoreHomePage() {
               <FlipkartProductRow
                 title="New Arrivals"
                 subtitle="Latest products just added"
-                products={newArrivals.length > 0 ? newArrivals : allProducts.slice(4)}
-                onProductClick={openProduct}
+                products={newArrivalProducts}
+                isLoading={newLoading || (newArrivals.length === 0 && fallbackLoading)}
+                onProductClick={handleProductClick}
                 onViewAll={() => goToShop()}
                 onWishlistToggle={toggleWishlist}
                 isWishlisted={isWishlisted}
