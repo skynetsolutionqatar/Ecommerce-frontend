@@ -1,3 +1,5 @@
-export default function ShopRoute() {
-  return null;
+import ShopPageClient from "@/components/store/ShopPageClient";
+
+export default function ShopPage() {
+  return <ShopPageClient />;
 }

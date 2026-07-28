@@ -1,3 +1,5 @@
-export default function CheckoutRoute() {
-  return null;
+import CheckoutPageClient from "@/components/store/CheckoutPageClient";
+
+export default function CheckoutPage() {
+  return <CheckoutPageClient />;
 }

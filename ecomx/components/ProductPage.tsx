@@ -11,10 +11,9 @@ interface ProductPageProps {
   product: Product;
   onAddToCart: (product: Product, color: string, size: string) => void;
   onWishlistToggle: (item: WishlistItem) => void;
-  isWishlisted: boolean;
+  isWishlisted: (productId: string) => boolean;
   onBack: () => void;
   onProductClick: (product: Product) => void;
-  wishlist: WishlistItem[];
 }
 
 function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
@@ -47,7 +46,6 @@ export default function ProductPage({
   isWishlisted,
   onBack,
   onProductClick,
-  wishlist,
 }: ProductPageProps) {
   const [imgIdx, setImgIdx] = useState(0);
   const [thumbOffset, setThumbOffset] = useState(0);
@@ -272,7 +270,7 @@ export default function ProductPage({
                       })
                     }
                     className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 bg-white transition-all cursor-pointer ${
-                      isWishlisted
+                      isWishlisted(product.id)
                         ? "border-red-400 text-red-500"
                         : "border-gray-200 text-gray-400 hover:border-red-300"
                     }`}
@@ -281,8 +279,8 @@ export default function ProductPage({
                       width="15"
                       height="15"
                       viewBox="0 0 24 24"
-                      fill={isWishlisted ? "#ef4444" : "none"}
-                      stroke={isWishlisted ? "#ef4444" : "#9ca3af"}
+                      fill={isWishlisted(product.id) ? "#ef4444" : "none"}
+                      stroke={isWishlisted(product.id) ? "#ef4444" : "#9ca3af"}
                       strokeWidth="2"
                     >
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -1006,16 +1004,8 @@ export default function ProductPage({
                           width="11"
                           height="11"
                           viewBox="0 0 24 24"
-                          fill={
-                            wishlist.some((w) => w.id === p.id)
-                              ? "#ef4444"
-                              : "none"
-                          }
-                          stroke={
-                            wishlist.some((w) => w.id === p.id)
-                              ? "#ef4444"
-                              : "#9ca3af"
-                          }
+                          fill={isWishlisted(p.id) ? "#ef4444" : "none"}
+                          stroke={isWishlisted(p.id) ? "#ef4444" : "#9ca3af"}
                           strokeWidth="2"
                         >
                           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />

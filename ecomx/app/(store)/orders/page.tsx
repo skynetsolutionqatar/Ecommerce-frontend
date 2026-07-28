@@ -1,3 +1,5 @@
-export default function OrdersRoute() {
-  return null;
+import OrdersPageClient from "@/components/store/OrdersPageClient";
+
+export default function OrdersPage() {
+  return <OrdersPageClient />;
 }

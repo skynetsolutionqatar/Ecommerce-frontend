@@ -7,10 +7,11 @@ import StoreProductCard from "./store/StoreProductCard";
 import * as Icons from "./Icons";
 import { tw } from "@/lib/theme";
 import { useProducts } from "@/hooks/useProducts";
-import { useStoreCategories } from "@/hooks/useStoreCategories";
+import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 import type { FilterState, SortOption, WishlistItem, Product } from "@/lib/types";
 import type { ApiProduct } from "@/types/product.types";
 
@@ -37,7 +38,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 interface ShopPageProps {
   onAddToCart: (product: Product, color: string, size: string) => void;
   onWishlistToggle: (item: WishlistItem) => void;
-  wishlist: WishlistItem[];
+  isWishlisted: (productId: string) => boolean;
   onProductClick: (product: Product) => void;
   initialCategory?: string;
   onHomeClick?: () => void;
@@ -62,6 +63,8 @@ function sortToQuery(sort: SortOption) {
 
 export default function ShopPage({
   onAddToCart,
+  onWishlistToggle,
+  isWishlisted,
   onProductClick,
   initialCategory,
   onHomeClick,
@@ -76,7 +79,8 @@ export default function ShopPage({
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
-  const { data: categories = [] } = useStoreCategories();
+  const { data: categoryData } = useCategories(STORE_CATEGORY_QUERY);
+  const categories = categoryData?.categories ?? [];
   const sortQuery = sortToQuery(sort);
   const selectedCategoryId = filters.categories[0];
 
@@ -118,6 +122,10 @@ export default function ShopPage({
   const handleAddToCart = (apiProduct: ApiProduct) => {
     const mapped = apiProductToStoreProduct(apiProduct);
     onAddToCart(mapped, mapped.colors[0]?.name ?? "", mapped.sizes[0] ?? "");
+  };
+
+  const handleWishlistToggle = (apiProduct: ApiProduct) => {
+    onWishlistToggle(apiProductToWishlistItem(apiProduct));
   };
 
   const pageTitle = useMemo(() => {
@@ -258,6 +266,8 @@ export default function ShopPage({
                     index={index}
                     onClick={handleProductClick}
                     onAddToCart={handleAddToCart}
+                    onWishlistToggle={handleWishlistToggle}
+                    isWishlisted={isWishlisted(product._id)}
                   />
                 ))}
               </div>

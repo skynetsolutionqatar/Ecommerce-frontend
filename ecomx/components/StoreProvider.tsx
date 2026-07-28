@@ -8,22 +8,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { PRODUCTS } from "@/lib/data";
+import { useRouter } from "next/navigation";
+import { fetchProduct } from "@/lib/api/product.api";
 import { authUserToStoreUser } from "@/lib/auth-utils";
-import {
-  pageToPath,
-  pathToPage,
-  pageTypeFromPath,
-  ROUTES,
-  type StorePage,
-} from "@/lib/routes";
-import { useAuthStore } from "@/store/auth.store";
+import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { ROUTES, shopUrl } from "@/lib/routes";
+import { useAuthStore, selectIsAuthenticated } from "@/store/auth.store";
+import { useWishlist } from "@/hooks/useWishlist";
 import type { CartItem, Product, StoreUser, WishlistItem } from "@/lib/types";
 
 interface StoreContextValue {
-  page: StorePage;
-  pageType: string;
   cart: CartItem[];
   wishlist: WishlistItem[];
   cartOpen: boolean;
@@ -31,18 +25,19 @@ interface StoreContextValue {
   searchOpen: boolean;
   loginOpen: boolean;
   user: StoreUser | null;
+  isWishlisted: (productId: string) => boolean;
   setCartOpen: (open: boolean) => void;
   setWishlistOpen: (open: boolean) => void;
   setSearchOpen: (open: boolean) => void;
   setLoginOpen: (open: boolean) => void;
-  setUser: (user: StoreUser | null) => void;
-  navigate: (page: StorePage, options?: { replace?: boolean }) => void;
-  goBack: () => void;
-  handleSetPage: (p: string) => void;
+  logout: () => void;
+  openProduct: (product: Product) => void;
+  goToShop: (categoryId?: string) => void;
   addToCart: (product: Product, color: string, size: string) => void;
   updateCart: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   toggleWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (productId: string) => void;
   addWishlistToCart: (item: WishlistItem) => void;
 }
 
@@ -56,22 +51,20 @@ export function useStore() {
 
 export default function StoreProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const page = useMemo(
-    () => pathToPage(pathname, searchParams),
-    [pathname, searchParams]
-  );
-
-  const pageType = useMemo(() => pageTypeFromPath(pathname), [pathname]);
 
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+
+  const {
+    wishlist,
+    isWishlisted,
+    toggleWishlist,
+    removeFromWishlist,
+    moveToCart,
+  } = useWishlist();
 
   const authUser = useAuthStore((s) => s.user);
   const isAuthHydrated = useAuthStore((s) => s.isHydrated);
@@ -81,53 +74,33 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
     return authUserToStoreUser(authUser);
   }, [authUser, isAuthHydrated]);
 
-  const setUser = useCallback((next: StoreUser | null) => {
-    if (next === null) {
-      useAuthStore.getState().clearAuth();
-    }
+  const logout = useCallback(() => {
+    useAuthStore.getState().clearAuth();
   }, []);
 
-  const scrollTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const navigate = useCallback(
-    (next: StorePage, options?: { replace?: boolean }) => {
-      scrollTop();
-      const path = pageToPath(next);
-      if (options?.replace) router.replace(path);
-      else router.push(path);
+  const openProduct = useCallback(
+    (product: Product) => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      router.push(ROUTES.product(product.slug ?? String(product.id)));
     },
-    [router, scrollTop]
+    [router]
   );
 
-  const goBack = useCallback(() => {
-    scrollTop();
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push(ROUTES.home);
-    }
-  }, [router, scrollTop]);
-
-  const handleSetPage = useCallback(
-    (p: string) => {
-      if (p === "home") navigate({ type: "home" });
-      else if (p === "shop") navigate({ type: "shop" });
-      else if (p === "checkout") navigate({ type: "checkout" });
-      else if (p === "cart") setCartOpen(true);
-      else if (p === "orders") navigate({ type: "orders" });
-      else if (p === "login") setLoginOpen(true);
-      else if (p === "support") navigate({ type: "shop" });
+  const goToShop = useCallback(
+    (categoryId?: string) => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      router.push(shopUrl(categoryId));
     },
-    [navigate]
+    [router]
   );
 
   const addToCart = useCallback((product: Product, color: string, size: string) => {
     const id = `${product.id}-${color}-${size}`;
-    setCart(prev => {
-      const existing = prev.find(i => i.id === id);
-      if (existing) return prev.map(i => (i.id === id ? { ...i, qty: i.qty + 1 } : i));
+    setCart((prev) => {
+      const existing = prev.find((i) => i.id === id);
+      if (existing) {
+        return prev.map((i) => (i.id === id ? { ...i, qty: i.qty + 1 } : i));
+      }
       return [
         ...prev,
         {
@@ -147,35 +120,60 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateCart = useCallback((id: string, qty: number) => {
-    if (qty < 1) setCart(prev => prev.filter(i => i.id !== id));
-    else setCart(prev => prev.map(i => (i.id === id ? { ...i, qty } : i)));
+    if (qty < 1) setCart((prev) => prev.filter((i) => i.id !== id));
+    else setCart((prev) => prev.map((i) => (i.id === id ? { ...i, qty } : i)));
   }, []);
 
   const removeFromCart = useCallback((id: string) => {
-    setCart(prev => prev.filter(i => i.id !== id));
+    setCart((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
-  const toggleWishlist = useCallback((item: WishlistItem) => {
-    setWishlist(prev =>
-      prev.find(i => i.id === item.id) ? prev.filter(i => i.id !== item.id) : [...prev, item]
-    );
-  }, []);
+  const handleToggleWishlist = useCallback(
+    (item: WishlistItem) => {
+      void toggleWishlist(item);
+    },
+    [toggleWishlist]
+  );
+
+  const handleRemoveFromWishlist = useCallback(
+    (productId: string) => {
+      void removeFromWishlist(productId);
+    },
+    [removeFromWishlist]
+  );
 
   const addWishlistToCart = useCallback(
-    (item: WishlistItem) => {
-      const product = PRODUCTS.find(p => p.id === item.id);
-      if (!product) return;
-      addToCart(product, product.colors[0].name, product.sizes[0]);
-      setWishlistOpen(false);
-      setCartOpen(true);
+    async (item: WishlistItem) => {
+      try {
+        const loggedIn = selectIsAuthenticated(useAuthStore.getState());
+        let product;
+
+        if (loggedIn) {
+          const apiProduct = await moveToCart(item.id);
+          if (!apiProduct) {
+            throw new Error("Move to cart failed");
+          }
+          product = apiProductToStoreProduct(apiProduct);
+        } else {
+          const apiProduct = await fetchProduct(item.id);
+          product = apiProductToStoreProduct(apiProduct);
+          if (isWishlisted(item.id)) {
+            await removeFromWishlist(item.id);
+          }
+        }
+
+        addToCart(product, product.colors[0]?.name ?? "Default", product.sizes?.[0] ?? "");
+        setWishlistOpen(false);
+        setCartOpen(true);
+      } catch {
+        // Product may have been removed
+      }
     },
-    [addToCart]
+    [addToCart, isWishlisted, moveToCart, removeFromWishlist]
   );
 
   const value = useMemo<StoreContextValue>(
     () => ({
-      page,
-      pageType,
       cart,
       wishlist,
       cartOpen,
@@ -183,23 +181,22 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       searchOpen,
       loginOpen,
       user,
+      isWishlisted,
       setCartOpen,
       setWishlistOpen,
       setSearchOpen,
       setLoginOpen,
-      setUser,
-      navigate,
-      goBack,
-      handleSetPage,
+      logout,
+      openProduct,
+      goToShop,
       addToCart,
       updateCart,
       removeFromCart,
-      toggleWishlist,
+      toggleWishlist: handleToggleWishlist,
+      removeFromWishlist: handleRemoveFromWishlist,
       addWishlistToCart,
     }),
     [
-      page,
-      pageType,
       cart,
       wishlist,
       cartOpen,
@@ -207,13 +204,15 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       searchOpen,
       loginOpen,
       user,
-      navigate,
-      goBack,
-      handleSetPage,
+      isWishlisted,
+      logout,
+      openProduct,
+      goToShop,
       addToCart,
       updateCart,
       removeFromCart,
-      toggleWishlist,
+      handleToggleWishlist,
+      handleRemoveFromWishlist,
       addWishlistToCart,
     ]
   );

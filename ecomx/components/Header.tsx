@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Icons from "./Icons";
 import type { CartItem, WishlistItem, StoreUser } from "@/lib/types";
 import Avatar from "./Avatar";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
-import { useStoreCategories } from "@/hooks/useStoreCategories";
+import { ROUTES } from "@/lib/routes";
+import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
 
@@ -20,18 +22,15 @@ interface HeaderProps {
   onLoginOpen: () => void;
   onLogout?: () => void;
   user?: StoreUser | null;
-  page: string;
-  setPage: (p: string) => void;
-  onNavigateHome: () => void;
   onCategorySelect?: (category: ApiCategory) => void;
 }
 
 const NAV_LINKS = [
-  { label: "Products", page: "shop" },
-  { label: "Solutions", page: "shop" },
-  { label: "Deals", page: "shop" },
-  { label: "Support", page: "support" },
-  { label: "Orders", page: "orders" },
+  { label: "Products", href: ROUTES.shop },
+  { label: "Solutions", href: ROUTES.shop },
+  { label: "Deals", href: ROUTES.shop },
+  { label: "Support", href: ROUTES.shop },
+  { label: "Orders", href: ROUTES.orders },
 ];
 
 export default function Header({
@@ -43,14 +42,16 @@ export default function Header({
   onLoginOpen,
   onLogout,
   user,
-  setPage,
-  onNavigateHome,
   onCategorySelect,
 }: HeaderProps) {
+  const router = useRouter();
   const { client } = useClientTheme();
-  const { data: categories = [], isLoading: categoriesLoading } =
-    useStoreCategories();
+  const { data } = useCategories(STORE_CATEGORY_QUERY);
+  const categories = data?.categories ?? [];
 
+  const goTo = (href: string) => router.push(href);
+
+  const categoriesLoading = !data;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catVisible, setCatVisible] = useState(true);
@@ -178,7 +179,7 @@ export default function Header({
           <div className="mx-auto flex max-w-[1440px] items-center gap-3 py-1.5 px-3 sm:px-5 md:px-8 md:gap-4 lg:px-[50px]">
             <motion.button
               type="button"
-              onClick={onNavigateHome}
+              onClick={() => goTo(ROUTES.home)}
               className="flex shrink-0 cursor-pointer flex-col items-start border-0 bg-transparent p-0"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -245,7 +246,7 @@ export default function Header({
                       <button
                         type="button"
                         onClick={() => {
-                          setPage("shop");
+                          goTo(ROUTES.shop);
                           setCatDropOpen(false);
                         }}
                         className="flex w-full px-4 py-2.5 text-left text-[12.5px] font-medium text-gray-700 hover:bg-blue-50 border-0 bg-transparent cursor-pointer"
@@ -405,7 +406,7 @@ export default function Header({
                   ))}
                   <motion.button
                     type="button"
-                    onClick={() => setPage("shop")}
+                    onClick={() => goTo(ROUTES.shop)}
                     className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer md:px-4"
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.95 }}
@@ -421,7 +422,7 @@ export default function Header({
               ) : (
                 <button
                   type="button"
-                  onClick={() => setPage("shop")}
+                  onClick={() => goTo(ROUTES.shop)}
                   className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer"
                 >
                   <span className="flex h-5 w-5 items-center justify-center text-gray-600">
@@ -508,9 +509,9 @@ export default function Header({
                     <button
                       type="button"
                       onClick={() => {
-                        setPage("shop");
-                        setMobileOpen(false);
-                      }}
+                      goTo(ROUTES.shop);
+                      setMobileOpen(false);
+                    }}
                       className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-[11px] font-medium text-gray-700"
                     >
                       <span className="flex h-4 w-4 items-center justify-center text-gray-500">
@@ -533,7 +534,7 @@ export default function Header({
                     key={item.label}
                     type="button"
                     onClick={() => {
-                      setPage(item.page);
+                      goTo(item.href);
                       setMobileOpen(false);
                     }}
                     className="mb-1 flex w-full items-center justify-between rounded-2xl border border-transparent px-4 py-3 text-left font-label text-[14px] font-semibold text-gray-800"

@@ -6,11 +6,14 @@ import { PRODUCTS, fmt } from "@/lib/data";
 import StoreImage from "./StoreImage";
 import * as Icons from "./Icons";
 import { type, tw } from "@/lib/theme";
-import type { Product } from "@/lib/types";
+import type { Product, WishlistItem } from "@/lib/types";
+import { productToWishlistItem } from "@/lib/store/wishlist-helpers";
 
 interface FlashSaleSectionProps {
   onProductClick: (product: Product) => void;
   onViewAll: () => void;
+  onWishlistToggle?: (item: WishlistItem) => void;
+  isWishlisted?: (productId: string) => boolean;
 }
 
 function useCountdown(targetHours = 8) {
@@ -49,7 +52,12 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
   );
 }
 
-export default function FlashSaleSection({ onProductClick, onViewAll }: FlashSaleSectionProps) {
+export default function FlashSaleSection({
+  onProductClick,
+  onViewAll,
+  onWishlistToggle,
+  isWishlisted,
+}: FlashSaleSectionProps) {
   const time = useCountdown(7);
   const deals = PRODUCTS.filter(p => p.originalPrice).slice(0, 8);
 
@@ -177,6 +185,28 @@ export default function FlashSaleSection({ onProductClick, onViewAll }: FlashSal
                     NEW
                   </span>
                 )}
+                {onWishlistToggle ? (
+                  <button
+                    type="button"
+                    aria-label={isWishlisted?.(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onWishlistToggle(productToWishlistItem(product));
+                    }}
+                    className="absolute bottom-1.5 right-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full border-0 bg-white/95 shadow-sm"
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill={isWishlisted?.(product.id) ? "#ef4444" : "none"}
+                      stroke={isWishlisted?.(product.id) ? "#ef4444" : "#9ca3af"}
+                      strokeWidth="2"
+                    >
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                  </button>
+                ) : null}
               </div>
 
               {/* Info */}

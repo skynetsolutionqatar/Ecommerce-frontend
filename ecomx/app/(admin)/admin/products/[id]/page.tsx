@@ -88,8 +88,8 @@ export default function AdminProductDetailPage({
 
         <ViewSection id="description" title="Description">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <ViewField label="Short Description" value={product.shortDescription} />
-            <ViewField label="Description" value={product.description} />
+            <ViewField label="Short Description" value={product.shortDescription} maxLength={120} />
+            <ViewField label="Description" value={product.description} maxLength={240} />
           </div>
         </ViewSection>
 

@@ -6,11 +6,14 @@ import { PRODUCT_STATUS } from "@/lib/Constant";
 import { formatPrice } from "@/lib/utils";
 import type { ApiProduct } from "@/types/product.types";
 import { resolveApiCategoryName } from "@/lib/store/product-mapper";
+import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 
 interface StoreProductCardProps {
   product: ApiProduct;
   onClick: (product: ApiProduct) => void;
   onAddToCart?: (product: ApiProduct) => void;
+  onWishlistToggle?: (product: ApiProduct) => void;
+  isWishlisted?: boolean;
   index?: number;
 }
 
@@ -31,6 +34,8 @@ export default function StoreProductCard({
   product,
   onClick,
   onAddToCart,
+  onWishlistToggle,
+  isWishlisted = false,
   index = 0,
 }: StoreProductCardProps) {
   const image = product.thumbnail ?? product.images?.[0];
@@ -73,6 +78,31 @@ export default function StoreProductCard({
           <span className="absolute right-2 top-2 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
             NEW
           </span>
+        ) : null}
+
+        {onWishlistToggle ? (
+          <button
+            type="button"
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            onClick={(e) => {
+              e.stopPropagation();
+              onWishlistToggle(product);
+            }}
+            className="absolute bottom-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full border-0 bg-white/95 shadow-sm transition hover:scale-105"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill={isWishlisted ? "#ef4444" : "none"}
+              stroke={isWishlisted ? "#ef4444" : "#9ca3af"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
         ) : null}
       </div>
 

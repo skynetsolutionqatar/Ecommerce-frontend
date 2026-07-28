@@ -54,19 +54,18 @@ function CategoryForm({
   isPending = false,
   onSubmit,
 }: CategoryFormProps) {
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories({
+  const { data: categoryData, isLoading: categoriesLoading } = useCategories({
     limit: 100,
     sortBy: "name",
     sortOrder: "asc",
   });
+  const categories = categoryData?.categories ?? [];
 
   const parentOptions = useMemo(
     () =>
       categories
         .filter(
-          (cat) =>
-            cat._id !== initialCategory?._id &&
-            cat.isParent === true
+          (cat) => cat._id !== initialCategory?._id && cat.isParent === true
         )
         .map((cat) => ({ label: cat.name, value: cat._id })),
     [categories, initialCategory?._id]
