@@ -1,15 +1,14 @@
-export interface CartItemVariant {
-  name: string;
-  value: string;
-}
+import type { ApiProduct } from "@/types/product.types";
 
 export interface ApiCartItem {
   _id: string;
-  productId: string | { _id: string; name: string; slug: string; price: number; images?: string[]; thumbnail?: string };
+  productId: string | Pick<ApiProduct, "_id" | "name" | "slug" | "price" | "thumbnail" | "images" | "stock">;
+  name: string;
+  thumbnail?: string;
+  slug?: string;
   quantity: number;
-  variant?: CartItemVariant;
   price: number;
-  subtotal?: number;
+  subtotal: number;
 }
 
 export interface ApiCart {
@@ -17,16 +16,26 @@ export interface ApiCart {
   customerId: string;
   tenantId: string;
   items: ApiCartItem[];
-  subtotal?: number;
-  itemCount?: number;
+  totalItems?: number;
+  totalAmount?: number;
+  finalAmount?: number;
+  couponCode?: string | null;
+  discountAmount?: number;
 }
 
 export interface AddToCartPayload {
   productId: string;
   quantity: number;
-  variant?: CartItemVariant;
 }
 
 export interface UpdateCartItemPayload {
   quantity: number;
+}
+
+export interface CartGetResponse {
+  cart: ApiCart;
+}
+
+export interface CartMutationResponse {
+  cart: ApiCart;
 }

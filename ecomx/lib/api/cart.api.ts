@@ -1,18 +1,18 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "./client";
 import type { PaginationMeta } from "@/types/api.types";
-import type { AddToCartPayload, ApiCart, UpdateCartItemPayload } from "@/types/cart.types";
+import type { AddToCartPayload, ApiCart, CartGetResponse, CartMutationResponse, UpdateCartItemPayload } from "@/types/cart.types";
 
 export const cartApi = {
-  get: () => apiGet<{ cart: ApiCart }>("/cart"),
+  get: () => apiGet<CartGetResponse>("/cart"),
 
-  add: (payload: AddToCartPayload) => apiPost<{ cart: ApiCart }>("/cart/add", payload),
+  add: (payload: AddToCartPayload) => apiPost<CartMutationResponse>("/cart/add", payload),
 
   updateItem: (itemId: string, payload: UpdateCartItemPayload) =>
-    apiPatch<{ cart: ApiCart }>(`/cart/items/${itemId}`, payload),
+    apiPatch<CartMutationResponse>(`/cart/items/${itemId}`, payload),
 
-  removeItem: (itemId: string) => apiDelete<{ cart: ApiCart }>(`/cart/items/${itemId}`),
+  removeItem: (itemId: string) => apiDelete<CartMutationResponse>(`/cart/items/${itemId}`),
 
-  clear: () => apiDelete<{ cart: ApiCart }>("/cart"),
+  clear: () => apiDelete<Record<string, never>>("/cart"),
 };
 
 export type CartResult = { cart: ApiCart; pagination?: PaginationMeta };

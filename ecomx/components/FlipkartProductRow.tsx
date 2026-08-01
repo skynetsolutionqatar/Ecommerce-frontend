@@ -111,17 +111,18 @@ export default function FlipkartProductRow({
         ) : (
           <div
             ref={scrollRef}
-            className={`flex gap-2 overflow-x-auto scroll-smooth px-4 pb-4 sm:gap-3 sm:px-5 md:px-6 sm:pb-5 ${tw.scrollbarHide}`}
+            className={`flex items-stretch gap-3 overflow-x-auto scroll-smooth px-4 py-2 pb-4 sm:gap-4 sm:px-5 md:px-6 sm:pb-5 ${tw.scrollbarHide}`}
           >
             {products.map((product, i) => (
-              <HomeScrollProductCard
-                key={product._id}
-                product={product}
-                index={i}
-                onClick={onProductClick}
-                onWishlistToggle={onWishlistToggle}
-                isWishlisted={isWishlisted?.(product._id)}
-              />
+              <div key={product._id} className="relative shrink-0">
+                <HomeScrollProductCard
+                  product={product}
+                  index={i}
+                  onClick={onProductClick}
+                  onWishlistToggle={onWishlistToggle}
+                  isWishlisted={isWishlisted?.(product._id)}
+                />
+              </div>
             ))}
           </div>
         )}

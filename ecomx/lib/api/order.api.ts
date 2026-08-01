@@ -46,6 +46,11 @@ export const orderApi = {
 
 export type OrdersResult = { orders: ApiOrder[]; pagination?: PaginationMeta };
 
+export async function fetchMyOrders(params?: OrderQueryParams): Promise<OrdersResult> {
+  const res = await orderApi.getMyOrders(params);
+  return { orders: res.data.orders, pagination: res.pagination };
+}
+
 export async function fetchOrders(params?: OrderQueryParams): Promise<OrdersResult> {
   const res = await orderApi.getAll(params);
   return { orders: res.data.orders, pagination: res.pagination };

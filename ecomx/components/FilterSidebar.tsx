@@ -1,6 +1,9 @@
 "use client";
+
 import { useState } from "react";
-import { SHOP_CATEGORIES, getCategoryCount, PRICE_MAX, fmt } from "@/lib/data";
+import { Colors } from "@/lib/theme";
+import { formatPrice } from "@/lib/utils";
+import { countActiveFilters } from "@/lib/store/shop-filters";
 import type { FilterState } from "@/lib/types";
 import * as Icons from "./Icons";
 
@@ -9,135 +12,183 @@ interface FilterSidebarProps {
   onChange: (f: FilterState) => void;
   onClear: () => void;
   resultCount: number;
+  isLoading?: boolean;
+  priceMax: number;
   categories?: { id: string; name: string; count?: number }[];
+  brands?: string[];
   mobile?: boolean;
+  onApply?: () => void;
 }
 
-const PRICE_PRESETS: { min: number; max: number; label: string }[] = [
-  { min: 0, max: 500, label: "Under QAR 500" },
-  { min: 500, max: 1500, label: "QAR 500 – 1,500" },
-  { min: 1500, max: 3000, label: "QAR 1,500 – 3,000" },
-  { min: 3000, max: PRICE_MAX, label: "QAR 3,000+" },
-];
+const BRAND = Colors.base_color;
 
-const BRANDS = ["Honeywell", "Zebra", "Datalogic", "ZKTeco", "PowerGuard", "atACC", "SecureVision", "Synology", "PartnerTech", "Star Micronics"];
-
-export default function FilterSidebar({ filters, onChange, onClear, resultCount, categories, mobile }: FilterSidebarProps) {
-  const [sections, setSections] = useState({ categories: true, brand: true, price: true, availability: true, rating: true });
+export default function FilterSidebar({
+  filters,
+  onChange,
+  onClear,
+  resultCount,
+  isLoading = false,
+  priceMax,
+  categories = [],
+  brands = [],
+  mobile,
+  onApply,
+}: FilterSidebarProps) {
+  const [sections, setSections] = useState({
+    categories: true,
+    brand: true,
+    price: true,
+    availability: true,
+    rating: true,
+  });
 
   const toggle = (key: keyof typeof sections) =>
-    setSections(prev => ({ ...prev, [key]: !prev[key] }));
+    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const toggleArr = <K extends keyof FilterState>(key: K, val: string) => {
-    const arr = filters[key] as string[];
-    const next = arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val];
-    onChange({ ...filters, [key]: next });
-  };
-
-  const activeCount =
-    filters.categories.length + filters.ratings.length + filters.colors.length +
-    filters.sizes.length + filters.tags.length +
-    (filters.priceRange[0] > 0 || filters.priceRange[1] < PRICE_MAX ? 1 : 0);
+  const activeCount = countActiveFilters(filters, priceMax);
 
   return (
     <aside className="w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
         <div className="flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-gray-700"
+          >
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="14" y2="12" />
+            <line x1="4" y1="18" x2="10" y2="18" />
           </svg>
-          <span className="font-semibold text-[14px] text-gray-900">Filters</span>
+          <span className="text-[14px] font-semibold text-gray-900">Filters</span>
         </div>
-        {activeCount > 0 && (
+        {activeCount > 0 ? (
           <button
             type="button"
             onClick={onClear}
-            className="text-[12px] font-semibold text-blue-600 cursor-pointer border-0 bg-transparent hover:underline"
+            className="cursor-pointer border-0 bg-transparent text-[12px] font-semibold hover:underline"
+            style={{ color: BRAND }}
           >
             Clear All
           </button>
-        )}
+        ) : null}
       </div>
 
-      {/* Categories */}
+      <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+        <p className="text-[12px] text-gray-600">
+          {isLoading ? (
+            "Loading results..."
+          ) : (
+            <>
+              <span className="font-bold" style={{ color: BRAND }}>
+                {resultCount}
+              </span>{" "}
+              {resultCount === 1 ? "result" : "results"} found
+            </>
+          )}
+        </p>
+      </div>
+
       <FilterSection title="Categories" open={sections.categories} onToggle={() => toggle("categories")}>
-        {(categories ?? SHOP_CATEGORIES.map((name) => ({ id: name, name, count: getCategoryCount(name) }))).map((cat) => (
-          <FilterCheckbox
-            key={cat.id}
-            label={cat.name}
-            count={cat.count}
-            checked={filters.categories.includes(cat.id)}
-            onChange={() => {
-              const next = filters.categories.includes(cat.id) ? [] : [cat.id];
-              onChange({ ...filters, categories: next });
-            }}
-          />
-        ))}
+        {categories.length > 0 ? (
+          categories.map((cat) => (
+            <FilterCheckbox
+              key={cat.id}
+              label={cat.name}
+              count={cat.count}
+              checked={filters.categories.includes(cat.id)}
+              onChange={() => {
+                const next = filters.categories.includes(cat.id) ? [] : [cat.id];
+                onChange({ ...filters, categories: next });
+              }}
+            />
+          ))
+        ) : (
+          <p className="text-[11px] text-gray-400">No categories</p>
+        )}
       </FilterSection>
 
-      {/* Brand */}
       <FilterSection title="Brand" open={sections.brand} onToggle={() => toggle("brand")}>
-        {BRANDS.map(brand => (
-          <FilterCheckbox
-            key={brand}
-            label={brand}
-            checked={filters.tags.includes(brand)}
-            onChange={() => toggleArr("tags", brand)}
-          />
-        ))}
+        {brands.length > 0 ? (
+          brands.map((brand) => (
+            <FilterCheckbox
+              key={brand}
+              label={brand}
+              checked={filters.brands.includes(brand)}
+              onChange={() => {
+                const next = filters.brands.includes(brand) ? [] : [brand];
+                onChange({ ...filters, brands: next });
+              }}
+            />
+          ))
+        ) : (
+          <p className="text-[11px] text-gray-400">No brands</p>
+        )}
       </FilterSection>
 
-      {/* Price Range */}
       <FilterSection title="Price Range" open={sections.price} onToggle={() => toggle("price")}>
         <div className="py-1 pb-2">
-          <div className="mb-2 flex justify-between text-[11px] font-semibold text-gray-700">
-            <span>{fmt(filters.priceRange[0])}</span>
-            <span>{filters.priceRange[1] >= PRICE_MAX ? `${fmt(PRICE_MAX)}+` : fmt(filters.priceRange[1])}</span>
+          <div className="mb-3 flex justify-between text-[11px] font-semibold text-gray-700">
+            <span>{formatPrice(filters.priceRange[0])}</span>
+            <span>
+              {filters.priceRange[1] >= priceMax
+                ? `${formatPrice(priceMax)}+`
+                : formatPrice(filters.priceRange[1])}
+            </span>
           </div>
           <input
             type="range"
             min={0}
-            max={PRICE_MAX}
-            value={filters.priceRange[1]}
-            onChange={e => onChange({ ...filters, priceRange: [filters.priceRange[0], Number(e.target.value)] })}
-            className="w-full cursor-pointer accent-blue-600"
+            max={priceMax}
+            step={Math.max(50, Math.round(priceMax / 100))}
+            value={Math.min(filters.priceRange[1], priceMax)}
+            onChange={(e) =>
+              onChange({
+                ...filters,
+                priceRange: [filters.priceRange[0], Number(e.target.value)],
+              })
+            }
+            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full"
+            style={{
+              accentColor: BRAND,
+              background: `linear-gradient(to right, ${BRAND} 0%, ${BRAND} ${(Math.min(filters.priceRange[1], priceMax) / priceMax) * 100}%, #e5e7eb ${(Math.min(filters.priceRange[1], priceMax) / priceMax) * 100}%, #e5e7eb 100%)`,
+            }}
           />
         </div>
       </FilterSection>
 
-      {/* Availability */}
       <FilterSection title="Availability" open={sections.availability} onToggle={() => toggle("availability")}>
-        {["In Stock", "Pre-order"].map(s => (
-          <FilterCheckbox
-            key={s}
-            label={s}
-            checked={filters.sizes.includes(s)}
-            onChange={() => toggleArr("sizes", s)}
-          />
-        ))}
+        <FilterCheckbox
+          label="In Stock"
+          checked={filters.inStock}
+          onChange={() => onChange({ ...filters, inStock: !filters.inStock })}
+        />
+        <FilterCheckbox
+          label="On Sale"
+          checked={filters.hasDiscount}
+          onChange={() => onChange({ ...filters, hasDiscount: !filters.hasDiscount })}
+        />
       </FilterSection>
 
-      {/* Rating */}
       <FilterSection title="Rating" open={sections.rating} onToggle={() => toggle("rating")} last>
-        {[4, 3, 2, 1].map(r => (
+        {[4, 3, 2, 1].map((r) => (
           <button
             key={r}
             type="button"
-            onClick={() => toggleArr("ratings", String(r))}
-            className="flex w-full items-center gap-2 border-0 bg-transparent cursor-pointer py-1.5 text-left"
+            onClick={() =>
+              onChange({ ...filters, minRating: filters.minRating === r ? null : r })
+            }
+            className="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent py-1.5 text-left"
           >
-            <div
-              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-all ${
-                filters.ratings.includes(String(r))
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-gray-300 bg-white"
-              }`}
-            >
-              {filters.ratings.includes(String(r)) && <Icons.Check />}
-            </div>
+            <FilterCheckBoxVisual checked={filters.minRating === r} />
             <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map(i => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill={i <= r ? "#F59E0B" : "#D1D5DB"}>
                   <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
                 </svg>
@@ -148,59 +199,89 @@ export default function FilterSidebar({ filters, onChange, onClear, resultCount,
         ))}
       </FilterSection>
 
-      {/* Apply Filters Button */}
-      <div className="px-4 py-4 border-t border-gray-100">
-        <button
-          type="button"
-          className="w-full rounded-lg border border-blue-600 py-2.5 text-[13px] font-semibold text-blue-600 bg-white cursor-pointer hover:bg-blue-50 transition-colors"
-        >
-          Apply Filters
-        </button>
-      </div>
+      {!mobile ? (
+        <div className="border-t border-gray-100 px-4 py-4">
+          <button
+            type="button"
+            onClick={onApply}
+            className="w-full cursor-pointer rounded-lg border py-2.5 text-[13px] font-semibold transition-colors hover:bg-[#0a255d]/5"
+            style={{ borderColor: BRAND, color: BRAND }}
+          >
+            Apply Filters
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }
 
-function FilterSection({ title, open, onToggle, children, last }: { title: string; open: boolean; onToggle: () => void; children: React.ReactNode; last?: boolean }) {
+function FilterCheckBoxVisual({ checked }: { checked: boolean }) {
   return (
-    <div className={`${last ? "" : "border-b border-gray-100"}`}>
+    <div
+      className="flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-all"
+      style={{
+        borderColor: checked ? Colors.base_color : "#d1d5db",
+        background: checked ? Colors.base_color : "#ffffff",
+        color: "#ffffff",
+      }}
+    >
+      {checked ? <Icons.Check /> : null}
+    </div>
+  );
+}
+
+function FilterSection({
+  title,
+  open,
+  onToggle,
+  children,
+  last,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  last?: boolean;
+}) {
+  return (
+    <div className={last ? "" : "border-b border-gray-100"}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between border-0 bg-transparent cursor-pointer px-4 py-3"
+        className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-4 py-3"
       >
         <span className="text-[13px] font-semibold text-gray-900">{title}</span>
         <span className={`flex text-gray-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
           <Icons.ChevronDown />
         </span>
       </button>
-      {open && (
-        <div className="px-4 pb-3">
-          {children}
-        </div>
-      )}
+      {open ? <div className="px-4 pb-3">{children}</div> : null}
     </div>
   );
 }
 
-function FilterCheckbox({ label, count, checked, onChange }: { label: string; count?: number; checked: boolean; onChange: () => void }) {
+function FilterCheckbox({
+  label,
+  count,
+  checked,
+  onChange,
+}: {
+  label: string;
+  count?: number;
+  checked: boolean;
+  onChange: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onChange}
-      className="flex w-full items-center gap-2 border-0 bg-transparent cursor-pointer py-1.5 text-left"
+      className="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent py-1.5 text-left"
     >
-      <div
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-all ${
-          checked ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300 bg-white"
-        }`}
-      >
-        {checked && <Icons.Check />}
-      </div>
+      <FilterCheckBoxVisual checked={checked} />
       <span className="flex-1 text-[12px] leading-snug text-gray-700">{label}</span>
-      {count !== undefined && count > 0 && (
+      {count !== undefined && count > 0 ? (
         <span className="text-[11px] text-gray-400">({count})</span>
-      )}
+      ) : null}
     </button>
   );
 }

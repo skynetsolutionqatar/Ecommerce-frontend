@@ -3,28 +3,25 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FilterSidebar from "./FilterSidebar";
-import StoreProductCard from "./store/StoreProductCard";
+import StoreProductCard, { type ShopViewMode } from "./store/StoreProductCard";
 import * as Icons from "./Icons";
-import { tw } from "@/lib/theme";
+import { tw, Colors } from "@/lib/theme";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useShopFilterMeta } from "@/hooks/useShopFilterMeta";
 import { PRODUCT_STATUS } from "@/lib/Constant";
+import {
+  createDefaultFilters,
+  filtersToProductQuery,
+  FALLBACK_PRICE_MAX,
+} from "@/lib/store/shop-filters";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
 import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 import type { FilterState, SortOption, WishlistItem, Product } from "@/lib/types";
 import type { ApiProduct } from "@/types/product.types";
 
 const ITEMS_PER_PAGE = 12;
-
-const DEFAULT_FILTERS: FilterState = {
-  categories: [],
-  priceRange: [0, 999999],
-  ratings: [],
-  colors: [],
-  sizes: [],
-  tags: [],
-};
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "relevance", label: "Relevance" },
@@ -37,10 +34,12 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 interface ShopPageProps {
   onAddToCart: (product: Product, color: string, size: string) => void;
+  onBuyNow: (product: Product, color: string, size: string) => void;
   onWishlistToggle: (item: WishlistItem) => void;
   isWishlisted: (productId: string) => boolean;
   onProductClick: (product: Product) => void;
   initialCategory?: string;
+  initialSearch?: string;
   onHomeClick?: () => void;
 }
 
@@ -63,47 +62,76 @@ function sortToQuery(sort: SortOption) {
 
 export default function ShopPage({
   onAddToCart,
+  onBuyNow,
   onWishlistToggle,
   isWishlisted,
   onProductClick,
   initialCategory,
+  initialSearch,
   onHomeClick,
 }: ShopPageProps) {
-  const [filters, setFilters] = useState<FilterState>({
-    ...DEFAULT_FILTERS,
-    categories: initialCategory ? [initialCategory] : [],
-  });
+  const { priceMax, brands } = useShopFilterMeta();
+  const [filters, setFilters] = useState<FilterState>(() => createDefaultFilters());
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>(() => createDefaultFilters());
   const [sort, setSort] = useState<SortOption>("relevance");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
+  const [viewMode, setViewMode] = useState<ShopViewMode>("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(search);
+  const debouncedPriceRange = useDebounce(appliedFilters.priceRange, 400);
 
   const { data: categoryData } = useCategories(STORE_CATEGORY_QUERY);
   const categories = categoryData?.categories ?? [];
   const sortQuery = sortToQuery(sort);
-  const selectedCategoryId = filters.categories[0];
+
+  const filterQuery = useMemo(
+    () =>
+      filtersToProductQuery(
+        { ...appliedFilters, priceRange: debouncedPriceRange },
+        priceMax
+      ),
+    [appliedFilters, debouncedPriceRange, priceMax]
+  );
 
   const { data, isLoading, isError } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
-    categoryId: selectedCategoryId || undefined,
     search: debouncedSearch || undefined,
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     ...sortQuery,
+    ...filterQuery,
   });
 
   const products = data?.products ?? [];
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages ?? 1;
   const total = pagination?.total ?? products.length;
+  const selectedCategoryId = appliedFilters.categories[0];
+
+  useEffect(() => {
+    const syncMax = (f: FilterState) => {
+      if (f.priceRange[1] === FALLBACK_PRICE_MAX || f.priceRange[1] > priceMax) {
+        return { ...f, priceRange: [f.priceRange[0], priceMax] as [number, number] };
+      }
+      return f;
+    };
+    setFilters(syncMax);
+    setAppliedFilters(syncMax);
+  }, [priceMax]);
 
   useEffect(() => {
     if (initialCategory) {
-      setFilters((f) => ({ ...f, categories: [initialCategory] }));
+      const next = { ...createDefaultFilters(priceMax), categories: [initialCategory] };
+      setFilters(next);
+      setAppliedFilters(next);
       setCurrentPage(1);
     }
-  }, [initialCategory]);
+  }, [initialCategory, priceMax]);
+
+  useEffect(() => {
+    if (initialSearch != null) setSearch(initialSearch);
+  }, [initialSearch]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
@@ -111,9 +139,42 @@ export default function ShopPage({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, sort, debouncedSearch]);
+  }, [appliedFilters, debouncedPriceRange, sort, debouncedSearch]);
 
-  const clearFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
+  const applyFilters = useCallback(() => {
+    setAppliedFilters(filters);
+    setCurrentPage(1);
+  }, [filters]);
+
+  const clearFilters = useCallback(() => {
+    const defaults = createDefaultFilters(priceMax);
+    setFilters(defaults);
+    setAppliedFilters(defaults);
+  }, [priceMax]);
+
+  const handleFilterChange = useCallback(
+    (next: FilterState) => {
+      setFilters(next);
+      const instantKeys: (keyof FilterState)[] = [
+        "categories",
+        "brands",
+        "inStock",
+        "hasDiscount",
+        "minRating",
+      ];
+      const isInstant = instantKeys.some((key) => {
+        if (key === "categories" || key === "brands") {
+          return JSON.stringify(next[key]) !== JSON.stringify(appliedFilters[key]);
+        }
+        return next[key] !== appliedFilters[key];
+      });
+      if (isInstant) {
+        setAppliedFilters(next);
+        setCurrentPage(1);
+      }
+    },
+    [appliedFilters]
+  );
 
   const handleProductClick = (apiProduct: ApiProduct) => {
     onProductClick(apiProductToStoreProduct(apiProduct));
@@ -122,6 +183,11 @@ export default function ShopPage({
   const handleAddToCart = (apiProduct: ApiProduct) => {
     const mapped = apiProductToStoreProduct(apiProduct);
     onAddToCart(mapped, mapped.colors[0]?.name ?? "", mapped.sizes[0] ?? "");
+  };
+
+  const handleBuyNow = (apiProduct: ApiProduct) => {
+    const mapped = apiProductToStoreProduct(apiProduct);
+    onBuyNow(mapped, mapped.colors[0]?.name ?? "", mapped.sizes[0] ?? "");
   };
 
   const handleWishlistToggle = (apiProduct: ApiProduct) => {
@@ -169,10 +235,14 @@ export default function ShopPage({
             <div className="overflow-hidden rounded-lg bg-white" style={{ border: "1px solid #e5e7eb" }}>
               <FilterSidebar
                 filters={filters}
-                onChange={setFilters}
+                onChange={handleFilterChange}
                 onClear={clearFilters}
+                onApply={applyFilters}
                 resultCount={total}
+                isLoading={isLoading}
+                priceMax={priceMax}
                 categories={categoryOptions}
+                brands={brands}
               />
             </div>
           </aside>
@@ -187,6 +257,31 @@ export default function ShopPage({
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
+                <div className="flex overflow-hidden rounded-lg border border-gray-200 bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    aria-label="Grid view"
+                    className={`flex h-9 w-9 items-center justify-center border-0 cursor-pointer transition ${
+                      viewMode === "grid" ? "text-white" : "bg-white text-gray-500 hover:text-gray-800"
+                    }`}
+                    style={viewMode === "grid" ? { background: Colors.base_color } : undefined}
+                  >
+                    <Icons.Grid />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    aria-label="List view"
+                    className={`flex h-9 w-9 items-center justify-center border-0 cursor-pointer transition ${
+                      viewMode === "list" ? "text-white" : "bg-white text-gray-500 hover:text-gray-800"
+                    }`}
+                    style={viewMode === "list" ? { background: Colors.base_color } : undefined}
+                  >
+                    <Icons.List />
+                  </button>
+                </div>
+
                 <input
                   type="search"
                   value={search}
@@ -218,7 +313,8 @@ export default function ShopPage({
                 <motion.button
                   type="button"
                   onClick={() => setMobileFilterOpen(true)}
-                  className="flex h-9 items-center gap-1.5 rounded-lg bg-gray-900 px-4 text-[12px] font-bold text-white lg:hidden"
+                  className="flex h-9 items-center gap-1.5 rounded-lg px-4 text-[12px] font-bold text-white lg:hidden"
+                  style={{ background: Colors.base_color }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Icons.SlidersH />
@@ -258,14 +354,22 @@ export default function ShopPage({
                 </motion.button>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4"
+                    : "flex flex-col gap-3"
+                }
+              >
                 {products.map((product, index) => (
                   <StoreProductCard
                     key={product._id}
                     product={product}
                     index={index}
+                    variant={viewMode}
                     onClick={handleProductClick}
                     onAddToCart={handleAddToCart}
+                    onBuyNow={handleBuyNow}
                     onWishlistToggle={handleWishlistToggle}
                     isWishlisted={isWishlisted(product._id)}
                   />
@@ -292,9 +396,12 @@ export default function ShopPage({
                       onClick={() => setCurrentPage(pageNum)}
                       className={`flex h-9 w-9 items-center justify-center rounded-lg border text-[12px] font-medium cursor-pointer ${
                         currentPage === pageNum
-                          ? "border-blue-600 bg-blue-600 text-white"
+                          ? "border-transparent text-white"
                           : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                       }`}
+                      style={
+                        currentPage === pageNum ? { background: Colors.base_color } : undefined
+                      }
                     >
                       {pageNum}
                     </button>
@@ -340,19 +447,29 @@ export default function ShopPage({
               <div className="flex-1 overflow-y-auto">
                 <FilterSidebar
                   filters={filters}
-                  onChange={setFilters}
+                  onChange={handleFilterChange}
                   onClear={clearFilters}
+                  onApply={() => {
+                    applyFilters();
+                    setMobileFilterOpen(false);
+                  }}
                   resultCount={total}
+                  isLoading={isLoading}
+                  priceMax={priceMax}
                   categories={categoryOptions}
+                  brands={brands}
                   mobile
                 />
               </div>
               <div className="border-t border-gray-100 px-5 py-4">
                 <button
                   type="button"
-                  onClick={() => setMobileFilterOpen(false)}
+                  onClick={() => {
+                    applyFilters();
+                    setMobileFilterOpen(false);
+                  }}
                   className="w-full rounded-xl py-3.5 text-[14px] font-bold text-white"
-                  style={{ background: "#1d4ed8" }}
+                  style={{ background: Colors.base_color }}
                 >
                   Show {total} Results
                 </button>

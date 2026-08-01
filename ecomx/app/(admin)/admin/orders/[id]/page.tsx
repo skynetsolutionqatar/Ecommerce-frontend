@@ -1,11 +1,16 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import BackPanel from "@/components/admin/utils/BackPanel";
 import ViewSection from "@/components/admin/utils/ViewSection";
 import ViewField from "@/components/admin/utils/ViewField";
-import { ORDER_STATUS_LIST } from "@/lib/Constant";
+import {
+  allowedTransitions,
+  ORDER_STATUS_LABEL,
+  ORDER_STATUS_LIST,
+  OrderStatus,
+} from "@/lib/Constant";
 import { useOrder, useOrderMutations } from "@/hooks/useOrders";
 import { formatDateTime, formatPrice } from "@/lib/utils";
 import { orderAddress, orderTotal } from "@/types/order.types";
@@ -42,6 +47,11 @@ export default function AdminOrderDetailPage({
     setTrackingNumber("");
   };
 
+  const toUpdateStatus = useMemo<OrderStatus[]>(() => {
+    if (!order?.status) return [];
+    return allowedTransitions[order.status];
+  }, [order?.status]);
+
   if (isLoading) {
     return (
       <BackPanel>
@@ -64,6 +74,12 @@ export default function AdminOrderDetailPage({
 
   const address = orderAddress(order);
 
+  // const toUpdateStatus = useMemo(() => {
+  //   if (!order?.status) return [];
+
+  //   return allowedTransitions[order?.status as OrderStatus] || [];
+  // }, [order?.status]);
+
   return (
     <BackPanel tabs={TABS}>
       <div className="space-y-6">
@@ -72,31 +88,70 @@ export default function AdminOrderDetailPage({
             <ViewField label="Order Number" value={order.orderNumber} />
             <ViewField
               label="Customer"
-              value={typeof order.customerId === "object" ? order.customerId.name : "—"}
+              value={
+                typeof order.customerId === "object"
+                  ? order.customerId.name
+                  : "—"
+              }
             />
             <ViewField label="Subtotal" value={formatPrice(order.subtotal)} />
-            <ViewField label="Shipping" value={formatPrice(order.shippingCharge ?? 0)} />
-            <ViewField label="Discount" value={formatPrice(order.discountAmount ?? 0)} />
+            <ViewField
+              label="Shipping"
+              value={formatPrice(order.shippingCharge ?? 0)}
+            />
+            <ViewField
+              label="Discount"
+              value={formatPrice(order.discountAmount ?? 0)}
+            />
             <ViewField label="Total" value={formatPrice(orderTotal(order))} />
-            <ViewField label="Status" value={order.status} badge badgeColor="blue" />
-            <ViewField label="Payment status" value={order.paymentStatus ?? "—"} />
+            <ViewField
+              label="Status"
+              value={order.status}
+              badge
+              badgeColor="blue"
+            />
+            <ViewField
+              label="Payment status"
+              value={order.paymentStatus ?? "—"}
+            />
             <ViewField label="Date" value={formatDateTime(order.createdAt)} />
-            <ViewField label="Payment method" value={order.paymentMethod ?? "—"} />
+            <ViewField
+              label="Payment method"
+              value={order.paymentMethod ?? "—"}
+            />
             <ViewField label="Tracking #" value={order.trackingNumber ?? "—"} />
             <ViewField label="Coupon" value={order.couponCode ?? "—"} />
           </div>
 
           <div className="mt-6 rounded-lg border bg-gray-50 p-4">
-            <h3 className="mb-3 text-sm font-semibold text-gray-700">Update Status</h3>
+            <h3 className="mb-3 text-sm font-semibold text-gray-700">
+              Update Status
+            </h3>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <select
+              {/* <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
                 className="h-10 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">Select status</option>
                 {ORDER_STATUS_LIST.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select> */}
+
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="h-10 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="">Select status</option>
+
+                {toUpdateStatus.map((status: any) => (
+                  <option key={status} value={status}>
+                    {ORDER_STATUS_LABEL[status as OrderStatus]}
+                  </option>
                 ))}
               </select>
               <input
@@ -128,7 +183,9 @@ export default function AdminOrderDetailPage({
             {order.items.map((item, i) => (
               <div key={i} className="flex justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {item.name}
+                  </p>
                   <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                 </div>
                 <span className="font-mono text-sm font-semibold">

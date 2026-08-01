@@ -76,7 +76,7 @@ export default function HomeScrollProductCard({
           onClick(product);
         }
       }}
-      className="group flex shrink-0 cursor-pointer flex-col text-left"
+      className="group relative flex shrink-0 cursor-pointer flex-col text-left transition-[box-shadow,border-color] duration-200 hover:z-20"
       style={{
         width: "clamp(145px, 21vw, 188px)",
         background: "#fff",
@@ -89,11 +89,10 @@ export default function HomeScrollProductCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.055, duration: 0.35 }}
       whileHover={{
-        y: -5,
-        boxShadow: "0 16px 40px rgba(17,24,39,0.14)",
+        boxShadow: "0 8px 24px rgba(17,24,39,0.12)",
         borderColor: "#9CA3AF",
       }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.99 }}
     >
       <div
         className="relative mx-2 mt-2 flex items-center justify-center overflow-hidden"
@@ -104,17 +103,13 @@ export default function HomeScrollProductCard({
         }}
       >
         {image ? (
-          <motion.div
-            className="flex h-full w-full items-center justify-center p-3"
-            whileHover={{ scale: 1.08 }}
-            transition={{ duration: 0.35 }}
-          >
+          <div className="flex h-full w-full items-center justify-center p-3 transition-transform duration-300 group-hover:scale-[1.04]">
             <StoreImage
               src={image}
               alt={product.name}
               className="h-full w-full object-contain drop-shadow-sm"
             />
-          </motion.div>
+          </div>
         ) : (
           <span className="text-[10px] text-gray-400">No image</span>
         )}

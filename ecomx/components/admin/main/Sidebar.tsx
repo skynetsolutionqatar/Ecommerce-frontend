@@ -572,6 +572,7 @@ import { usePathname } from "next/navigation";
 
 import { adminSections, type AdminMenuItem } from "../utils/SideSection";
 import { adminType } from "@/lib/admin/typography";
+import { ADMIN_ROUTES } from "@/lib/config";
 import { colors } from "../utils/Colors";
 
 export const skynetClient = {
@@ -652,24 +653,9 @@ export default function Sidebar() {
         } flex items-center justify-between px-4 py-3 transition-all duration-500`}
       >
         {!collapsed && (
-          <h1 className={`flex items-center gap-2 ${adminType.sidebarBrand}`}>
+          <Link href={ADMIN_ROUTES.dashboard} className={`flex items-center gap-2 ${adminType.sidebarBrand}`}>
             <span className="text-emerald-700 dark:text-emerald-400">SKYNET™</span>
-          </h1>
-          // <motion.button
-          //   type="button"
-          //   onClick={() => window.open(skynetClient.siteUrl, "_blank")}
-          //   className="flex shrink-0 cursor-pointer flex-col items-start border-0 bg-transparent p-0"
-          //   whileHover={{ scale: 1.03 }}
-          //   whileTap={{ scale: 0.97 }}
-          // >
-          //   <span className="font-display text-[20px] font-extrabold leading-none tracking-tight text-gray-900 sm:text-[22px]">
-          //     {skynetClient.name.split(" ")[0]}
-          //     <span className="text-[11px] font-black text-gray-400">™</span>
-          //   </span>
-          //   <span className="hidden font-eyebrow text-[7px] tracking-[0.22em] text-gray-400 sm:block">
-          //     {skynetClient.tagline}
-          //   </span>
-          // </motion.button>
+          </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

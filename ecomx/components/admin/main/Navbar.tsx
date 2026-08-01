@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Bell,
-  Edit3,
-  LogOut,
-  RefreshCcw,
-  User,
-} from "lucide-react";
+import { Bell, Edit3, LogOut, RefreshCcw, Store, User } from "lucide-react";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
 import LiveClock from "@/components/admin/main/LiveClock";
@@ -14,6 +8,7 @@ import { adminSections } from "@/components/admin/utils/SideSection";
 import { adminType } from "@/lib/admin/typography";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -62,8 +57,12 @@ export default function Navbar() {
           {open && (
             <div className="absolute right-0 top-12 z-[110] w-56 rounded-xl border border-border bg-card shadow-lg">
               <div className="border-b border-border px-4 py-3">
-                <p className={adminType.navUserName}>{user?.name ?? "Admin User"}</p>
-                <p className={adminType.navUserEmail}>{user?.email ?? "admin@skynet.com"}</p>
+                <p className={adminType.navUserName}>
+                  {user?.name ?? "Admin User"}
+                </p>
+                <p className={adminType.navUserEmail}>
+                  {user?.email ?? "admin@skynet.com"}
+                </p>
               </div>
 
               <div className="flex flex-col p-2">
@@ -85,6 +84,14 @@ export default function Navbar() {
                 >
                   <RefreshCcw size={16} /> Switch User
                 </button>
+
+                <Link
+                  href="/"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${adminType.navMenuItem}`}
+                >
+                  <Store className="h-4 w-4 opacity-60" />
+                  Go to Store
+                </Link>
                 <button
                   type="button"
                   onClick={logout}

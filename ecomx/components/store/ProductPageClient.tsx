@@ -8,12 +8,13 @@ interface ProductPageClientProps {
 }
 
 export default function ProductPageClient({ slug }: ProductPageClientProps) {
-  const { addToCart, toggleWishlist, isWishlisted, openProduct } = useStore();
+  const { addToCart, buyNow, toggleWishlist, isWishlisted, openProduct } = useStore();
 
   return (
     <ProductRouteView
       slug={slug}
       onAddToCart={addToCart}
+      onBuyNow={buyNow}
       onWishlistToggle={toggleWishlist}
       isWishlisted={isWishlisted}
       onProductClick={openProduct}

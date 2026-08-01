@@ -16,11 +16,12 @@ import type {
 export const PRODUCTS_KEY = "products";
 export const PRODUCT_KEY = "product";
 
-export function useProducts(params?: ProductQueryParams) {
+export function useProducts(params?: ProductQueryParams, enabled = true) {
   return useQuery({
     queryKey: [PRODUCTS_KEY, params],
     queryFn: () => fetchProducts(params),
     staleTime: 60_000,
+    enabled,
     placeholderData: (prev) => prev,
   });
 }

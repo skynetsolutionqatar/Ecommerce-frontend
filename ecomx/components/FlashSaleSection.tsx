@@ -121,19 +121,20 @@ export default function FlashSaleSection({
         </div>
       ) : (
         <div
-          className={`flex gap-2 overflow-x-auto scroll-smooth bg-gray-50 px-4 py-3 sm:gap-3 sm:px-5 md:px-6 sm:py-4 ${tw.scrollbarHide}`}
+          className={`flex items-stretch gap-3 overflow-x-auto scroll-smooth bg-gray-50 px-4 py-3 sm:gap-4 sm:px-5 md:px-6 sm:py-4 ${tw.scrollbarHide}`}
         >
           {products.map((product, i) => (
-            <HomeScrollProductCard
-              key={product._id}
-              product={product}
-              index={i}
-              imageHeight={120}
-              showBrand={false}
-              onClick={onProductClick}
-              onWishlistToggle={onWishlistToggle}
-              isWishlisted={isWishlisted?.(product._id)}
-            />
+            <div key={product._id} className="relative shrink-0">
+              <HomeScrollProductCard
+                product={product}
+                index={i}
+                imageHeight={120}
+                showBrand={false}
+                onClick={onProductClick}
+                onWishlistToggle={onWishlistToggle}
+                isWishlisted={isWishlisted?.(product._id)}
+              />
+            </div>
           ))}
         </div>
       )}

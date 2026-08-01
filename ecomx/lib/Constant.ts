@@ -56,6 +56,16 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   [ORDER_STATUS.REFUNDED]: "Refunded",
 };
 
+export const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["processing", "cancelled"],
+  processing: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: ["refunded"],
+  cancelled: [],
+  refunded: [],
+};
+
 /** Review moderation statuses */
 export const REVIEW_STATUS = {
   PENDING: "pending",
@@ -131,6 +141,7 @@ export const STORAGE_KEYS = {
   ACCESS_TOKEN: "skynet_access_token",
   REFRESH_TOKEN: "skynet_refresh_token",
   GUEST_WISHLIST: "skynet_guest_wishlist",
+  GUEST_CART: "skynet_guest_cart",
 } as const;
 
 /** Route prefixes */

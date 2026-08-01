@@ -9,6 +9,8 @@ import Avatar from "./Avatar";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
+import { ADMIN_ROUTES, isAdminRole } from "@/lib/config";
+import { useAuthStore } from "@/store/auth.store";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
@@ -25,7 +27,7 @@ interface HeaderProps {
   onCategorySelect?: (category: ApiCategory) => void;
 }
 
-const NAV_LINKS = [
+const MOBILE_NAV_LINKS = [
   { label: "Products", href: ROUTES.shop },
   { label: "Solutions", href: ROUTES.shop },
   { label: "Deals", href: ROUTES.shop },
@@ -61,6 +63,15 @@ export default function Header({
   const lastScrollY = useRef(0);
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+  const authUser = useAuthStore((s) => s.user);
+
+  const handleLogoClick = () => {
+    if (isAdminRole(authUser?.role)) {
+      goTo(ADMIN_ROUTES.dashboard);
+    } else {
+      goTo(ROUTES.home);
+    }
+  };
 
   const searchHints = useMemo(
     () =>
@@ -179,7 +190,7 @@ export default function Header({
           <div className="mx-auto flex max-w-[1440px] items-center gap-3 py-1.5 px-3 sm:px-5 md:px-8 md:gap-4 lg:px-[50px]">
             <motion.button
               type="button"
-              onClick={() => goTo(ROUTES.home)}
+              onClick={handleLogoClick}
               className="flex shrink-0 cursor-pointer flex-col items-start border-0 bg-transparent p-0"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -290,6 +301,18 @@ export default function Header({
 
             {/* Desktop Actions */}
             <div className="flex shrink-0 items-center gap-1">
+              {user ? (
+                <motion.button
+                  type="button"
+                  onClick={() => goTo(ROUTES.orders)}
+                  className="hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 md:flex hover:bg-gray-50 transition-all"
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Icons.Bag />
+                  <span>Orders</span>
+                </motion.button>
+              ) : null}
+
               <motion.button
                 type="button"
                 onClick={onLoginOpen}
@@ -529,7 +552,7 @@ export default function Header({
                 >
                   NAVIGATION
                 </p>
-                {NAV_LINKS.map((item) => (
+                {MOBILE_NAV_LINKS.map((item) => (
                   <motion.button
                     key={item.label}
                     type="button"

@@ -9,7 +9,8 @@ import type { Product, WishlistItem } from "@/lib/types";
 
 interface ProductRouteViewProps {
   slug: string;
-  onAddToCart: (product: Product, color: string, size: string) => void;
+  onAddToCart: (product: Product, color: string, size: string, qty?: number) => void;
+  onBuyNow: (product: Product, color: string, size: string, qty?: number) => Promise<boolean>;
   onWishlistToggle: (item: WishlistItem) => void;
   isWishlisted: (productId: string) => boolean;
   onProductClick: (product: Product) => void;
@@ -18,6 +19,7 @@ interface ProductRouteViewProps {
 export default function ProductRouteView({
   slug,
   onAddToCart,
+  onBuyNow,
   onWishlistToggle,
   isWishlisted,
   onProductClick,
@@ -54,6 +56,7 @@ export default function ProductRouteView({
       key={product.id}
       product={product}
       onAddToCart={onAddToCart}
+      onBuyNow={onBuyNow}
       onWishlistToggle={onWishlistToggle}
       isWishlisted={isWishlisted}
       onBack={() => router.back()}

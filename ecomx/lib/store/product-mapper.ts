@@ -35,10 +35,13 @@ export function apiProductToStoreProduct(product: ApiProduct): Product {
     isBestSeller: product.isBestSeller ?? false,
     rating: product.averageRating ?? 0,
     reviews: product.reviewCount ?? 0,
-    colors: (product.colors ?? []).map((c) => ({
-      name: c.name ?? "Default",
-      hex: c.hex ?? "#D1D5DB",
-    })),
+    colors:
+      (product.colors ?? []).length > 0
+        ? (product.colors ?? []).map((c) => ({
+            name: c.name ?? "Default",
+            hex: c.hex ?? "#D1D5DB",
+          }))
+        : [{ name: "Default", hex: "#D1D5DB" }],
     sizes: product.displaySizes ?? [],
     badge: product.badge ?? "",
     badgeColor: product.badgeColor ?? "#111827",

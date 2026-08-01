@@ -9,7 +9,8 @@ import { Colors, tw } from "@/lib/theme";
 
 interface ProductPageProps {
   product: Product;
-  onAddToCart: (product: Product, color: string, size: string) => void;
+  onAddToCart: (product: Product, color: string, size: string, qty?: number) => void;
+  onBuyNow: (product: Product, color: string, size: string, qty?: number) => Promise<boolean>;
   onWishlistToggle: (item: WishlistItem) => void;
   isWishlisted: (productId: string) => boolean;
   onBack: () => void;
@@ -42,6 +43,7 @@ type Tab = (typeof TABS)[number];
 export default function ProductPage({
   product,
   onAddToCart,
+  onBuyNow,
   onWishlistToggle,
   isWishlisted,
   onBack,
@@ -52,6 +54,8 @@ export default function ProductPage({
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState("");
   const [pincode, setPincode] = useState("");
   const [pincodeChecked, setPincodeChecked] = useState(false);
   const [tab, setTab] = useState<Tab>("Description");
@@ -65,6 +69,11 @@ export default function ProductPage({
   );
   const relatedProducts = similar.length >= 3 ? similar : fallbackSimilar;
 
+  const maxQty =
+    product.stock != null && product.stock > 0 ? product.stock : Number.POSITIVE_INFINITY;
+  const outOfStock =
+    product.stock != null ? product.stock <= 0 : false;
+
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -75,7 +84,14 @@ export default function ProductPage({
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     setImgIdx(0);
     setThumbOffset(0);
+    setQty(1);
   }, [product.id]);
+
+  useEffect(() => {
+    if (Number.isFinite(maxQty) && qty > maxQty) {
+      setQty(Math.max(1, maxQty));
+    }
+  }, [maxQty, qty]);
 
   const THUMB_VISIBLE = 4;
 
@@ -103,9 +119,31 @@ export default function ProductPage({
     selectImage(Math.min(product.images.length - 1, imgIdx + 1));
 
   const handleAdd = () => {
-    onAddToCart(product, product.colors[0]?.name ?? "Default", selectedSize);
+    if (outOfStock) return;
+    onAddToCart(product, product.colors[0]?.name ?? "Default", selectedSize, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = async () => {
+    if (outOfStock || buying) return;
+
+    setBuyError("");
+    setBuying(true);
+
+    try {
+      const ok = await onBuyNow(
+        product,
+        product.colors[0]?.name ?? "Default",
+        selectedSize,
+        qty
+      );
+      if (!ok) {
+        setBuyError("Unable to proceed. Please sign in or check available stock.");
+      }
+    } finally {
+      setBuying(false);
+    }
   };
 
   const crumbs = [
@@ -448,7 +486,8 @@ export default function ProductPage({
                   <button
                     type="button"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="flex h-8 w-8 items-center justify-center border-0 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 text-lg font-light"
+                    disabled={qty <= 1}
+                    className="flex h-8 w-8 items-center justify-center border-0 bg-white text-lg font-light text-gray-700 cursor-pointer hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     −
                   </button>
@@ -457,8 +496,9 @@ export default function ProductPage({
                   </span>
                   <button
                     type="button"
-                    onClick={() => setQty((q) => q + 1)}
-                    className="flex h-8 w-8 items-center justify-center border-0 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 text-lg font-light"
+                    onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                    disabled={Number.isFinite(maxQty) && qty >= maxQty}
+                    className="flex h-8 w-8 items-center justify-center border-0 bg-white text-lg font-light text-gray-700 cursor-pointer hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     +
                   </button>
@@ -470,6 +510,9 @@ export default function ProductPage({
                       : "Out of Stock"}
                   </span>
                 )}
+                {Number.isFinite(maxQty) && qty >= maxQty && product.stock && product.stock > 0 ? (
+                  <span className="text-[11px] font-medium text-orange-600">Max available</span>
+                ) : null}
               </div>
 
               {/* CTA Buttons — match screenshot: blue Add to Cart + dark Buy Now */}
@@ -477,7 +520,8 @@ export default function ProductPage({
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-[14px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90"
+                  disabled={outOfStock}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border-0 py-3 text-[14px] font-bold text-white cursor-pointer transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ background: `${Colors.base_color}` }}
                 >
                   <svg
@@ -498,13 +542,17 @@ export default function ProductPage({
                 </button>
                 <button
                   type="button"
-                  onClick={handleAdd}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg py-3 text-[14px] font-bold text-white border-0 cursor-pointer transition-colors hover:bg-gray-800"
+                  onClick={() => void handleBuyNow()}
+                  disabled={outOfStock || buying}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border-0 py-3 text-[14px] font-bold text-white cursor-pointer transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ background: "#111827" }}
                 >
-                  ⚡ Buy Now
+                  {buying ? "Processing..." : "⚡ Buy Now"}
                 </button>
               </div>
+              {buyError ? (
+                <p className="text-[12px] font-medium text-red-600">{buyError}</p>
+              ) : null}
 
               {/* Delivery checker */}
               <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">

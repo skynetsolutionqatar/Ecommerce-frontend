@@ -81,7 +81,10 @@ export default function CartDrawer({
               </button>
             </div>
           ) : (
-            cart.map((item) => (
+            cart.map((item) => {
+              const atMaxStock = item.stock != null && item.qty >= item.stock;
+
+              return (
               <div key={item.id} className="mb-5 flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -99,23 +102,32 @@ export default function CartDrawer({
                     </div>
                   ) : null}
                   <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center overflow-hidden rounded-lg border border-gray-200">
-                      <button
-                        type="button"
-                        onClick={() => onUpdate(item.id, item.qty - 1)}
-                        className="flex h-8 w-8 items-center justify-center border-0 bg-white text-gray-500 cursor-pointer hover:text-[#0a255d]"
-                      >
-                        <Icons.Minus />
-                      </button>
-                      <span className="w-7 text-center text-sm font-semibold text-gray-900">{item.qty}</span>
-                      <button
-                        type="button"
-                        onClick={() => onUpdate(item.id, item.qty + 1)}
-                        className="flex h-8 w-8 items-center justify-center border-0 bg-white cursor-pointer hover:text-[#0a255d]"
-                        style={{ color: Colors.base_color }}
-                      >
-                        <Icons.Plus />
-                      </button>
+                    <div>
+                      <div className="flex items-center overflow-hidden rounded-lg border border-gray-200">
+                        <button
+                          type="button"
+                          onClick={() => onUpdate(item.id, item.qty - 1)}
+                          className="flex h-8 w-8 items-center justify-center border-0 bg-white text-gray-500 cursor-pointer hover:text-[#0a255d]"
+                        >
+                          <Icons.Minus />
+                        </button>
+                        <span className="w-7 text-center text-sm font-semibold text-gray-900">{item.qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => onUpdate(item.id, item.qty + 1)}
+                          disabled={atMaxStock}
+                          className="flex h-8 w-8 items-center justify-center border-0 bg-white cursor-pointer hover:text-[#0a255d] disabled:cursor-not-allowed disabled:opacity-40"
+                          style={{ color: atMaxStock ? undefined : Colors.base_color }}
+                          aria-label={atMaxStock ? "Maximum stock reached" : "Increase quantity"}
+                        >
+                          <Icons.Plus />
+                        </button>
+                      </div>
+                      {atMaxStock ? (
+                        <p className="mt-1 text-[11px] font-medium text-orange-600">
+                          Only {item.stock} available in stock
+                        </p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm font-bold text-gray-900">
@@ -133,7 +145,8 @@ export default function CartDrawer({
                   </div>
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </div>
 

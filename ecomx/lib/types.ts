@@ -21,13 +21,19 @@ export interface Review {
 export interface FilterState {
   categories: string[];
   priceRange: [number, number];
-  ratings: string[];
-  colors: string[];
-  sizes: string[];
-  tags: string[];
+  minRating: number | null;
+  brands: string[];
+  inStock: boolean;
+  hasDiscount: boolean;
 }
 
-export type SortOption = "relevance" | "price-asc" | "price-desc" | "rating" | "newest" | "bestseller";
+export type SortOption =
+  | "relevance"
+  | "price-asc"
+  | "price-desc"
+  | "rating"
+  | "newest"
+  | "bestseller";
 
 export interface ProductColor {
   name: string;
@@ -56,12 +62,11 @@ export interface Product {
   stock?: number;
   sku?: string;
   brand_logo?: string;
-  discountPct:number
+  discountPct: number;
 }
 
-
 export interface CartItem {
-  id: string; // unique: productId + color + size
+  id: string;
   productId: string;
   name: string;
   brand: string;
@@ -70,6 +75,7 @@ export interface CartItem {
   color?: string;
   size?: string;
   qty: number;
+  stock?: number;
 }
 
 export interface WishlistItem {
@@ -111,8 +117,8 @@ export interface HeroSlide {
   badge?: string;
   accentColor?: string;
   bg?: string;
-  headline:string
-  sub:string
+  headline: string;
+  sub: string;
   // accent2: string;
 }
 
