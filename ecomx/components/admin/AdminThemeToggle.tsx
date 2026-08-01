@@ -18,7 +18,7 @@ export default function AdminThemeToggle() {
       onClick={handleToggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Light mode" : "Dark mode"}
-      className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-[color,background-color,border-color,transform] duration-300 hover:bg-muted hover:text-foreground"
+      className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-[color,background-color,border-color,transform] duration-300 hover:bg-muted/60 hover:text-foreground"
     >
       <span
         key={theme}

@@ -141,7 +141,7 @@ export function AuthAltActions({
 }) {
   return (
     <div className="mt-8 rounded-2xl border border-border/60 bg-bg-soft/60 p-5">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <AuthAltButton href={primary.href} label={primary.label} />
         <AuthAltButton href={secondary.href} label={secondary.label} icon="store" />
       </div>

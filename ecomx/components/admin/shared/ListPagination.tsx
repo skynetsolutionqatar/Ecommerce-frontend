@@ -40,15 +40,15 @@ export default function ListPagination({
   const visiblePages = getVisiblePages(page, pages);
 
   return (
-    <div className="flex items-center justify-between border-t border-border p-4 text-sm">
+    <div className="flex flex-col gap-3 border-t border-border p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
       <p className="text-muted-foreground">
         Showing {showing} of {total}
       </p>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap justify-center gap-2 sm:justify-end">
         <Button
           onClick={() => onPageChange(Math.max(page - 1, 1))}
           disabled={page === 1}
-          className="rounded-md border border-border bg-card px-3 py-1 text-foreground hover:bg-accent disabled:opacity-50"
+          className="rounded-md border border-border bg-card px-3 py-1 text-foreground hover:bg-muted/60 disabled:opacity-50"
         >
           Prev
         </Button>
@@ -56,7 +56,7 @@ export default function ListPagination({
           <>
             <Button
               onClick={() => onPageChange(1)}
-              className={`rounded-md border border-border px-3 py-1 ${page === 1 ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-accent"}`}
+              className={`rounded-md border border-border px-3 py-1 ${page === 1 ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
             >
               1
             </Button>
@@ -67,7 +67,7 @@ export default function ListPagination({
           <Button
             key={pageNumber}
             onClick={() => onPageChange(pageNumber)}
-            className={`rounded-md border border-border px-3 py-1 ${page === pageNumber ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-accent"}`}
+            className={`rounded-md border border-border px-3 py-1 ${page === pageNumber ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
           >
             {pageNumber}
           </Button>
@@ -79,7 +79,7 @@ export default function ListPagination({
             )}
             <Button
               onClick={() => onPageChange(pages)}
-              className={`rounded-md border border-border px-3 py-1 ${page === pages ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-accent"}`}
+              className={`rounded-md border border-border px-3 py-1 ${page === pages ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
             >
               {pages}
             </Button>
@@ -88,7 +88,7 @@ export default function ListPagination({
         <Button
           onClick={() => onPageChange(Math.min(page + 1, pages))}
           disabled={!hasNext || page >= pages}
-          className="rounded-md border border-border bg-card px-3 py-1 text-foreground hover:bg-accent disabled:opacity-50"
+          className="rounded-md border border-border bg-card px-3 py-1 text-foreground hover:bg-muted/60 disabled:opacity-50"
         >
           Next
         </Button>

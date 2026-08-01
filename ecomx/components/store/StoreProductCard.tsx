@@ -46,7 +46,7 @@ function WishlistButton({
       type="button"
       aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
       onClick={onToggle}
-      className="flex h-8 w-8 items-center justify-center rounded-full border-0 bg-white/95 shadow-sm transition hover:scale-105"
+      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-white/95 shadow-sm transition hover:scale-105"
     >
       <svg
         width="15"
@@ -81,7 +81,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onAdd}
-          className="flex-1 rounded-lg py-2 text-[11px] font-bold text-white transition hover:opacity-90"
+          className="flex-1 cursor-pointer rounded-lg py-2 text-[11px] font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed"
           style={{ background: Colors.base_color }}
         >
           Add to Cart
@@ -91,7 +91,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onBuy}
-          className="flex-1 rounded-lg bg-gray-900 py-2 text-[11px] font-bold text-white transition hover:bg-gray-800"
+          className="flex-1 cursor-pointer rounded-lg bg-gray-900 py-2 text-[11px] font-bold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed"
         >
           Buy Now
         </button>
@@ -185,7 +185,7 @@ export default function StoreProductCard({
               </div>
             ) : null}
             {!outOfStock ? (
-              <div className="w-full min-w-[200px] sm:min-w-[240px]" onClick={stop}>
+              <div className="w-full min-w-0 sm:min-w-[200px] md:min-w-[240px]" onClick={stop}>
                 <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} compact />
               </div>
             ) : null}

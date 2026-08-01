@@ -64,7 +64,7 @@ function RecentTransactionsTable({
             {rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-border last:border-0 hover:bg-accent/50"
+                className="border-b border-border last:border-0 hover:bg-muted/60"
               >
                 <td className={`py-3.5 pr-4 font-mono ${adminType.badge} ${adminType.tableCellPrimary}`}>
                   {row.id}

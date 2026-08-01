@@ -28,7 +28,7 @@ function PageHeader({
   const router = useRouter();
 
   return (
-    <div className={`mb-6 flex items-center justify-between ${className}`}>
+    <div className={`mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${className}`}>
       <div className="flex items-start gap-3">
         {showBackButton && (
           <Button variant="outline" size="icon" onClick={() => router.back()}>

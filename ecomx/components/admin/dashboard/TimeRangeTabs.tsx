@@ -12,16 +12,16 @@ interface TimeRangeTabsProps {
 
 function TimeRangeTabs({ ranges, value, onChange }: TimeRangeTabsProps) {
   return (
-    <div className="inline-flex rounded-lg bg-muted p-1">
+    <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1 shadow-sm">
       {ranges.map((range) => (
         <button
           key={range.key}
           type="button"
           onClick={() => onChange(range.key)}
-          className={`rounded-md px-4 py-1.5 ${adminType.tabButton} transition ${
+          className={`rounded-md px-3 py-1.5 sm:px-4 ${adminType.tabButton} transition ${
             value === range.key
-              ? "bg-emerald-900 text-white shadow-sm dark:bg-emerald-700"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-emerald-800 text-white shadow-sm dark:bg-emerald-700"
+              : "bg-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           }`}
         >
           {range.label}

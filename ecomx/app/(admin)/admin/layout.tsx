@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import AdminAuthGuard from "@/components/admin/AdminAuthGuard";
 import AdminThemeProvider from "@/components/admin/AdminThemeProvider";
 import Navbar from "@/components/admin/main/Navbar";
@@ -29,18 +30,37 @@ function AdminToaster() {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <AdminAuthGuard>
       <AdminThemeProvider>
         <div className="flex h-screen w-full overflow-hidden">
-          <div className="h-full shrink-0 border-r border-border bg-card shadow-sm">
+          <div className="hidden h-full shrink-0 border-r border-border bg-card shadow-sm md:block">
             <Sidebar />
           </div>
-          <div className="flex flex-1 flex-col overflow-hidden">
+
+          {mobileNavOpen ? (
+            <>
+              <button
+                type="button"
+                aria-label="Close menu"
+                className="fixed inset-0 z-[150] bg-black/50 md:hidden"
+                onClick={() => setMobileNavOpen(false)}
+              />
+              <div className="fixed inset-y-0 left-0 z-[160] md:hidden">
+                <Sidebar mobile onNavigate={() => setMobileNavOpen(false)} />
+              </div>
+            </>
+          ) : null}
+
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <div className="relative z-[100] h-16 shrink-0 border-b border-border bg-card shadow-sm">
-              <Navbar />
+              <Navbar onMenuClick={() => setMobileNavOpen(true)} />
             </div>
-            <main className="flex-1 overflow-y-auto bg-background p-2">{children}</main>
+            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-2 sm:p-3 md:p-4">
+              {children}
+            </main>
           </div>
         </div>
         <AdminToaster />

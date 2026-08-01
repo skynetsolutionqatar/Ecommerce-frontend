@@ -23,13 +23,13 @@ export const tw = {
   glassPanel:
     "bg-white/65 backdrop-blur-xl border border-white/80 shadow-[0_8px_32px_color-mix(in_srgb,var(--color-primary)_7%,transparent)]",
   btnPrimary:
-    "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 bg-gradient-to-br from-[#0a255dff] to-accent shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_35%,transparent)] hover:from-accent-hover hover:to-primary-light",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 bg-gradient-to-br from-[#0a255dff] to-accent shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_35%,transparent)] hover:from-accent-hover hover:to-primary-light disabled:cursor-not-allowed",
   btnPrimarySm:
-    "inline-flex items-center justify-center gap-1 rounded-full px-3.5 py-1.5 font-label text-[10px] font-semibold text-white whitespace-nowrap transition-all duration-300 bg-gradient-to-br from-[#0a255dff] to-accent max-w-full",
+    "inline-flex cursor-pointer items-center justify-center gap-1 rounded-full px-3.5 py-1.5 font-label text-[10px] font-semibold text-white whitespace-nowrap transition-all duration-300 bg-gradient-to-br from-[#0a255dff] to-accent max-w-full disabled:cursor-not-allowed",
   btnDark:
-    "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-semibold text-white bg-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0a255dff]",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-semibold text-white bg-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0a255dff] disabled:cursor-not-allowed",
   btnOutline:
-    "inline-flex items-center gap-2 rounded-full px-7 py-3 font-label text-sm font-semibold border border-border bg-white text-primary transition-all hover:border-accent hover:text-accent hover:-translate-y-0.5",
+    "inline-flex cursor-pointer items-center gap-2 rounded-full px-7 py-3 font-label text-sm font-semibold border border-border bg-white text-primary transition-all hover:border-accent hover:text-accent hover:-translate-y-0.5 disabled:cursor-not-allowed",
   glassCard:
     "bg-white/85 backdrop-blur-xl border border-white/70 shadow-[0_8px_32px_color-mix(in_srgb,var(--color-primary)_8%,transparent)]",
   productGrid:

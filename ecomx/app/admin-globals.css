@@ -115,6 +115,15 @@
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Override store theme accent (#111827) so admin hovers stay light gray */
+  --accent: oklch(0.965 0.004 260);
+  --color-accent: oklch(0.965 0.004 260);
+}
+
+.dark.admin-shell,
+.admin-shell.dark {
+  --accent: oklch(0.25 0.015 260);
+  --color-accent: oklch(0.25 0.015 260);
 }
 
 /* Smooth cross-fade when switching light / dark theme */
@@ -194,6 +203,23 @@ html.admin-theme-transition [data-slot="chart"] *,
 @layer base {
   .admin-shell {
     @apply bg-background text-foreground font-sans text-sm;
+  }
+
+  .admin-shell button:not(:disabled),
+  .admin-shell [type="button"]:not(:disabled),
+  .admin-shell [type="submit"]:not(:disabled),
+  .admin-shell [role="button"]:not([aria-disabled="true"]),
+  .admin-shell select:not(:disabled),
+  .admin-shell summary,
+  .admin-shell label[for],
+  .admin-shell a[href] {
+    cursor: pointer;
+  }
+
+  .admin-shell button:disabled,
+  .admin-shell [disabled],
+  .admin-shell [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 
   .admin-shell table {
@@ -282,7 +308,7 @@ html.admin-theme-transition [data-slot="chart"] *,
   border-radius: 1rem !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: #ffffff !important;
+  color: var(--popover-foreground) !important;
   --tw-ring-shadow: 0 0 #0000 !important;
 }
 
@@ -292,14 +318,10 @@ html.admin-theme-transition [data-slot="chart"] *,
   max-height: 500px !important;
   overflow: hidden !important;
   border-radius: 1rem !important;
-  border: 1px solid rgb(255 255 255 / 0.12) !important;
-  background: rgb(156 163 175 / 0.92) !important;
-  color: #ffffff !important;
-  box-shadow:
-    0 25px 50px -12px rgb(0 0 0 / 0.35),
-    0 0 0 1px rgb(255 255 255 / 0.08) inset !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.18) !important;
 }
 
 .admin-command-search-dialog [data-slot="command-input-wrapper"] {
@@ -309,22 +331,22 @@ html.admin-theme-transition [data-slot="chart"] *,
 .admin-command-search-dialog [data-slot="input-group"] {
   height: 2.5rem !important;
   border-radius: 0.5rem !important;
-  border: 1px solid rgb(255 255 255 / 0.25) !important;
-  background: rgb(255 255 255 / 0.22) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--background) !important;
   box-shadow: none !important;
 }
 
 .admin-command-search-dialog [data-slot="command-input"] {
-  color: #ffffff !important;
+  color: var(--foreground) !important;
   font-size: 0.875rem !important;
 }
 
 .admin-command-search-dialog [data-slot="command-input"]::placeholder {
-  color: rgb(229 231 235) !important;
+  color: var(--muted-foreground) !important;
 }
 
 .admin-command-search-dialog [data-slot="input-group"] svg {
-  color: rgb(229 231 235) !important;
+  color: var(--muted-foreground) !important;
   opacity: 1 !important;
 }
 
@@ -334,7 +356,7 @@ html.admin-theme-transition [data-slot="chart"] *,
 }
 
 .admin-command-search-dialog [cmdk-group-heading] {
-  color: rgb(209 213 219) !important;
+  color: var(--muted-foreground) !important;
   font-size: 0.6875rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.08em !important;
@@ -352,11 +374,11 @@ html.admin-theme-transition [data-slot="chart"] *,
   font-size: 0.875rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  color: #ffffff !important;
+  color: var(--foreground) !important;
 }
 
 .admin-command-search-item svg:not(.ml-auto) {
-  color: #ffffff !important;
+  color: var(--muted-foreground) !important;
   width: 1rem !important;
   height: 1rem !important;
   flex-shrink: 0;
@@ -368,18 +390,18 @@ html.admin-theme-transition [data-slot="chart"] *,
 
 .admin-command-search-item[data-selected="true"],
 .admin-command-search-item[aria-selected="true"] {
-  background: #ffffff !important;
-  color: #111827 !important;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12) !important;
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  box-shadow: none !important;
 }
 
 .admin-command-search-item[data-selected="true"] svg:not(.ml-auto),
 .admin-command-search-item[aria-selected="true"] svg:not(.ml-auto) {
-  color: #111827 !important;
+  color: var(--accent-foreground) !important;
 }
 
 .admin-command-search-dialog [data-slot="command-empty"] {
-  color: rgb(229 231 235);
+  color: var(--muted-foreground);
   padding: 1.5rem 0;
   text-align: center;
   font-size: 0.875rem;
@@ -550,7 +572,7 @@ html.admin-theme-transition [data-slot="chart"] *,
 }
 
 .admin-shell .admin-table tbody tr:hover {
-  background-color: color-mix(in oklch, var(--accent) 55%, transparent);
+  background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }
 
 .admin-shell table thead.bg-gray-100 {
@@ -564,7 +586,7 @@ html.admin-theme-transition [data-slot="chart"] *,
 
 .admin-shell table tbody tr.hover\:bg-gray-50:hover,
 .admin-shell table tbody tr[class*="hover:bg-gray-50"]:hover {
-  background-color: color-mix(in oklch, var(--accent) 55%, transparent) !important;
+  background-color: color-mix(in oklch, var(--muted) 70%, transparent) !important;
 }
 
 /* ─── Admin form fields ─── */
@@ -634,5 +656,5 @@ html.admin-theme-transition [data-slot="chart"] *,
 
 .dark .admin-shell .hover\:bg-gray-50:hover,
 .dark .admin-shell [class*="hover:bg-gray-50"]:hover {
-  background-color: color-mix(in oklch, var(--accent) 55%, transparent);
+  background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }

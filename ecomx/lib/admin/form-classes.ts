@@ -54,7 +54,7 @@ export const adminTableClass = "admin-table w-full text-sm";
 export const adminTableHeadClass = "bg-muted text-foreground";
 
 export const adminTableRowClass =
-  "border-t border-border transition-colors hover:bg-accent/50";
+  "border-t border-border transition-colors hover:bg-muted/60";
 
 export const adminTableCellMuted = "text-muted-foreground";
 

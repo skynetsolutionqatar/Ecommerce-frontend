@@ -161,7 +161,7 @@ export default function ProductPage({
       <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px] pt-4 flex flex-col gap-3">
         {/* Breadcrumb */}
         <div className="bg-white py-3 px-4 sm:px-6 md:px-8 rounded-2xl shadow-sm border border-gray-100">
-          <nav className="flex items-center gap-1 text-[11.5px] text-gray-500">
+          <nav className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11.5px] text-gray-500">
             {crumbs.map((crumb, i) => (
               <span key={crumb} className="flex items-center gap-1">
                 {i > 0 && <span className="text-gray-300">›</span>}
@@ -197,9 +197,9 @@ export default function ProductPage({
           {/* <div className="grid grid-cols-1 gap-6 lg:grid-cols-[460px_1fr] xl:grid-cols-[500px_1fr]"> */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[58%_42%] xl:grid-cols-[60%_40%]">
             {/* ─── LEFT: Image Gallery ─── */}
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 md:flex-row">
               {/* Thumbnail strip with vertical scroll arrows */}
-              <div className="flex w-[72px] shrink-0 flex-col items-center gap-1.5">
+              <div className="hidden w-[72px] shrink-0 flex-col items-center gap-1.5 md:flex">
                 <button
                   type="button"
                   onClick={scrollThumbsUp}
@@ -272,8 +272,7 @@ export default function ProductPage({
               {/* Main image + controls */}
               <div className="flex flex-1 flex-col gap-2">
                 <div
-                  className="relative flex flex-1 overflow-hidden rounded-xl border border-gray-200 bg-[#fafafa]"
-                  style={{ minHeight: "420px" }}
+                  className="relative flex flex-1 overflow-hidden rounded-xl border border-gray-200 bg-[#fafafa] min-h-[280px] md:min-h-[420px]"
                 >
                   {/* Badges — same row */}
                   <div className="absolute left-3 top-3 z-10 flex flex-row flex-wrap items-center gap-1.5">
@@ -478,7 +477,7 @@ export default function ProductPage({
               )}
 
               {/* Quantity + Stock */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span className="text-[12.5px] font-semibold text-gray-700">
                   Quantity
                 </span>
@@ -627,13 +626,13 @@ export default function ProductPage({
         <LazyMount>
         {/* ─── Tabs ─── */}
         <div className="bg-white px-4 sm:px-6 md:px-8 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="flex border-b border-gray-200">
+          <div className="flex overflow-x-auto border-b border-gray-200">
             {TABS.map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTab(t)}
-                className={`relative shrink-0 px-5 py-3.5 border-0 cursor-pointer text-[13px] font-semibold transition-colors ${
+                className={`relative shrink-0 px-3 py-3 sm:px-5 sm:py-3.5 border-0 cursor-pointer text-[12px] sm:text-[13px] font-semibold transition-colors ${
                   tab === t
                     ? "text-blue-600"
                     : "text-gray-500 hover:text-gray-700"

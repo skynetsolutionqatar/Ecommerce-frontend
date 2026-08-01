@@ -132,11 +132,11 @@ export default function BackPanel({
             </div>
           )}
 
-          <div className="p-6">{children}</div>
+          <div className="p-4 sm:p-6">{children}</div>
         </div>
 
         {footerButtons.length > 0 && (
-          <div className="z-30 flex shrink-0 items-center justify-end gap-2 border-t border-border bg-card px-6 py-3 shadow-md">
+          <div className="z-30 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-border bg-card px-4 py-3 shadow-md sm:px-6">
             {footerButtons.map((button, index) => (
               <Button
                 key={index}

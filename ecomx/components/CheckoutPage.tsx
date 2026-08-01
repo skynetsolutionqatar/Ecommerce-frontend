@@ -145,7 +145,7 @@ export default function CheckoutPage({
   if (cart.length === 0) {
     return (
       <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-20`}>
-        <div className="mx-auto max-w-[900px] px-6 py-16 text-center">
+        <div className="mx-auto max-w-[900px] px-3 py-16 text-center sm:px-5 md:px-8">
           <p className="mb-4 text-sm text-muted">Your cart is empty.</p>
           <button type="button" onClick={onBack} className={tw.btnPrimary}>
             Continue Shopping
@@ -166,25 +166,28 @@ export default function CheckoutPage({
           <Icons.ChevronLeft /> Back
         </button>
 
-        <h1 className="mb-2 font-display text-[42px] font-bold text-primary">Checkout</h1>
+        <h1 className="mb-2 font-display text-[28px] font-bold text-primary sm:text-[36px] md:text-[42px]">
+          Checkout
+        </h1>
 
-        <div className="mb-10 flex overflow-hidden rounded-full border border-border">
+        <div className="mb-10 flex flex-col overflow-hidden rounded-full border border-border sm:flex-row">
           {["Contact Info", "Delivery", "Payment"].map((s, i) => (
             <button
               key={s}
               type="button"
               onClick={() => goToStep(i + 1)}
-              className={`flex-1 border-0 py-3 text-[13px] font-semibold cursor-pointer transition-all ${
+              className={`flex-1 border-0 py-3 text-[11px] font-semibold cursor-pointer transition-all sm:text-[13px] ${
                 step === i + 1 ? "bg-primary text-white" : "bg-white text-muted"
-              } ${i < 2 ? "border-r border-border" : ""}`}
+              } ${i < 2 ? "sm:border-r sm:border-border" : ""} ${i > 0 ? "border-t border-border sm:border-t-0" : ""}`}
             >
-              {i + 1}. {s}
+              <span className="sm:hidden">{i + 1}. {s.split(" ")[0]}</span>
+              <span className="hidden sm:inline">{i + 1}. {s}</span>
             </button>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
-          <div className="rounded-3xl border border-border bg-white p-8">
+          <div className="rounded-3xl border border-border bg-white p-4 sm:p-6 md:p-8">
             {step === 1 && (
               <div className="flex flex-col gap-4">
                 <h3 className="mb-1 font-display text-[22px] font-bold text-primary">
@@ -392,7 +395,7 @@ export default function CheckoutPage({
             )}
           </div>
 
-          <div className="sticky top-[100px] rounded-3xl border border-border bg-white p-6">
+          <div className="sticky top-[100px] rounded-3xl border border-border bg-white p-4 sm:p-6">
             <div className="mb-4 text-sm font-bold text-primary">
               Order Summary ({cart.length} item{cart.length !== 1 ? "s" : ""})
             </div>

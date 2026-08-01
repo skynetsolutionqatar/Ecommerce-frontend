@@ -93,13 +93,17 @@ export default function CommandSearch({
 
   return (
     <>
-      <div
+      <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+        className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground shadow-sm transition hover:border-ring hover:bg-muted/60 hover:text-foreground"
       >
-        <Search size={16} />
-        <span>Search menu... (Ctrl + K)</span>
-      </div>
+        <Search size={16} className="shrink-0" />
+        <span className="truncate">
+          <span className="hidden lg:inline">Search menu... (Ctrl + K)</span>
+          <span className="lg:hidden">Search...</span>
+        </span>
+      </button>
 
       <CommandDialog
         open={open}

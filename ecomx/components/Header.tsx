@@ -9,8 +9,6 @@ import Avatar from "./Avatar";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
-import { ADMIN_ROUTES, isAdminRole } from "@/lib/config";
-import { useAuthStore } from "@/store/auth.store";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
@@ -63,15 +61,6 @@ export default function Header({
   const lastScrollY = useRef(0);
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-  const authUser = useAuthStore((s) => s.user);
-
-  const handleLogoClick = () => {
-    if (isAdminRole(authUser?.role)) {
-      goTo(ADMIN_ROUTES.dashboard);
-    } else {
-      goTo(ROUTES.home);
-    }
-  };
 
   const searchHints = useMemo(
     () =>
@@ -190,7 +179,7 @@ export default function Header({
           <div className="mx-auto flex max-w-[1440px] items-center gap-3 py-1.5 px-3 sm:px-5 md:px-8 md:gap-4 lg:px-[50px]">
             <motion.button
               type="button"
-              onClick={handleLogoClick}
+              onClick={() => goTo(ROUTES.home)}
               className="flex shrink-0 cursor-pointer flex-col items-start border-0 bg-transparent p-0"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -487,7 +476,14 @@ export default function Header({
                 className="flex items-center justify-between px-5 py-4"
                 style={{ background: "#0f172a" }}
               >
-                <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    goTo(ROUTES.home);
+                    setMobileOpen(false);
+                  }}
+                  className="border-0 bg-transparent p-0 text-left cursor-pointer"
+                >
                   <div className="font-display text-lg font-extrabold text-white">
                     {client.name.split(" ")[0]}
                     <span className="text-slate-300 text-sm">™</span>
@@ -497,7 +493,7 @@ export default function Header({
                   >
                     {client.tagline}
                   </div>
-                </div>
+                </button>
                 <motion.button
                   type="button"
                   onClick={() => setMobileOpen(false)}

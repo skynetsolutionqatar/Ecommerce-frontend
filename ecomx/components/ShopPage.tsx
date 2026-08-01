@@ -256,7 +256,7 @@ export default function ShopPage({
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                 <div className="flex overflow-hidden rounded-lg border border-gray-200 bg-white">
                   <button
                     type="button"

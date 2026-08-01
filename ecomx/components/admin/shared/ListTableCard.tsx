@@ -7,7 +7,7 @@ interface ListTableCardProps {
 
 export default function ListTableCard({ children, footer }: ListTableCardProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
       {children}
       {footer}
     </div>

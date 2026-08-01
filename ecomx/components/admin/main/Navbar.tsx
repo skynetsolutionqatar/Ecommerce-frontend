@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Edit3, LogOut, RefreshCcw, Store, User } from "lucide-react";
+import { Bell, Edit3, LogOut, Menu, RefreshCcw, Store, User } from "lucide-react";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
 import LiveClock from "@/components/admin/main/LiveClock";
@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-export default function Navbar() {
+export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { user, logout } = useAuth();
@@ -32,13 +32,25 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="relative z-[100] flex w-full items-center justify-between border-b border-border bg-card px-6 py-2">
-      <div className="flex w-2/5 min-w-80 max-w-2xl items-center rounded-md py-2">
+    <header className="relative z-[100] flex w-full min-w-0 items-center justify-between gap-2 border-b border-border bg-card px-3 py-2 sm:px-4 md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 md:max-w-2xl lg:w-2/5">
+        {onMenuClick ? (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open menu"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:bg-muted/60 md:hidden"
+          >
+            <Menu size={20} />
+          </button>
+        ) : null}
         <CommandSearch sections={adminSections} />
       </div>
 
-      <div className="flex items-center gap-4">
-        <LiveClock />
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+        <div className="hidden lg:block">
+          <LiveClock />
+        </div>
 
         <AdminThemeToggle />
 
@@ -68,26 +80,26 @@ export default function Navbar() {
               <div className="flex flex-col p-2">
                 <button
                   type="button"
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${adminType.navMenuItem}`}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
                 >
                   <User size={16} /> Profile
                 </button>
                 <button
                   type="button"
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${adminType.navMenuItem}`}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
                 >
                   <Edit3 size={16} /> Change Password
                 </button>
                 <button
                   type="button"
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${adminType.navMenuItem}`}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
                 >
                   <RefreshCcw size={16} /> Switch User
                 </button>
 
                 <Link
                   href="/"
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent ${adminType.navMenuItem}`}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
                 >
                   <Store className="h-4 w-4 opacity-60" />
                   Go to Store

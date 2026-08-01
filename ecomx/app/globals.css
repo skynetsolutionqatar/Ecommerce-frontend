@@ -151,6 +151,27 @@ body {
   @apply min-h-full font-sans text-primary antialiased bg-bg;
 }
 
+body:not(:has(.admin-shell)) button:not(:disabled),
+body:not(:has(.admin-shell)) [type="button"]:not(:disabled),
+body:not(:has(.admin-shell)) [type="submit"]:not(:disabled),
+body:not(:has(.admin-shell)) [type="reset"]:not(:disabled),
+body:not(:has(.admin-shell)) [role="button"]:not([aria-disabled="true"]),
+body:not(:has(.admin-shell)) select:not(:disabled),
+body:not(:has(.admin-shell)) summary,
+body:not(:has(.admin-shell)) label[for],
+body:not(:has(.admin-shell)) a[href] {
+  cursor: pointer;
+}
+
+body:not(:has(.admin-shell)) button:disabled,
+body:not(:has(.admin-shell)) [type="button"]:disabled,
+body:not(:has(.admin-shell)) [type="submit"]:disabled,
+body:not(:has(.admin-shell)) [type="reset"]:disabled,
+body:not(:has(.admin-shell)) select:disabled,
+body:not(:has(.admin-shell)) [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 h1,
 h2,
 h3 {

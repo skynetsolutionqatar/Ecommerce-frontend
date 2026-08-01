@@ -16,7 +16,7 @@ export function ChartExpandButton({ onClick }: ChartExpandButtonProps) {
       type="button"
       onClick={onClick}
       aria-label="Expand chart"
-      className="rounded-md p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+      className="rounded-md p-1 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
     >
       <Maximize2 size={18} />
     </button>

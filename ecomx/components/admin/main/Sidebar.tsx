@@ -596,7 +596,13 @@ export const skynetClient = {
   },
 };
 
-export default function Sidebar() {
+export default function Sidebar({
+  mobile = false,
+  onNavigate,
+}: {
+  mobile?: boolean;
+  onNavigate?: () => void;
+} = {}) {
   const [collapsed, setCollapsed] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [menuToggle, setMenuToggle] = useState<{ path: string; menu: string | null } | null>(
@@ -605,7 +611,11 @@ export default function Sidebar() {
 
   const pathname = usePathname();
 
-  const isExpanded = !collapsed || hovered;
+  const isExpanded = mobile || !collapsed || hovered;
+
+  const handleNavigate = () => {
+    onNavigate?.();
+  };
 
   // ✅ Better matching for nested routes
   const isPathActive = (basePath: string) => {
@@ -645,33 +655,52 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-500">
+    <aside
+      className={`flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-500 ${
+        mobile ? "w-[min(280px,85vw)]" : ""
+      }`}
+    >
       {/* Header */}
       <div
         className={`${
-          collapsed ? "w-16" : "w-48"
+          mobile ? "w-full" : collapsed ? "w-16" : "w-48"
         } flex items-center justify-between px-4 py-3 transition-all duration-500`}
       >
-        {!collapsed && (
-          <Link href={ADMIN_ROUTES.dashboard} className={`flex items-center gap-2 ${adminType.sidebarBrand}`}>
-            <span className="text-emerald-700 dark:text-emerald-400">SKYNET™</span>
-          </Link>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-muted-foreground hover:text-foreground"
+        <Link
+          href={ADMIN_ROUTES.dashboard}
+          onClick={handleNavigate}
+          className={`flex items-center gap-2 border-0 bg-transparent p-0 no-underline ${adminType.sidebarBrand}`}
         >
-          {collapsed ? <X size={20} /> : <Menu size={20} />}
-        </button>
+          <span className="text-emerald-700 dark:text-emerald-400">
+            {isExpanded ? "SKYNET™" : "S™"}
+          </span>
+        </Link>
+        {mobile ? (
+          <button
+            type="button"
+            onClick={handleNavigate}
+            aria-label="Close menu"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X size={20} />
+          </button>
+        ) : (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {collapsed ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
       <div
         className={`flex-1 transition-all duration-500 ${
-          isExpanded ? "w-48" : "w-16"
+          mobile ? "w-full" : isExpanded ? "w-48" : "w-16"
         }`}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={() => !mobile && setHovered(true)}
+        onMouseLeave={() => !mobile && setHovered(false)}
       >
         <nav className="h-full overflow-y-auto px-2 py-4 space-y-4">
           {adminSections.map((section, sIdx) => (
@@ -734,6 +763,7 @@ export default function Sidebar() {
                                   <li key={subIdx}>
                                     <Link
                                       href={sub.path}
+                                      onClick={handleNavigate}
                                       className={`flex items-center gap-2 px-2 py-1 rounded-md transition ${adminType.sidebarSubNav} ${
                                         isActive
                                           ? `text-white ${colors.mainColor}`
@@ -752,6 +782,7 @@ export default function Sidebar() {
                       ) : (
                         <Link
                           href={item.path || "#"}
+                          onClick={handleNavigate}
                           className={`flex items-center gap-2 px-2 py-2 rounded-md transition ${
                             isPathActive(item.path || "")
                               ? `${colors.mainColor} text-white`
