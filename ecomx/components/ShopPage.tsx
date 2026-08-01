@@ -440,7 +440,11 @@ export default function ShopPage({
             >
               <div className="flex items-center justify-between border-b border-gray-100 px-5 pb-3 pt-4">
                 <span className="font-display text-[16px] font-bold text-gray-900">Filters</span>
-                <button type="button" onClick={() => setMobileFilterOpen(false)} className="text-gray-500">
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="cursor-pointer border-0 bg-transparent p-1 text-gray-500"
+                >
                   <Icons.X />
                 </button>
               </div>

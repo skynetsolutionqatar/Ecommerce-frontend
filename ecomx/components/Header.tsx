@@ -497,7 +497,7 @@ export default function Header({
                 <motion.button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white"
+                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-white/15 text-white"
                   whileTap={{ scale: 0.9 }}
                 >
                   <Icons.X />

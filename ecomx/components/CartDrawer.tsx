@@ -16,7 +16,7 @@ interface CartDrawerProps {
 }
 
 const closeBtnClass =
-  "flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-[#0a255d]/30 hover:bg-gray-50 hover:text-[#0a255d]";
+  "flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-[#0a255d]/30 hover:bg-gray-50 hover:text-[#0a255d]";
 
 const primaryBtnClass =
   "inline-flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-bold text-white transition hover:opacity-90";

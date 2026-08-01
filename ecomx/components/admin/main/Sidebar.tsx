@@ -680,14 +680,14 @@ export default function Sidebar({
             type="button"
             onClick={handleNavigate}
             aria-label="Close menu"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground cursor-pointer"
           >
             <X size={20} />
           </button>
         ) : (
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground cursor-pointer"
           >
             {collapsed ? <X size={20} /> : <Menu size={20} />}
           </button>

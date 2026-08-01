@@ -1,11 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import toast from "react-hot-toast";
 import { PRODUCTS, fmt } from "@/lib/data";
 import type { Product, WishlistItem } from "@/lib/types";
 import StoreImage from "./StoreImage";
 import LazyMount from "./LazyMount";
 import * as Icons from "./Icons";
 import { Colors, tw } from "@/lib/theme";
+import { useProductReviews, useMyReviews } from "@/hooks/useReviews";
+import { useMyOrders } from "@/hooks/useOrders";
+import { ORDER_STATUS } from "@/lib/Constant";
+import { useStore } from "@/components/StoreProvider";
+import WriteReviewModal from "@/components/store/WriteReviewModal";
+import {
+  findReviewableOrder,
+  reviewedProductIds,
+} from "@/lib/store/review-eligibility";
+import { reviewBody, type ApiReview } from "@/types/review.types";
+import { formatDate } from "@/lib/utils";
 
 interface ProductPageProps {
   product: Product;
@@ -40,6 +52,11 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
 const TABS = ["Description", "Specifications", "Downloads", "Support"] as const;
 type Tab = (typeof TABS)[number];
 
+function reviewCustomerName(customerId: ApiReview["customerId"]) {
+  if (typeof customerId === "object" && customerId?.name) return customerId.name;
+  return "Customer";
+}
+
 export default function ProductPage({
   product,
   onAddToCart,
@@ -59,6 +76,42 @@ export default function ProductPage({
   const [pincode, setPincode] = useState("");
   const [pincodeChecked, setPincodeChecked] = useState(false);
   const [tab, setTab] = useState<Tab>("Description");
+  const [reviewOpen, setReviewOpen] = useState(false);
+
+  const { user, setLoginOpen } = useStore();
+  const isLoggedIn = !!user;
+
+  const { data: myOrdersData } = useMyOrders(
+    { status: ORDER_STATUS.DELIVERED, limit: 50 },
+    isLoggedIn
+  );
+  const { data: myReviewsData, refetch: refetchMyReviews } = useMyReviews(
+    { limit: 100 },
+    isLoggedIn
+  );
+  const reviewedIds = useMemo(
+    () => reviewedProductIds(myReviewsData?.reviews ?? []),
+    [myReviewsData?.reviews]
+  );
+  const reviewableOrder = useMemo(
+    () => findReviewableOrder(myOrdersData?.orders ?? [], product.id, reviewedIds),
+    [myOrdersData?.orders, product.id, reviewedIds]
+  );
+  const alreadyReviewed = reviewedIds.has(product.id);
+
+  const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchProductReviews } =
+    useProductReviews(product.id, {
+    limit: 20,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+  const productReviews = reviewsData?.reviews ?? [];
+  const displayedReviews = productReviews.slice(0, 5);
+  const ratingCounts = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: productReviews.filter((r) => r.rating === star).length,
+  }));
+  const ratingSampleTotal = productReviews.length || 1;
 
   const similar = PRODUCTS.filter(
     (p) => p.id !== product.id && p.category === product.category
@@ -92,6 +145,22 @@ export default function ProductPage({
       setQty(Math.max(1, maxQty));
     }
   }, [maxQty, qty]);
+
+  const handleWriteReview = () => {
+    if (!isLoggedIn) {
+      setLoginOpen(true);
+      return;
+    }
+    if (alreadyReviewed) {
+      toast("You already submitted a review for this product.", { icon: "ℹ️" });
+      return;
+    }
+    if (!reviewableOrder) {
+      toast.error("You can review this product after your order is delivered.");
+      return;
+    }
+    setReviewOpen(true);
+  };
 
   const THUMB_VISIBLE = 4;
 
@@ -806,121 +875,99 @@ export default function ProductPage({
                 </div>
               </div>
               <div className="mt-4 flex flex-col gap-1.5">
-                {[5, 4, 3, 2, 1].map((star, idx) => {
-                  const ratios = [0.68, 0.16, 0.08, 0.05, 0.03];
-                  const count = Math.round(product.reviews * ratios[idx]);
-                  return (
-                    <div key={star} className="flex items-center gap-2">
-                      <span className="w-3 text-right text-[11px] font-semibold text-gray-600">
-                        {star}
-                      </span>
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${Math.round(ratios[idx] * 100)}%`,
-                            background:
-                              star >= 4
-                                ? "#1d4ed8"
-                                : star === 3
-                                ? "#94a3b8"
-                                : "#e2e8f0",
-                          }}
-                        />
-                      </div>
-                      <span className="w-7 text-right text-[11px] text-gray-400">
-                        {count}
-                      </span>
+                {ratingCounts.map(({ star, count }) => (
+                  <div key={star} className="flex items-center gap-2">
+                    <span className="w-3 text-right text-[11px] font-semibold text-gray-600">
+                      {star}
+                    </span>
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${Math.round((count / ratingSampleTotal) * 100)}%`,
+                          background:
+                            star >= 4 ? "#1d4ed8" : star === 3 ? "#94a3b8" : "#e2e8f0",
+                        }}
+                      />
                     </div>
-                  );
-                })}
+                    <span className="w-7 text-right text-[11px] text-gray-400">{count}</span>
+                  </div>
+                ))}
               </div>
               <button
                 type="button"
-                className="mt-4 rounded-lg border border-blue-600 px-4 py-2 text-[12px] font-bold text-blue-600 cursor-pointer bg-transparent hover:bg-blue-50"
+                onClick={handleWriteReview}
+                className="mt-4 rounded-lg border border-blue-600 px-4 py-2 text-[12px] font-bold text-blue-600 cursor-pointer bg-transparent hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={alreadyReviewed}
               >
-                Write a Review
+                {alreadyReviewed ? "Review Submitted" : "Write a Review"}
               </button>
+              {!isLoggedIn ? (
+                <p className="mt-2 text-[11px] text-gray-400">Sign in to leave a review</p>
+              ) : !alreadyReviewed && !reviewableOrder ? (
+                <p className="mt-2 text-[11px] text-gray-400">
+                  Available after your order is delivered
+                </p>
+              ) : null}
             </div>
 
             {/* Review cards */}
             <div className="flex flex-col gap-4">
-              {[
-                {
-                  name: "Fatima H.",
-                  location: "Doha, Qatar",
-                  rating: 5,
-                  date: "Dec 15, 2024",
-                  title: "Reliable label printing for warehouse",
-                  body: "Runs 10+ hours daily in our warehouse. Labels are crisp at 203 DPI and setup with Skynet was same-day. Support answered every question quickly.",
-                  tags: ["Label Printing", "4 Inch • USB"],
-                  helpful: 87,
-                },
-                {
-                  name: "Mohammed R.",
-                  location: "West Bay, Qatar",
-                  rating: 4,
-                  date: "Nov 28, 2024",
-                  title: "Great product, quick delivery",
-                  body: "Excellent build quality. Integration with our atACC ERP was smooth. Skynet's support team helped configure it remotely within 2 hours.",
-                  tags: ["USB", "Windows"],
-                  helpful: 43,
-                },
-              ].map((rev, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border border-gray-100 bg-gray-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[14px] font-bold text-orange-600">
-                        {rev.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-bold text-gray-900">
-                          {rev.name}
+              {reviewsLoading ? (
+                <p className="text-sm text-gray-400">Loading reviews...</p>
+              ) : displayedReviews.length === 0 ? (
+                <p className="text-sm text-gray-400">No reviews yet. Be the first to review.</p>
+              ) : (
+                displayedReviews.map((rev) => {
+                  const name = reviewCustomerName(rev.customerId);
+                  const body = reviewBody(rev);
+                  return (
+                    <div key={rev._id} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[14px] font-bold text-orange-600">
+                            {name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .slice(0, 2)}
+                          </div>
+                          <div>
+                            <div className="text-[13px] font-bold text-gray-900">{name}</div>
+                            {rev.location ? (
+                              <div className="text-[11px] text-gray-500">{rev.location}</div>
+                            ) : null}
+                          </div>
                         </div>
-                        <div className="text-[11px] text-gray-500">
-                          {rev.location}
+                        <div className="text-right">
+                          <StarRating rating={rev.rating} size={12} />
+                          <div className="mt-0.5 text-[10.5px] text-gray-400">
+                            {formatDate(rev.createdAt)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <StarRating rating={rev.rating} size={12} />
-                      <div className="mt-0.5 text-[10.5px] text-gray-400">
-                        {rev.date}
+                      <div className="mt-3">
+                        {rev.orderId ? (
+                          <span className="mb-1.5 inline-block rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-600">
+                            ✓ Verified Purchase
+                          </span>
+                        ) : null}
+                        {rev.title ? (
+                          <p className="text-[13px] font-semibold text-gray-900">{rev.title}</p>
+                        ) : null}
+                        {body ? (
+                          <p className="mt-1 text-[12.5px] leading-relaxed text-gray-600">{body}</p>
+                        ) : null}
+                        {(rev.helpfulCount ?? 0) > 0 ? (
+                          <div className="mt-2 text-[11px] text-gray-400">
+                            👍 Helpful ({rev.helpfulCount})
+                          </div>
+                        ) : null}
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-3">
-                    <span className="mb-1.5 inline-block rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-600">
-                      ✓ Verified Purchase
-                    </span>
-                    <p className="text-[13px] font-semibold text-gray-900">
-                      {rev.title}
-                    </p>
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-gray-600">
-                      {rev.body}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {rev.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full border border-gray-200 bg-white px-2.5 py-0.5 text-[10.5px] font-medium text-gray-600"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-2 text-[11px] text-gray-400">
-                      👍 Helpful ({rev.helpful})
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -1067,6 +1114,20 @@ export default function ProductPage({
         </div>
         </LazyMount>
       </div>
+
+      {reviewableOrder ? (
+        <WriteReviewModal
+          open={reviewOpen}
+          productId={product.id}
+          orderId={reviewableOrder._id}
+          productName={product.name}
+          onClose={() => setReviewOpen(false)}
+          onSuccess={() => {
+            void refetchMyReviews();
+            void refetchProductReviews();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

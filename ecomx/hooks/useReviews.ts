@@ -1,8 +1,14 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchReviews, reviewApi } from "@/lib/api/review.api";
-import type { ModerateReviewPayload, ReviewQueryParams } from "@/types/review.types";
+import { fetchReviews, fetchProductReviews, fetchMyReviews, reviewApi } from "@/lib/api/review.api";
+import type {
+  CreateReviewPayload,
+  ModerateReviewPayload,
+  MyReviewQuery,
+  ProductReviewQuery,
+  ReviewQueryParams,
+} from "@/types/review.types";
 
 export const REVIEWS_KEY = "reviews";
 export const REVIEW_KEY = "review";
@@ -39,6 +45,40 @@ export function useReview(id: string) {
     },
     enabled: !!id,
     retry: false,
+  });
+}
+
+export function useProductReviews(productId: string, params?: ProductReviewQuery) {
+  return useQuery({
+    queryKey: [REVIEWS_KEY, "product", productId, params],
+    queryFn: () => fetchProductReviews(productId, params),
+    enabled: !!productId,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function useMyReviews(params?: MyReviewQuery, enabled = true) {
+  return useQuery({
+    queryKey: [REVIEWS_KEY, "my", params],
+    queryFn: () => fetchMyReviews(params),
+    enabled,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function useCreateReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateReviewPayload) => reviewApi.create(payload),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [REVIEWS_KEY] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({ queryKey: ["product"] });
+      void queryClient.invalidateQueries({ queryKey: [REVIEWS_KEY, "product", variables.productId] });
+    },
   });
 }
 

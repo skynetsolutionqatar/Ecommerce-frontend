@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <button
                 type="button"
                 aria-label="Close menu"
-                className="fixed inset-0 z-[150] bg-black/50 md:hidden"
+                className="fixed inset-0 z-[150] cursor-pointer bg-black/50 md:hidden"
                 onClick={() => setMobileNavOpen(false)}
               />
               <div className="fixed inset-y-0 left-0 z-[160] md:hidden">

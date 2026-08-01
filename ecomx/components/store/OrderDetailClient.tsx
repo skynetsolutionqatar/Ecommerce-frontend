@@ -1,15 +1,19 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as Icons from "@/components/Icons";
 import { tw } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
 import { useMyOrder, useMyOrderMutations } from "@/hooks/useOrders";
+import { useMyReviews } from "@/hooks/useReviews";
 import { ORDER_STATUS, ORDER_STATUS_LABEL } from "@/lib/Constant";
+import { reviewedProductIds } from "@/lib/store/review-eligibility";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { orderAddress, orderTotal } from "@/types/order.types";
 import StoreImage from "@/components/StoreImage";
 import OrderStatusTracker from "@/components/store/OrderStatusTracker";
+import WriteReviewModal from "@/components/store/WriteReviewModal";
 
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-500/15 text-amber-700",
@@ -24,6 +28,20 @@ export default function OrderDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const { data: order, isLoading, isError } = useMyOrder(id);
   const { cancel } = useMyOrderMutations();
+  const [reviewTarget, setReviewTarget] = useState<{
+    productId: string;
+    productName: string;
+  } | null>(null);
+
+  const isDelivered = order?.status === ORDER_STATUS.DELIVERED;
+  const { data: myReviewsData, refetch: refetchMyReviews } = useMyReviews(
+    { limit: 100 },
+    isDelivered
+  );
+  const reviewedIds = useMemo(
+    () => reviewedProductIds(myReviewsData?.reviews ?? []),
+    [myReviewsData?.reviews]
+  );
 
   const canCancel =
     order?.status === ORDER_STATUS.PENDING || order?.status === ORDER_STATUS.CONFIRMED;
@@ -96,6 +114,26 @@ export default function OrderDetailClient({ id }: { id: string }) {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-gray-900">{item.name}</p>
                       <p className="text-xs text-muted">Qty: {item.quantity}</p>
+                      {isDelivered ? (
+                        reviewedIds.has(item.productId) ? (
+                          <p className="mt-1 text-[11px] font-semibold text-green-600">
+                            Review submitted
+                          </p>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setReviewTarget({
+                                productId: item.productId,
+                                productName: item.name,
+                              })
+                            }
+                            className="mt-2 cursor-pointer rounded-lg border border-blue-600 px-3 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-50"
+                          >
+                            Write Review
+                          </button>
+                        )
+                      ) : null}
                     </div>
                     <p className="text-sm font-bold text-accent">
                       {formatPrice((item.subtotal ?? item.price * item.quantity))}
@@ -156,6 +194,17 @@ export default function OrderDetailClient({ id }: { id: string }) {
           </div>
         </div>
       </div>
+
+      {reviewTarget && order ? (
+        <WriteReviewModal
+          open
+          productId={reviewTarget.productId}
+          orderId={order._id}
+          productName={reviewTarget.productName}
+          onClose={() => setReviewTarget(null)}
+          onSuccess={() => void refetchMyReviews()}
+        />
+      ) : null}
     </div>
   );
 }

@@ -49,3 +49,8 @@ export async function fetchProductReviews(
   const res = await reviewApi.getProductReviews(productId, params);
   return { reviews: res.data.reviews, pagination: res.pagination };
 }
+
+export async function fetchMyReviews(params?: MyReviewQuery): Promise<ReviewsResult> {
+  const res = await reviewApi.getMyReviews(params);
+  return { reviews: res.data.reviews, pagination: res.pagination };
+}

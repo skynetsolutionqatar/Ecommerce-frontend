@@ -14,7 +14,7 @@ interface WishlistDrawerProps {
 }
 
 const closeBtnClass =
-  "flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-[#0a255d]/30 hover:bg-gray-50 hover:text-[#0a255d]";
+  "flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-[#0a255d]/30 hover:bg-gray-50 hover:text-[#0a255d]";
 
 const primaryBtnSmClass =
   "inline-flex items-center justify-center gap-1 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition hover:opacity-90";
