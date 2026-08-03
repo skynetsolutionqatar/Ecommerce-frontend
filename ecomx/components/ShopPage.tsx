@@ -250,8 +250,8 @@ export default function ShopPage({
           <main className="min-w-0 flex-1">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="font-display text-[22px] font-bold text-gray-900">{pageTitle}</h1>
-                <p className="mt-0.5 text-[12px] text-gray-500">
+                <h1 className="font-display text-2xl font-bold text-gray-900 md:text-[22px]">{pageTitle}</h1>
+                <p className="mt-0.5 text-sm text-gray-500 md:text-[12px]">
                   {isLoading ? "Loading..." : `${total} products found`}
                 </p>
               </div>

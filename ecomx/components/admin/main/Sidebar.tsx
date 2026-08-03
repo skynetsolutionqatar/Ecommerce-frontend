@@ -671,7 +671,7 @@ export default function Sidebar({
           onClick={handleNavigate}
           className={`flex items-center gap-2 border-0 bg-transparent p-0 no-underline ${adminType.sidebarBrand}`}
         >
-          <span className="text-emerald-700 dark:text-emerald-400">
+          <span className="text-[#0a255dff] dark:text-[#0a255dff] font-bold text-lg">
             {isExpanded ? "SKYNET™" : "S™"}
           </span>
         </Link>

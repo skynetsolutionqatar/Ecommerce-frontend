@@ -30,14 +30,9 @@ export default function AdminCategoryDetailPage({
 
   const handleDelete = async () => {
     if (!category) return;
-    try {
-      await remove.mutateAsync(id);
-      toast.success("Category deleted");
-      router.push(ADMIN_ROUTES.categories);
-    } catch {
-      toast.error("Failed to delete category");
-      throw new Error("Delete failed");
-    }
+    await remove.mutateAsync(id);
+    toast.success("Category deleted");
+    router.push(ADMIN_ROUTES.categories);
   };
 
   if (isLoading) {

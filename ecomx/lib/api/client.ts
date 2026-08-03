@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_CONFIG, TOKEN_KEYS } from "@/lib/config";
 import { HTTP_STATUS } from "@/lib/Constant";
+import { showError } from "@/lib/toast";
 import { useAuthStore } from "@/store/auth.store";
 import type { ApiResponse } from "@/types/api.types";
 import type { AuthTokens } from "@/types/auth.types";
@@ -82,6 +83,10 @@ apiClient.interceptors.response.use(
       if (newToken) {
         original.headers.set("Authorization", `Bearer ${newToken}`);
         return apiClient(original);
+      }
+
+      if (typeof window !== "undefined") {
+        showError("Session expired. Please sign in again.");
       }
     }
 

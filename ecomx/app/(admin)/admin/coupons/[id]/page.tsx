@@ -37,14 +37,9 @@ export default function AdminCouponDetailPage({
 
   const handleDelete = async () => {
     if (!coupon) return;
-    try {
-      await remove.mutateAsync(id);
-      toast.success("Coupon deleted");
-      router.push(ADMIN_ROUTES.coupons);
-    } catch {
-      toast.error("Failed to delete coupon");
-      throw new Error("Delete failed");
-    }
+    await remove.mutateAsync(id);
+    toast.success("Coupon deleted");
+    router.push(ADMIN_ROUTES.coupons);
   };
 
   if (isLoading) {

@@ -2,7 +2,6 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useFormik } from "formik";
-import toast from "react-hot-toast";
 import {
   FormCheckbox,
   FormInput,
@@ -94,11 +93,7 @@ function ProductForm({
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
-      try {
-        await onSubmit(toCreateProductPayload(values));
-      } catch {
-        toast.error(isEdit ? "Failed to update product" : "Failed to create product");
-      }
+      await onSubmit(toCreateProductPayload(values));
     },
   });
 

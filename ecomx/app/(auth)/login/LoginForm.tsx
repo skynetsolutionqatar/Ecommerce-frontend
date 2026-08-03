@@ -13,6 +13,7 @@ import {
   AuthSubmitButton,
   authInputClass,
 } from "@/components/auth/AuthShell";
+import { getErrorMessage } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function LoginForm() {
@@ -31,8 +32,8 @@ export default function LoginForm() {
     setLocalError(null);
     try {
       await login(form, redirectParam ?? undefined);
-    } catch {
-      setLocalError(error ?? "Login failed");
+    } catch (err) {
+      setLocalError(getErrorMessage(err, "Login failed"));
     }
   };
 

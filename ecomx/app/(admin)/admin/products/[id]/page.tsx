@@ -35,14 +35,9 @@ export default function AdminProductDetailPage({
 
   const handleDelete = async () => {
     if (!product) return;
-    try {
-      await remove.mutateAsync(id);
-      toast.success("Product deleted");
-      router.push(ADMIN_ROUTES.products);
-    } catch {
-      toast.error("Failed to delete product");
-      throw new Error("Delete failed");
-    }
+    await remove.mutateAsync(id);
+    toast.success("Product deleted");
+    router.push(ADMIN_ROUTES.products);
   };
 
   if (isLoading) {

@@ -2,7 +2,6 @@
 
 import React, { useMemo } from "react";
 import { useFormik } from "formik";
-import toast from "react-hot-toast";
 import {
   FormCheckbox,
   FormInput,
@@ -80,16 +79,10 @@ function CategoryForm({
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
-      try {
-        const payload = isEdit
-          ? toUpdateCategoryPayload(values)
-          : toCreateCategoryPayload(values);
-        await onSubmit(payload);
-      } catch {
-        toast.error(
-          isEdit ? "Failed to update category" : "Failed to create category"
-        );
-      }
+      const payload = isEdit
+        ? toUpdateCategoryPayload(values)
+        : toCreateCategoryPayload(values);
+      await onSubmit(payload);
     },
   });
 

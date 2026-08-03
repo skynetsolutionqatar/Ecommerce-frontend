@@ -60,6 +60,7 @@ export default function Header({
   const [catDropOpen, setCatDropOpen] = useState(false);
   const lastScrollY = useRef(0);
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
   const searchHints = useMemo(
@@ -92,31 +93,43 @@ export default function Header({
   }, [searchHints.length]);
 
   useEffect(() => {
-    const setH = (full: boolean) => {
+    const node = headerRef.current;
+    if (!node) return;
+
+    const syncHeaderHeight = () => {
       document.documentElement.style.setProperty(
         "--header-height",
-        full ? "138px" : "78px"
+        `${Math.ceil(node.getBoundingClientRect().height)}px`
       );
     };
+
+    syncHeaderHeight();
+    const observer = new ResizeObserver(syncHeaderHeight);
+    observer.observe(node);
+    window.addEventListener("resize", syncHeaderHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncHeaderHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     const fn = () => {
       const y = window.scrollY;
       if (y <= 10) {
         setScrolled(false);
         setCatVisible(true);
-        setH(true);
       } else {
         setScrolled(true);
         if (y > lastScrollY.current + 4) {
           setCatVisible(false);
-          setH(false);
         } else if (y < lastScrollY.current - 4) {
           setCatVisible(true);
-          setH(true);
         }
       }
       lastScrollY.current = y;
     };
-    setH(true);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
@@ -128,7 +141,7 @@ export default function Header({
 
   return (
     <>
-      <div className="fixed left-0 right-0 top-0 z-[150]">
+      <div ref={headerRef} className="fixed left-0 right-0 top-0 z-[150]">
         {/* ── Top Promo Bar ── */}
         <div
           className="flex items-center justify-between py-1"
@@ -326,8 +339,9 @@ export default function Header({
               <motion.button
                 type="button"
                 onClick={onWishlistOpen}
-                className="relative hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 sm:flex hover:bg-gray-50 transition-all"
+                className="relative flex items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all"
                 whileTap={{ scale: 0.97 }}
+                aria-label="Wishlist"
               >
                 <Icons.Heart filled={wishlist.length > 0} />
                 <span className="hidden lg:inline">Wishlist</span>
@@ -541,6 +555,33 @@ export default function Header({
                   </div>
                 </div>
               )}
+
+              <div className="grid grid-cols-2 gap-2 border-b border-gray-100 p-4 md:hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onWishlistOpen();
+                    setMobileOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-800"
+                >
+                  <Icons.Heart filled={wishlist.length > 0} />
+                  Wishlist
+                  {wishlist.length > 0 ? ` (${wishlist.length})` : ""}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCartOpen();
+                    setMobileOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-800"
+                >
+                  <Icons.Bag />
+                  Cart
+                  {cartCount > 0 ? ` (${cartCount})` : ""}
+                </button>
+              </div>
 
               <nav className="flex-1 p-4">
                 <p

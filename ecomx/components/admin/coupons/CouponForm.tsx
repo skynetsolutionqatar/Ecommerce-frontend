@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useFormik } from "formik";
-import toast from "react-hot-toast";
 import {
   FormCheckbox,
   FormDateInput,
@@ -72,12 +71,8 @@ function CouponForm({
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
-      try {
-        const payload = isEdit ? toUpdateCouponPayload(values) : toCreateCouponPayload(values);
-        await onSubmit(payload);
-      } catch {
-        toast.error(isEdit ? "Failed to update coupon" : "Failed to create coupon");
-      }
+      const payload = isEdit ? toUpdateCouponPayload(values) : toCreateCouponPayload(values);
+      await onSubmit(payload);
     },
   });
 

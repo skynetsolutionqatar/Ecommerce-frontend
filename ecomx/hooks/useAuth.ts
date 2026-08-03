@@ -6,6 +6,7 @@ import { authApi } from "@/lib/api/auth.api";
 import { ROLE } from "@/lib/Constant";
 import { AUTH_ROUTES, getPostAuthRedirect, isAdminRole } from "@/lib/config";
 import { getErrorMessage } from "@/lib/utils";
+import { showError } from "@/lib/toast";
 import { useAuthStore } from "@/store/auth.store";
 import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth.types";
 import { authUserToStoreUser } from "@/lib/auth-utils";
@@ -48,6 +49,7 @@ export function useAuth() {
       } catch (err) {
         const msg = getErrorMessage(err, "Login failed");
         setError(msg);
+        showError(msg);
         throw err;
       } finally {
         setLoading(false);
@@ -75,6 +77,7 @@ export function useAuth() {
       } catch (err) {
         const msg = getErrorMessage(err, "Registration failed");
         setError(msg);
+        showError(msg);
         throw err;
       } finally {
         setLoading(false);

@@ -49,6 +49,7 @@ export function apiProductToStoreProduct(product: ApiProduct): Product {
     tags: product.tags ?? [],
     description: product.description ?? product.shortDescription ?? "",
     category: resolveApiCategoryName(product),
+    categoryId: resolveApiCategoryId(product) || undefined,
     stock: product.stock,
     sku: product.sku,
     discountPct,

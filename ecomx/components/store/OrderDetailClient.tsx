@@ -74,11 +74,11 @@ export default function OrderDetailClient({ id }: { id: string }) {
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-24`}>
-      <div className="mx-auto max-w-[900px] px-4 sm:px-6">
+      <div className="mx-auto max-w-[900px] px-4 pt-2 sm:px-6">
         <button
           type="button"
           onClick={() => router.push(ROUTES.orders)}
-          className="mb-6 flex items-center gap-1 border-0 bg-transparent text-[13px] font-semibold text-accent cursor-pointer"
+          className={`${tw.storeBackLink} mb-6`}
         >
           <Icons.ChevronLeft /> My Orders
         </button>

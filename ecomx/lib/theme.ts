@@ -12,6 +12,8 @@ export const type = {
 export const tw = {
   pageTopOffset:
     "pt-[var(--page-top)] transition-[padding-top] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+  storeBackLink:
+    "inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm cursor-pointer transition hover:bg-gray-50",
   heroSlider:
     "min-h-[320px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[420px] xl:min-h-[460px]",
   scrollbarHide:
@@ -25,7 +27,7 @@ export const tw = {
   btnPrimary:
     "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 bg-gradient-to-br from-[#0a255dff] to-accent shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_35%,transparent)] hover:from-accent-hover hover:to-primary-light disabled:cursor-not-allowed",
   btnPrimarySm:
-    "inline-flex cursor-pointer items-center justify-center gap-1 rounded-full px-3.5 py-1.5 font-label text-[10px] font-semibold text-white whitespace-nowrap transition-all duration-300 bg-gradient-to-br from-[#0a255dff] to-accent max-w-full disabled:cursor-not-allowed",
+    "inline-flex cursor-pointer items-center justify-center gap-1 rounded-full px-4 py-2 md:px-3.5 md:py-1.5 font-label text-xs md:text-[10px] font-semibold text-white whitespace-nowrap transition-all duration-300 bg-gradient-to-br from-[#0a255dff] to-accent max-w-full disabled:cursor-not-allowed",
   btnDark:
     "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 font-label text-sm font-semibold text-white bg-primary transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0a255dff] disabled:cursor-not-allowed",
   btnOutline:

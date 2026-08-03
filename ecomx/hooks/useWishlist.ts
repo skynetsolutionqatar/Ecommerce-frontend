@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { wishlistApi } from "@/lib/api/wishlist.api";
+import { showError } from "@/lib/toast";
 import {
   clearGuestWishlist,
   loadGuestWishlist,
@@ -80,8 +81,9 @@ export function useWishlist() {
         }
 
         mergedRef.current = true;
-      } catch {
+      } catch (err) {
         applyGuestState(setItems, setWishlistedIds);
+        showError(err, "Could not sync your wishlist");
       } finally {
         syncingRef.current = false;
         setIsSyncing(false);
@@ -131,9 +133,10 @@ export function useWishlist() {
             setItems((prev) => prev.filter((entry) => entry.id !== productId));
           }
         }
-      } catch {
+      } catch (err) {
         setWishlistedIds(previousIds);
         setItems(previousItems);
+        showError(err, "Could not update wishlist");
       }
     },
     [wishlistedIds, items, isLoggedIn, persistGuest]

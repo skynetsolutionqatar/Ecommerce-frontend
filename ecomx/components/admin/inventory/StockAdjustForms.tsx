@@ -32,13 +32,9 @@ function StockAdjustForms({ isPending = false, onAdd, onReduce }: StockAdjustFor
     initialValues: defaultAddStockValues,
     validationSchema: addStockValidationSchema,
     onSubmit: async (values, { resetForm }) => {
-      try {
-        await onAdd(toAddStockPayload(values));
-        resetForm();
-        toast.success("Stock added");
-      } catch {
-        toast.error("Failed to add stock");
-      }
+      await onAdd(toAddStockPayload(values));
+      resetForm();
+      toast.success("Stock added");
     },
   });
 
@@ -46,13 +42,9 @@ function StockAdjustForms({ isPending = false, onAdd, onReduce }: StockAdjustFor
     initialValues: defaultReduceStockValues,
     validationSchema: reduceStockValidationSchema,
     onSubmit: async (values, { resetForm }) => {
-      try {
-        await onReduce(toReduceStockPayload(values));
-        resetForm();
-        toast.success("Stock reduced");
-      } catch {
-        toast.error("Failed to reduce stock");
-      }
+      await onReduce(toReduceStockPayload(values));
+      resetForm();
+      toast.success("Stock reduced");
     },
   });
 

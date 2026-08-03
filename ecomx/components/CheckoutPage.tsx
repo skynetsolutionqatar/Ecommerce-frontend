@@ -6,6 +6,8 @@ import type { CartItem } from "@/lib/types";
 import type { PlaceOrderPayload } from "@/types/order.types";
 import * as Icons from "@/components/Icons";
 import { tw, type } from "@/lib/theme";
+import { showError, showSuccess } from "@/lib/toast";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
 
 export interface CheckoutFormData {
@@ -133,9 +135,10 @@ export default function CheckoutPage({
         paymentMethod: "cash_on_delivery",
       });
       router.push(`${ROUTES.orders}?placed=${encodeURIComponent(orderNumber)}`);
+      showSuccess(`Order ${orderNumber} placed successfully`);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not place order. Please try again.";
+      const message = getApiErrorMessage(err, "Could not place order. Please try again.");
+      showError(message);
       setSubmitError(message);
     } finally {
       setPlacing(false);
@@ -157,11 +160,11 @@ export default function CheckoutPage({
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-20`}>
-      <div className="mx-auto max-w-[900px] px-3 sm:px-5 md:px-8 lg:px-[50px]">
+      <div className="mx-auto max-w-[900px] px-3 pt-2 sm:px-5 md:px-8 lg:px-[50px]">
         <button
           type="button"
           onClick={onBack}
-          className="mb-8 flex items-center gap-1 border-0 bg-transparent text-[13px] font-semibold text-accent cursor-pointer"
+          className={`${tw.storeBackLink} mb-6`}
         >
           <Icons.ChevronLeft /> Back
         </button>

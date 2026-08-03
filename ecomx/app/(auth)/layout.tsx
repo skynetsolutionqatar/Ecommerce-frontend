@@ -1,4 +1,5 @@
 import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
+import AppToaster from "@/components/AppToaster";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="pointer-events-none absolute inset-0 lg:left-[44%] lg:max-w-none [background:radial-gradient(ellipse_at_top_right,rgba(10,37,93,0.04),transparent_55%)]" />
         <div className="relative w-full max-w-[420px]">{children}</div>
       </main>
+      <AppToaster />
     </div>
   );
 }

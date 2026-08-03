@@ -97,6 +97,7 @@ export function useMyOrderMutations() {
   const place = useMutation({
     mutationFn: orderApi.place,
     onSuccess: invalidate,
+    meta: { silentError: true },
   });
 
   return { cancel, place };

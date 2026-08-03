@@ -6,6 +6,7 @@ import * as Icons from "./Icons";
 import { tw, type } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
 import { useMyOrders, useMyOrderMutations } from "@/hooks/useOrders";
+import { showSuccess } from "@/lib/toast";
 import {
   ORDER_STATUS,
   ORDER_STATUS_LABEL,
@@ -117,6 +118,7 @@ export default function OrdersPage({
     setCancellingId(id);
     try {
       await cancel.mutateAsync(id);
+      showSuccess("Order cancelled");
     } finally {
       setCancellingId(null);
     }
@@ -124,11 +126,11 @@ export default function OrdersPage({
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-24`}>
-      <div className="mx-auto max-w-[900px] px-4 sm:px-6">
+      <div className="mx-auto max-w-[900px] px-4 pt-2 sm:px-6">
         <button
           type="button"
           onClick={onBack}
-          className="mb-8 flex items-center gap-1 border-0 bg-transparent text-[13px] font-semibold text-accent cursor-pointer hover:text-accent-hover"
+          className={`${tw.storeBackLink} mb-6`}
         >
           <Icons.ChevronLeft /> Back
         </button>

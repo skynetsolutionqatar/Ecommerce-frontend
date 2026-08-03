@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import toast from "react-hot-toast";
 import StarRatingInput from "@/components/store/StarRatingInput";
 import { useCreateReview } from "@/hooks/useReviews";
-import { getErrorMessage } from "@/lib/utils";
+import { showError, showSuccess } from "@/lib/toast";
 
 interface WriteReviewFormProps {
   productId: string;
@@ -32,11 +31,11 @@ export default function WriteReviewForm({
     e.preventDefault();
 
     if (rating < 1) {
-      toast.error("Please select a star rating");
+      showError("Please select a star rating");
       return;
     }
     if (!body.trim()) {
-      toast.error("Please write your review");
+      showError("Please write your review");
       return;
     }
 
@@ -48,10 +47,10 @@ export default function WriteReviewForm({
         title: title.trim() || undefined,
         body: body.trim(),
       });
-      toast.success("Review submitted! It will appear after admin approval.");
+      showSuccess("Review submitted! It will appear after admin approval.");
       onSuccess?.();
-    } catch (err) {
-      toast.error(getErrorMessage(err, "Could not submit review"));
+    } catch {
+      // Global mutation error toast handles API failures.
     }
   };
 

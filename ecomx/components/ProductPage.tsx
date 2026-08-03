@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
-import { PRODUCTS, fmt } from "@/lib/data";
+import { fmt } from "@/lib/data";
 import type { Product, WishlistItem } from "@/lib/types";
 import StoreImage from "./StoreImage";
 import LazyMount from "./LazyMount";
 import * as Icons from "./Icons";
 import { Colors, tw } from "@/lib/theme";
+import { useProducts } from "@/hooks/useProducts";
+import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { PRODUCT_STATUS } from "@/lib/Constant";
 import { useProductReviews, useMyReviews } from "@/hooks/useReviews";
 import { useMyOrders } from "@/hooks/useOrders";
 import { ORDER_STATUS } from "@/lib/Constant";
@@ -113,14 +116,54 @@ export default function ProductPage({
   }));
   const ratingSampleTotal = productReviews.length || 1;
 
-  const similar = PRODUCTS.filter(
-    (p) => p.id !== product.id && p.category === product.category
-  ).slice(0, 6);
-  const fallbackSimilar = PRODUCTS.filter((p) => p.id !== product.id).slice(
-    0,
-    6
+  const { data: categoryRelatedData, isLoading: categoryRelatedLoading } = useProducts(
+    {
+      status: PRODUCT_STATUS.ACTIVE,
+      categoryId: product.categoryId,
+      limit: 12,
+      sortBy: "totalSold",
+      sortOrder: "desc",
+    },
+    !!product.categoryId
   );
-  const relatedProducts = similar.length >= 3 ? similar : fallbackSimilar;
+
+  const categoryRelated = useMemo(
+    () =>
+      (categoryRelatedData?.products ?? [])
+        .filter((p) => p._id !== product.id)
+        .map(apiProductToStoreProduct),
+    [categoryRelatedData?.products, product.id]
+  );
+
+  const needsMoreRelated = !product.categoryId || categoryRelated.length < 3;
+
+  const { data: generalRelatedData, isLoading: generalRelatedLoading } = useProducts(
+    {
+      status: PRODUCT_STATUS.ACTIVE,
+      limit: 12,
+      sortBy: "totalSold",
+      sortOrder: "desc",
+    },
+    needsMoreRelated
+  );
+
+  const relatedProducts = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: Product[] = [];
+
+    for (const item of [...categoryRelated, ...(generalRelatedData?.products ?? []).map(apiProductToStoreProduct)]) {
+      if (item.id === product.id || seen.has(item.id)) continue;
+      seen.add(item.id);
+      merged.push(item);
+      if (merged.length >= 6) break;
+    }
+
+    return merged;
+  }, [categoryRelated, generalRelatedData?.products, product.id]);
+
+  const relatedLoading =
+    (!!product.categoryId && categoryRelatedLoading) ||
+    (needsMoreRelated && generalRelatedLoading);
 
   const maxQty =
     product.stock != null && product.stock > 0 ? product.stock : Number.POSITIVE_INFINITY;
@@ -980,7 +1023,25 @@ export default function ProductPage({
           <div
             className={`flex gap-3 overflow-x-auto scroll-smooth ${tw.scrollbarHide} pb-2`}
           >
-            {relatedProducts.map((p) => {
+            {relatedLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex shrink-0 flex-col rounded-lg border border-gray-200 bg-white overflow-hidden animate-pulse"
+                  style={{ width: "170px" }}
+                >
+                  <div className="h-[110px] bg-gray-100" />
+                  <div className="space-y-2 px-2.5 py-3">
+                    <div className="h-2 w-12 rounded bg-gray-100" />
+                    <div className="h-3 w-full rounded bg-gray-100" />
+                    <div className="h-3 w-2/3 rounded bg-gray-100" />
+                  </div>
+                </div>
+              ))
+            ) : relatedProducts.length === 0 ? (
+              <p className="text-sm text-gray-500">No related products found.</p>
+            ) : (
+            relatedProducts.map((p) => {
               const pd = p.originalPrice
                 ? Math.round(
                     ((p.originalPrice - p.price) / p.originalPrice) * 100
@@ -1055,8 +1116,8 @@ export default function ProductPage({
                         {p.name}
                       </span>
                     </button>
-                    <span className="mb-0.5 text-[10px] font-semibold text-green-600">
-                      In Stock
+                    <span className={`mb-0.5 text-[10px] font-semibold ${p.stock != null && p.stock <= 0 ? "text-red-500" : "text-green-600"}`}>
+                      {p.stock != null && p.stock <= 0 ? "Out of Stock" : "In Stock"}
                     </span>
                     <div className="text-[13px] font-extrabold text-gray-900">
                       {fmt(p.price)}
@@ -1109,7 +1170,8 @@ export default function ProductPage({
                   </div>
                 </div>
               );
-            })}
+            })
+            )}
           </div>
         </div>
         </LazyMount>

@@ -15,6 +15,7 @@ import {
   AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
+import { getErrorMessage } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function RegisterForm() {
@@ -49,8 +50,8 @@ export default function RegisterForm() {
         redirectParam ?? undefined
       );
       setSuccess(true);
-    } catch {
-      setLocalError(error ?? "Registration failed");
+    } catch (err) {
+      setLocalError(getErrorMessage(err, "Registration failed"));
     }
   };
 

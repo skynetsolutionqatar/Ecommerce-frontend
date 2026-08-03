@@ -1,9 +1,9 @@
 'use client';
 
 import { uploadApi, UploadedImage } from '@/lib/api/upload.api';
+import { getApiErrorMessage } from '@/lib/api/errors';
+import { showError, showSuccess } from '@/lib/toast';
 import { useState, useCallback } from 'react';
-import toast from 'react-hot-toast';
-
 
 interface UseUploadOptions {
   onSuccess?: (images: UploadedImage[]) => void;
@@ -21,10 +21,9 @@ export function useUpload(options: UseUploadOptions = {}) {
   } = options;
 
   const [isUploading, setIsUploading] = useState(false);
-  const [progress,    setProgress]    = useState(0);
+  const [progress, setProgress] = useState(0);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
-  // ─── Validate files before uploading ─────────────────────────────────────
   const validateFiles = (files: File[]): string | null => {
     if (files.length > maxFiles) {
       return `Maximum ${maxFiles} files allowed`;
@@ -45,11 +44,10 @@ export function useUpload(options: UseUploadOptions = {}) {
     return null;
   };
 
-  // ─── Upload product images ────────────────────────────────────────────────
   const uploadProductImages = useCallback(async (files: File[]) => {
     const error = validateFiles(files);
     if (error) {
-      toast.error(error);
+      showError(error);
       onError?.(error);
       return null;
     }
@@ -63,11 +61,11 @@ export function useUpload(options: UseUploadOptions = {}) {
       setProgress(100);
       setUploadedImages((prev) => [...prev, ...images]);
       onSuccess?.(images);
-      toast.success(`${images.length} image(s) uploaded`);
+      showSuccess(`${images.length} image(s) uploaded`);
       return images;
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Upload failed';
-      toast.error(msg);
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Upload failed');
+      showError(msg);
       onError?.(msg);
       return null;
     } finally {
@@ -76,14 +74,13 @@ export function useUpload(options: UseUploadOptions = {}) {
     }
   }, [maxFiles, maxSizeMB, onSuccess, onError]);
 
-  // ─── Upload single image (category, avatar, banner) ────────────────────────
   const uploadSingleImage = useCallback(async (
     file: File,
     type: 'category' | 'avatar' | 'banner'
   ) => {
     const error = validateFiles([file]);
     if (error) {
-      toast.error(error);
+      showError(error);
       onError?.(error);
       return null;
     }
@@ -101,11 +98,11 @@ export function useUpload(options: UseUploadOptions = {}) {
 
       setProgress(100);
       onSuccess?.([result]);
-      toast.success('Image uploaded successfully');
+      showSuccess('Image uploaded successfully');
       return result;
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Upload failed';
-      toast.error(msg);
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Upload failed');
+      showError(msg);
       onError?.(msg);
       return null;
     } finally {
@@ -114,11 +111,10 @@ export function useUpload(options: UseUploadOptions = {}) {
     }
   }, [onSuccess, onError]);
 
-  // ─── Upload review images ─────────────────────────────────────────────────
   const uploadReviewImages = useCallback(async (files: File[]) => {
     const error = validateFiles(files);
     if (error) {
-      toast.error(error);
+      showError(error);
       return null;
     }
 
@@ -130,9 +126,8 @@ export function useUpload(options: UseUploadOptions = {}) {
       setProgress(100);
       onSuccess?.(images);
       return images;
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Upload failed';
-      toast.error(msg);
+    } catch (err) {
+      showError(err, 'Upload failed');
       return null;
     } finally {
       setIsUploading(false);
@@ -140,15 +135,14 @@ export function useUpload(options: UseUploadOptions = {}) {
     }
   }, [onSuccess]);
 
-  // ─── Delete image ─────────────────────────────────────────────────────────
   const deleteImage = useCallback(async (publicId: string) => {
     try {
       await uploadApi.delete(publicId);
       setUploadedImages((prev) => prev.filter((img) => img.publicId !== publicId));
-      toast.success('Image deleted');
+      showSuccess('Image deleted');
       return true;
-    } catch {
-      toast.error('Failed to delete image');
+    } catch (err) {
+      showError(err, 'Failed to delete image');
       return false;
     }
   }, []);

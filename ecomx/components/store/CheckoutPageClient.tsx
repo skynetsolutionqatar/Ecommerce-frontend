@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import type { AxiosError } from "axios";
 import CheckoutPage from "@/components/CheckoutPage";
 import { useStore } from "@/components/StoreProvider";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/routes";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { useMyOrderMutations } from "@/hooks/useOrders";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { PlaceOrderPayload } from "@/types/order.types";
@@ -28,9 +28,7 @@ export default function CheckoutPageClient() {
         await refreshCart();
         return res.data.order.orderNumber;
       } catch (err) {
-        const axiosErr = err as AxiosError<{ message?: string }>;
-        const message = axiosErr.response?.data?.message;
-        throw new Error(message ?? "Could not place order. Please try again.");
+        throw new Error(getApiErrorMessage(err, "Could not place order. Please try again."));
       }
     },
     [place, refreshCart]

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { fetchProduct } from "@/lib/api/product.api";
+import { showError } from "@/lib/toast";
 import { authUserToStoreUser } from "@/lib/auth-utils";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
 import { ROUTES, shopUrl } from "@/lib/routes";
@@ -176,8 +177,8 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
 
         setWishlistOpen(false);
         setCartOpen(true);
-      } catch {
-        // Product may have been removed
+      } catch (err) {
+        showError(err, "Could not move item to cart");
       }
     },
     [addToCart, isWishlisted, moveToCart, refreshCart, removeFromWishlist]

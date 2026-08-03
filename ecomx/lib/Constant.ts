@@ -158,6 +158,11 @@ export const AUTH_PATH = {
 /** HTTP status codes used in client logic */
 export const HTTP_STATUS = {
   UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
 } as const;
 
 /** Sort direction */

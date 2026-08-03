@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import BackPanel from "@/components/admin/utils/BackPanel";
+import { showError } from "@/lib/toast";
 
 interface ListPageShellProps {
   isLoading?: boolean;
@@ -17,6 +19,18 @@ export default function ListPageShell({
   errorMessage = "Failed to load data",
   children,
 }: ListPageShellProps) {
+  const toastedRef = useRef(false);
+
+  useEffect(() => {
+    if (isError && !toastedRef.current) {
+      toastedRef.current = true;
+      showError(errorMessage);
+    }
+    if (!isError) {
+      toastedRef.current = false;
+    }
+  }, [isError, errorMessage]);
+
   if (isLoading) {
     return (
       <BackPanel showBack={false}>

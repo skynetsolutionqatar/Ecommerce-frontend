@@ -66,14 +66,9 @@ export default function AdminReviewDetailPage({
   };
 
   const handleDelete = async () => {
-    try {
-      await remove.mutateAsync(id);
-      toast.success("Review deleted");
-      router.push(ADMIN_ROUTES.reviews);
-    } catch {
-      toast.error("Failed to delete review");
-      throw new Error("Delete failed");
-    }
+    await remove.mutateAsync(id);
+    toast.success("Review deleted");
+    router.push(ADMIN_ROUTES.reviews);
   };
 
   const reviewLabel =

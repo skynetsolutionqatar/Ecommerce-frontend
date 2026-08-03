@@ -135,15 +135,15 @@ html {
 
 @media (max-width: 768px) {
   html {
-    --header-height: 112px;
-    --header-gap: 8px;
+    --header-height: 128px;
+    --header-gap: 14px;
   }
 }
 
 @media (max-width: 480px) {
   html {
-    --header-height: 96px;
-    --header-gap: 6px;
+    --header-height: 124px;
+    --header-gap: 14px;
   }
 }
 

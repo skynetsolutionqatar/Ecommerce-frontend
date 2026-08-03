@@ -59,6 +59,7 @@ export interface Product {
   tags: string[];
   description: string;
   category?: string;
+  categoryId?: string;
   stock?: number;
   sku?: string;
   brand_logo?: string;

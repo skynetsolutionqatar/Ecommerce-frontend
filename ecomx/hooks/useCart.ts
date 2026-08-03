@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cartApi } from "@/lib/api/cart.api";
+import { showError } from "@/lib/toast";
 import { clearGuestCart, loadGuestCart, saveGuestCart } from "@/lib/store/guest-cart";
 import {
   apiCartToCartItems,
@@ -71,8 +72,9 @@ export function useCart() {
 
         await fetchServerCart();
         mergedRef.current = true;
-      } catch {
+      } catch (err) {
         setItems(loadGuestCart());
+        showError(err, "Could not sync your cart");
       } finally {
         syncingRef.current = false;
         setIsSyncing(false);
@@ -88,10 +90,12 @@ export function useCart() {
       const stock = product.stock ?? existing?.stock;
 
       if (stock != null && stock <= 0) {
+        showError("This item is out of stock");
         return false;
       }
 
       if (stock != null && (existing?.qty ?? 0) + qtyToAdd > stock) {
+        showError("Not enough stock available");
         return false;
       }
 
@@ -114,8 +118,9 @@ export function useCart() {
         await cartApi.add({ productId: product.id, quantity: qtyToAdd });
         await fetchServerCart();
         return true;
-      } catch {
+      } catch (err) {
         setItems(previousItems);
+        showError(err, "Could not add item to cart");
         return false;
       }
     },
@@ -137,8 +142,9 @@ export function useCart() {
         await cartApi.removeItem(id);
         await fetchServerCart();
         return true;
-      } catch {
+      } catch (err) {
         setItems(previousItems);
+        showError(err, "Could not remove item from cart");
         return false;
       }
     },
@@ -173,8 +179,9 @@ export function useCart() {
         await cartApi.updateItem(id, { quantity: qty });
         await fetchServerCart();
         return true;
-      } catch {
+      } catch (err) {
         setItems(previousItems);
+        showError(err, "Could not update cart quantity");
         return false;
       }
     },
@@ -194,8 +201,9 @@ export function useCart() {
       await cartApi.clear();
       setItems([]);
       return true;
-    } catch {
+    } catch (err) {
       setItems(previousItems);
+      showError(err, "Could not clear cart");
       return false;
     }
   }, [items, isLoggedIn]);

@@ -54,11 +54,8 @@ export function truncate(str: string, max = 50): string {
   return `${str.slice(0, max)}…`;
 }
 
+import { getApiErrorMessage } from "@/lib/api/errors";
+
 export function getErrorMessage(error: unknown, fallback = "Something went wrong"): string {
-  if (typeof error === "string") return error;
-  if (error && typeof error === "object") {
-    const e = error as { response?: { data?: { message?: string } }; message?: string };
-    return e.response?.data?.message ?? e.message ?? fallback;
-  }
-  return fallback;
+  return getApiErrorMessage(error, fallback);
 }
