@@ -143,11 +143,10 @@ export default function ProductPurchasePanel({
                 key={s}
                 type="button"
                 onClick={() => setSelectedSize(s)}
-                className={`rounded-lg border-2 px-4 py-2 md:py-1.5 text-[13px] md:text-[12px] font-semibold cursor-pointer transition-all ${
-                  selectedSize === s
+                className={`rounded-lg border-2 px-4 py-2 md:py-1.5 text-[13px] md:text-[12px] font-semibold cursor-pointer transition-all ${selectedSize === s
                     ? "border-blue-600 bg-blue-50 text-blue-700"
                     : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-                }`}
+                  }`}
               >
                 {s}
               </button>
@@ -206,7 +205,7 @@ export default function ProductPurchasePanel({
           <svg
             className="h-[18px] w-[18px] md:h-4 md:w-4"
             viewBox="0 0 24 24"
-            viewBox="0 0 24 24"
+            //viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
