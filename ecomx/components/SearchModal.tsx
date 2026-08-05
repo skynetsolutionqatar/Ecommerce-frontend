@@ -156,7 +156,7 @@ export default function SearchModal({ open, onClose, onProductSelect }: SearchMo
 
         {!showResults ? (
           <div className="px-6 py-5">
-            <div className={`mb-4 ${type.eyebrow} text-[11px] tracking-[0.12em] text-muted`}>
+            <div className={`mb-4 ${type.eyebrow} text-[13px] md:text-[11px] tracking-[0.12em] text-muted`}>
               {popularTerms.length > 0 ? "Browse Categories" : "Popular Searches"}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ export default function SearchModal({ open, onClose, onProductSelect }: SearchMo
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-[11px] text-muted">Type at least 2 characters to search</p>
+            <p className="mt-4 text-[13px] md:text-[11px] text-muted">Type at least 2 characters to search</p>
           </div>
         ) : null}
       </div>

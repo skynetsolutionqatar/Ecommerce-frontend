@@ -61,7 +61,7 @@ export default function CheckoutPage({
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
       errors[field] ? "border-red-400" : "border-border"
     }`;
-  const labelClass = "mb-1.5 block text-xs font-bold text-primary/80";
+  const labelClass = "mb-1.5 block text-sm md:text-xs font-bold text-primary/80";
 
   const setField = (field: keyof CheckoutFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -209,7 +209,7 @@ export default function CheckoutPage({
                     className={inputClass("fullName")}
                   />
                   {errors.fullName ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.fullName}</p>
                   ) : null}
                 </div>
                 <div>
@@ -226,7 +226,7 @@ export default function CheckoutPage({
                     className={inputClass("email")}
                   />
                   {errors.email ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.email}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.email}</p>
                   ) : null}
                 </div>
                 <div>
@@ -243,7 +243,7 @@ export default function CheckoutPage({
                     className={inputClass("phone")}
                   />
                   {errors.phone ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.phone}</p>
                   ) : null}
                 </div>
                 <button
@@ -274,7 +274,7 @@ export default function CheckoutPage({
                     className={inputClass("line1")}
                   />
                   {errors.line1 ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.line1}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.line1}</p>
                   ) : null}
                 </div>
                 <div>
@@ -302,7 +302,7 @@ export default function CheckoutPage({
                     className={inputClass("city")}
                   />
                   {errors.city ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.city}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.city}</p>
                   ) : null}
                 </div>
                 <div>
@@ -318,7 +318,7 @@ export default function CheckoutPage({
                     className={inputClass("country")}
                   />
                   {errors.country ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.country}</p>
+                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.country}</p>
                   ) : null}
                 </div>
                 <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[13px] text-gray-700">
@@ -353,7 +353,7 @@ export default function CheckoutPage({
                     </span>
                     <div>
                       <p className="text-sm font-bold text-primary">Cash on Delivery</p>
-                      <p className="text-xs text-muted">Pay when your order arrives</p>
+                      <p className="text-sm md:text-xs text-muted">Pay when your order arrives</p>
                     </div>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ export default function CheckoutPage({
                   ✓ No online payment required · Pay the delivery agent in QAR
                 </div>
                 {!isLoggedIn ? (
-                  <p className="text-xs font-medium text-amber-700">
+                  <p className="text-sm md:text-xs font-medium text-amber-700">
                     Sign in is required to place an order.{" "}
                     <button
                       type="button"
@@ -373,7 +373,7 @@ export default function CheckoutPage({
                   </p>
                 ) : null}
                 {submitError ? (
-                  <p className="text-xs font-medium text-red-600">{submitError}</p>
+                  <p className="text-sm md:text-xs font-medium text-red-600">{submitError}</p>
                 ) : null}
                 <div className="mt-2 flex gap-2.5">
                   <button
@@ -413,8 +413,8 @@ export default function CheckoutPage({
                   decoding="async"
                 />
                 <div className="flex-1">
-                  <div className="text-xs font-semibold leading-snug text-primary">{item.name}</div>
-                  <div className="text-[11px] text-muted">Qty: {item.qty}</div>
+                  <div className="text-sm md:text-xs font-semibold leading-snug text-primary">{item.name}</div>
+                  <div className="text-[13px] md:text-[11px] text-muted">Qty: {item.qty}</div>
                 </div>
                 <div className="text-[13px] font-bold text-primary">
                   QAR {(item.price * item.qty).toLocaleString()}
@@ -429,12 +429,12 @@ export default function CheckoutPage({
                     className={`flex justify-between ${i === 2 ? "mt-1 border-t border-border pt-2" : ""}`}
                   >
                     <span
-                      className={`${i === 2 ? "text-sm font-bold text-primary" : "text-xs text-muted"}`}
+                      className={`${i === 2 ? "text-sm font-bold text-primary" : "text-sm md:text-xs text-muted"}`}
                     >
                       {l}
                     </span>
                     <span
-                      className={`${i === 2 ? `${type.price} text-sm font-extrabold text-primary` : "text-xs font-medium"} ${
+                      className={`${i === 2 ? `${type.price} text-sm font-extrabold text-primary` : "text-sm md:text-xs font-medium"} ${
                         i === 1 ? "text-gray-600" : "text-primary/80"
                       }`}
                     >

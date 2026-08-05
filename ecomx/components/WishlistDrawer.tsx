@@ -17,10 +17,10 @@ const closeBtnClass =
   "flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-[#0a255d]/30 hover:bg-gray-50 hover:text-[#0a255d]";
 
 const primaryBtnSmClass =
-  "inline-flex items-center justify-center gap-1 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition hover:opacity-90";
+  "inline-flex items-center justify-center gap-1 rounded-lg px-3.5 py-2.5 md:py-2 text-sm md:text-xs font-semibold text-white transition hover:opacity-90";
 
 const removeBtnClass =
-  "inline-flex shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-600 transition hover:border-[#0a255d]/40 hover:text-[#0a255d]";
+  "inline-flex shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 md:py-2 text-sm md:text-xs font-semibold text-gray-600 transition hover:border-[#0a255d]/40 hover:text-[#0a255d]";
 
 export default function WishlistDrawer({
   wishlist,
@@ -42,7 +42,7 @@ export default function WishlistDrawer({
             <span className="text-base font-bold">Wishlist</span>
             {wishlist.length > 0 ? (
               <span
-                className="rounded-full px-2.5 py-0.5 text-xs font-bold text-white"
+                className="rounded-full px-2.5 py-0.5 text-sm md:text-xs font-bold text-white"
                 style={{ background: Colors.base_color }}
               >
                 {wishlist.length}
@@ -79,7 +79,7 @@ export default function WishlistDrawer({
                   className="h-[72px] w-[72px] shrink-0 rounded-xl object-cover bg-gray-50"
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="mb-0.5 text-[11px] text-gray-500">{item.brand}</div>
+                  <div className="mb-0.5 text-[12px] md:text-[11px] text-gray-500">{item.brand}</div>
                   <div className="mb-2 text-sm font-semibold text-gray-900">{item.name}</div>
                   <div className="mb-3 font-mono text-[13px] font-bold text-[#0a255d]">{fmt(item.price)}</div>
                   <div className="flex flex-col gap-2 sm:flex-row">

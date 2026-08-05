@@ -343,7 +343,7 @@ export default function LoginModal({
                     <button
                       type="button"
                       onClick={() => setMode("forgot")}
-                      className="cursor-pointer border-0 bg-transparent text-xs font-bold text-[#0a255d] hover:underline"
+                      className="cursor-pointer border-0 bg-transparent text-sm md:text-xs font-bold text-[#0a255d] hover:underline"
                     >
                       Forgot password?
                     </button>
@@ -351,8 +351,8 @@ export default function LoginModal({
                 )}
 
                 {error && (
-                  <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-semibold text-red-700">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[10px]">
+                  <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm md:text-xs font-semibold text-red-700">
+                    <span className="mt-0.5 flex h-5 w-5 md:h-4 md:w-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[12px] md:text-[10px]">
                       !
                     </span>
                     {error}
@@ -378,7 +378,7 @@ export default function LoginModal({
                   <>
                     <div className="flex items-center gap-3 py-1">
                       <div className="h-px flex-1 bg-gray-200" />
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                      <span className="text-[13px] md:text-[11px] font-bold uppercase tracking-wider text-gray-400">
                         or continue with
                       </span>
                       <div className="h-px flex-1 bg-gray-200" />
@@ -388,7 +388,7 @@ export default function LoginModal({
                         type="button"
                         className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
                       >
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#4285F4] text-[10px] font-black text-white">
+                        <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-[#4285F4] text-[12px] md:text-[10px] font-black text-white">
                           G
                         </span>
                         Google
@@ -397,7 +397,7 @@ export default function LoginModal({
                         type="button"
                         className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
                       >
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0078D4] text-[10px] font-black text-white">
+                        <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-[#0078D4] text-[12px] md:text-[10px] font-black text-white">
                           M
                         </span>
                         Microsoft
@@ -438,7 +438,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-600">
+      <label className="mb-2 flex items-center gap-1.5 text-[13px] md:text-[11px] font-bold uppercase tracking-wider text-gray-600">
         <span className="flex text-[#0a255d]">{icon}</span>
         {label}
       </label>

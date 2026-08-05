@@ -78,7 +78,7 @@ export default function FlashSaleSection({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-label text-[11px] font-medium text-slate-300">Ends in</span>
+          <span className="font-label text-[13px] md:text-[11px] font-medium text-slate-300">Ends in</span>
           <div className="flex items-center gap-1">
             {[
               { v: time.h, l: "H" },

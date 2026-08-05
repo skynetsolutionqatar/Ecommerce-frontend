@@ -27,7 +27,7 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
         {[1, 2, 3, 4, 5].map((i) => (
           <svg
             key={i}
-            className="h-2.5 w-2.5"
+            className="h-3.5 w-3.5 md:h-2.5 md:w-2.5"
             viewBox="0 0 24 24"
             fill={i <= Math.round(rating) ? "#F59E0B" : "#D1D5DB"}
           >
@@ -36,7 +36,7 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
         ))}
       </div>
       {reviews > 0 ? (
-        <span className="font-label text-[9px] text-gray-400">({reviews})</span>
+        <span className="font-label text-[11px] md:text-[9px] text-gray-400">({reviews})</span>
       ) : null}
     </div>
   );
@@ -111,12 +111,12 @@ export default function HomeScrollProductCard({
             />
           </div>
         ) : (
-          <span className="text-[10px] text-gray-400">No image</span>
+          <span className="text-[12px] md:text-[10px] text-gray-400">No image</span>
         )}
 
         {discount ? (
           <span
-            className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5 font-label text-[9.5px] font-black text-white"
+            className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5 font-label text-[11px] md:text-[9.5px] font-black text-white"
             style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)" }}
           >
             -{discount}%
@@ -125,7 +125,7 @@ export default function HomeScrollProductCard({
 
         {product.isNew ? (
           <span
-            className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 font-label text-[9px] font-black text-white"
+            className="absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 font-label text-[11px] md:text-[9px] font-black text-white"
             style={{ background: "linear-gradient(135deg,#0891b2,#0e7490)" }}
           >
             NEW
@@ -140,11 +140,10 @@ export default function HomeScrollProductCard({
               e.stopPropagation();
               onWishlistToggle(apiProductToWishlistItem(product));
             }}
-            className="absolute bottom-1.5 right-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full border-0 bg-white/95 shadow-sm"
+            className="absolute bottom-1.5 right-1.5 z-10 flex h-8 w-8 md:h-7 md:w-7 items-center justify-center rounded-full border-0 bg-white/95 shadow-sm"
           >
             <svg
-              width="13"
-              height="13"
+              className="h-[15px] w-[15px] md:h-[13px] md:w-[13px]"
               viewBox="0 0 24 24"
               fill={isWishlisted ? "#ef4444" : "none"}
               stroke={isWishlisted ? "#ef4444" : "#9ca3af"}
@@ -158,12 +157,12 @@ export default function HomeScrollProductCard({
 
       <div className="flex flex-1 flex-col px-2.5 pt-2 pb-2.5">
         {showBrand && product.brand ? (
-          <div className={`mb-0.5 ${type.eyebrow} text-[7.5px] tracking-widest text-gray-400 uppercase`}>
+          <div className={`mb-0.5 ${type.eyebrow} text-[9px] md:text-[7.5px] tracking-widest text-gray-400 uppercase`}>
             {product.brand}
           </div>
         ) : null}
 
-        <div className="mb-1 line-clamp-2 font-sans text-[11.5px] font-semibold leading-snug text-gray-800">
+        <div className="mb-1 line-clamp-2 font-sans text-[13px] md:text-[11.5px] font-semibold leading-snug text-gray-800">
           {product.name}
         </div>
 
@@ -175,11 +174,11 @@ export default function HomeScrollProductCard({
 
         {compareAt && compareAt > product.price ? (
           <div className="flex items-center gap-1.5">
-            <span className={`${type.price} text-[10px] text-gray-400 line-through`}>
+            <span className={`${type.price} text-[11px] md:text-[10px] text-gray-400 line-through`}>
               {formatPrice(compareAt)}
             </span>
             {discount ? (
-              <span className="font-label text-[9.5px] font-bold text-green-600">{discount}% off</span>
+              <span className="font-label text-[11px] md:text-[9.5px] font-bold text-green-600">{discount}% off</span>
             ) : null}
           </div>
         ) : null}

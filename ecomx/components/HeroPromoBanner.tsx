@@ -20,7 +20,7 @@ export default function HeroPromoBanner({ onExplore }: HeroPromoBannerProps) {
 
         {/* Copy */}
         <div className="relative z-[1] max-w-md">
-          <span className={`${type.eyebrow} inline-block rounded-full bg-accent/20 px-3 py-1 text-[10px] tracking-widest text-accent-light`}>
+          <span className={`${type.eyebrow} inline-block rounded-full bg-accent/20 px-3 py-1 text-[12px] md:text-[10px] tracking-widest text-accent-light`}>
             New this week
           </span>
           <h2 className="mt-3 font-display text-3xl font-extrabold leading-[1.1] text-white sm:text-4xl">

@@ -64,7 +64,7 @@ export default function WriteReviewForm({
       ) : null}
 
       <div>
-        <label className="mb-2 block text-xs font-bold text-gray-600">Your rating</label>
+        <label className="mb-2 block text-sm md:text-xs font-bold text-gray-600">Your rating</label>
         <StarRatingInput
           value={rating}
           onChange={setRating}
@@ -74,7 +74,7 @@ export default function WriteReviewForm({
       </div>
 
       <div>
-        <label htmlFor="review-title" className="mb-1.5 block text-xs font-bold text-gray-600">
+        <label htmlFor="review-title" className="mb-1.5 block text-sm md:text-xs font-bold text-gray-600">
           Title <span className="font-normal text-gray-400">(optional)</span>
         </label>
         <input
@@ -89,7 +89,7 @@ export default function WriteReviewForm({
       </div>
 
       <div>
-        <label htmlFor="review-body" className="mb-1.5 block text-xs font-bold text-gray-600">
+        <label htmlFor="review-body" className="mb-1.5 block text-sm md:text-xs font-bold text-gray-600">
           Review <span className="text-red-500">*</span>
         </label>
         <textarea
@@ -105,7 +105,7 @@ export default function WriteReviewForm({
         />
       </div>
 
-      <p className="text-[11px] text-gray-400">
+      <p className="text-[13px] md:text-[11px] text-gray-400">
         Reviews are moderated before they appear on the product page.
       </p>
 

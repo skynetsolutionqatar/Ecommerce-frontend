@@ -12,7 +12,7 @@ export default function TestimonialsSection() {
 
       <div className="relative z-[1] w-full">
         <div className="mb-16 text-center">
-          <div className={`mb-4 ${type.eyebrow} text-[11px] text-accent`}>
+          <div className={`mb-4 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}>
             Real Stories
           </div>
           <h2 className="font-display text-[clamp(36px,4vw,56px)] font-bold leading-tight text-primary">
@@ -43,7 +43,7 @@ export default function TestimonialsSection() {
                 <div>
                   <div className="text-sm font-bold text-primary">{t.name}</div>
                   <div className="mt-0.5 text-xs text-accent">{t.role}</div>
-                  <div className="mt-1 text-[11px] text-muted">Purchased: {t.product}</div>
+                  <div className="mt-1 text-[13px] md:text-[11px] text-muted">Purchased: {t.product}</div>
                 </div>
               </div>
             </div>

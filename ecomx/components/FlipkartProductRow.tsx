@@ -52,7 +52,7 @@ export default function FlipkartProductRow({
             {title}
           </h2>
           {subtitle ? (
-            <p className="mt-0.5 font-label text-[11px] text-gray-500">{subtitle}</p>
+            <p className="mt-0.5 font-label text-[13px] md:text-[11px] text-gray-500">{subtitle}</p>
           ) : null}
         </div>
         <motion.button
@@ -76,7 +76,7 @@ export default function FlipkartProductRow({
               aria-label="Previous"
             >
               <svg
-                className="h-3.5 w-3.5 text-gray-600"
+                className="h-4 w-4 md:h-3.5 md:w-3.5 text-gray-600"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2.5}
@@ -94,7 +94,7 @@ export default function FlipkartProductRow({
               aria-label="Next"
             >
               <svg
-                className="h-3.5 w-3.5 text-gray-600"
+                className="h-4 w-4 md:h-3.5 md:w-3.5 text-gray-600"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2.5}

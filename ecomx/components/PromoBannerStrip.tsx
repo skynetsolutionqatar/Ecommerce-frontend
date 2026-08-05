@@ -54,7 +54,7 @@ export default function PromoBannerStrip({ onCategoryClick }: PromoBannerStripPr
           />
           <div className="relative z-[1]">
             <span
-              className={`mb-2 inline-block rounded-full px-2.5 py-0.5 ${type.eyebrow} text-[9px] font-bold tracking-widest`}
+              className={`mb-2 inline-block rounded-full px-2.5 py-0.5 ${type.eyebrow} text-[11px] md:text-[9px] font-bold tracking-widest`}
               style={{ background: `${b.accent}25`, color: b.accent, border: `1px solid ${b.accent}45` }}
             >
               {b.tag}

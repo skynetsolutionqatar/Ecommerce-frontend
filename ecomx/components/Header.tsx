@@ -148,7 +148,7 @@ export default function Header({
           style={{ background: `${Colors.base_color}` }}
         >
           <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-3 sm:px-5 md:px-8 lg:px-[50px]">
-            <div className="flex items-center gap-5 text-[11px] text-white/85">
+            <div className="flex items-center gap-5 text-[12px] md:text-[11px] text-white/85">
               <span className="flex items-center gap-1.5">
                 🚚 Free Delivery on orders over QAR 299
               </span>
@@ -162,7 +162,7 @@ export default function Header({
                 🎧 Expert Support
               </span>
             </div>
-            <div className="flex items-center gap-3 text-[11px] text-white/85">
+            <div className="flex items-center gap-3 text-[12px] md:text-[11px] text-white/85">
               <button
                 type="button"
                 className="flex items-center gap-1 hover:text-white transition-colors bg-transparent border-0 cursor-pointer"
@@ -351,7 +351,7 @@ export default function Header({
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white"
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 md:h-4 md:w-4 items-center justify-center rounded-full bg-red-500 text-[10px] md:text-[9px] font-black text-white"
                     >
                       {wishlist.length > 9 ? "9+" : wishlist.length}
                     </motion.span>
@@ -373,7 +373,7 @@ export default function Header({
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white"
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 md:h-4 md:w-4 items-center justify-center rounded-full bg-red-500 text-[10px] md:text-[9px] font-black text-white"
                     >
                       {cartCount > 9 ? "9+" : cartCount}
                     </motion.span>
@@ -422,10 +422,10 @@ export default function Header({
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <span className="flex h-5 w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                      <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                         {resolveCategoryIcon(cat.name)}
                       </span>
-                      <span className="whitespace-nowrap font-label text-[8.5px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
+                      <span className="whitespace-nowrap font-label text-[11px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
                         {cat.name}
                       </span>
                     </motion.button>
@@ -437,10 +437,10 @@ export default function Header({
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <span className="flex h-5 w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                    <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                       {CategoryIcons.More}
                     </span>
-                    <span className="whitespace-nowrap font-label text-[8.5px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
+                    <span className="whitespace-nowrap font-label text-[11px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
                       More Categories
                     </span>
                   </motion.button>
@@ -451,10 +451,10 @@ export default function Header({
                   onClick={() => goTo(ROUTES.shop)}
                   className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center text-gray-600">
+                  <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600">
                     {CategoryIcons.More}
                   </span>
-                  <span className="font-label text-[9px] text-gray-600">
+                  <span className="font-label text-[11px] md:text-[9px] text-gray-600">
                     Shop All
                   </span>
                 </button>
@@ -521,9 +521,9 @@ export default function Header({
               {categories.length > 0 && (
                 <div className="border-b border-gray-100 p-4">
                   <p
-                    className={`mb-2 px-1 ${type.eyebrow} text-[9px] text-gray-400`}
+                    className={`mb-2 px-1 ${type.eyebrow} text-[11px] text-gray-400`}
                   >
-                    CATEGORIErS
+                    CATEGORIES
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
@@ -531,9 +531,9 @@ export default function Header({
                         key={cat._id}
                         type="button"
                         onClick={() => handleCategoryClick(cat)}
-                        className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-[11px] font-medium text-gray-700"
+                        className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-[13px] font-medium text-gray-700"
                       >
-                        <span className="flex h-4 w-4 items-center justify-center text-gray-500">
+                        <span className="flex h-5 w-5 items-center justify-center text-gray-500">
                           {resolveCategoryIcon(cat.name)}
                         </span>
                         {cat.name}
@@ -545,9 +545,9 @@ export default function Header({
                       goTo(ROUTES.shop);
                       setMobileOpen(false);
                     }}
-                      className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-[11px] font-medium text-gray-700"
+                      className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-[13px] font-medium text-gray-700"
                     >
-                      <span className="flex h-4 w-4 items-center justify-center text-gray-500">
+                      <span className="flex h-5 w-5 items-center justify-center text-gray-500">
                         {CategoryIcons.More}
                       </span>
                       More Categories
@@ -585,10 +585,10 @@ export default function Header({
 
               <nav className="flex-1 p-4">
                 <p
-                  className={`mb-2 px-1 ${type.eyebrow} text-[9px] text-gray-400`}
-                >
-                  NAVIGATION
-                </p>
+                  className={`mb-2 px-1 ${type.eyebrow} text-[11px] text-gray-400`}
+                  >
+                    NAVIGATION
+                  </p>
                 {MOBILE_NAV_LINKS.map((item) => (
                   <motion.button
                     key={item.label}
@@ -622,7 +622,7 @@ export default function Header({
                       <div className="truncate font-label text-[13px] font-bold text-gray-900">
                         {user.name}
                       </div>
-                      <div className="truncate font-label text-[10.5px] text-gray-500">
+                      <div className="truncate font-label text-[12px] md:text-[10.5px] text-gray-500">
                         {user.email}
                       </div>
                     </div>
@@ -632,7 +632,7 @@ export default function Header({
                         onLogout?.();
                         setMobileOpen(false);
                       }}
-                      className="shrink-0 rounded-xl border border-gray-300 px-3 py-1.5 font-label text-[11px] font-bold text-gray-700"
+                      className="shrink-0 rounded-xl border border-gray-300 px-3 py-2 font-label text-[13px] md:text-[11px] font-bold text-gray-700"
                       whileTap={{ scale: 0.95 }}
                     >
                       Sign Out

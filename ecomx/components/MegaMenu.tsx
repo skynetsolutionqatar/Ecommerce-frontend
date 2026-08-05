@@ -59,7 +59,7 @@ export default function MegaMenu({ section, onClose }: MegaMenuProps) {
             <StoreImage src={img.url} alt={img.label} className="block h-[110px] w-full object-cover" />
             <div className="px-3 pb-3 pt-2.5">
               <div className="text-[12.5px] font-semibold text-primary">{img.label}</div>
-              <div className="mt-0.5 text-[11px] font-bold text-accent">{img.price}</div>
+              <div className="mt-0.5 text-[13px] md:text-[11px] font-bold text-accent">{img.price}</div>
             </div>
           </button>
         ))}
@@ -70,7 +70,7 @@ export default function MegaMenu({ section, onClose }: MegaMenuProps) {
 
 function ColLabel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`mb-3 ${type.eyebrow} text-[10px] tracking-[0.13em] text-accent ${className}`}>
+    <div className={`mb-3 ${type.eyebrow} text-[12px] md:text-[10px] tracking-[0.13em] text-accent ${className}`}>
       {children}
     </div>
   );

@@ -70,11 +70,11 @@ export default function NewsletterSection() {
                 <span className="text-xl">🎉</span>
                 <div>
                   <div className="text-[13px] font-bold text-green-800">You&apos;re in!</div>
-                  <div className="text-[11px] text-green-600">Check your inbox for a welcome gift.</div>
+                  <div className="text-[13px] md:text-[11px] text-green-600">Check your inbox for a welcome gift.</div>
                 </div>
               </div>
             )}
-            <p className="mt-2 text-center text-[10.5px] text-gray-400 md:text-left">
+            <p className="mt-2 text-center text-[12px] md:text-[10.5px] text-gray-400 md:text-left">
               No spam. Unsubscribe anytime. Your data is yours.
             </p>
           </div>

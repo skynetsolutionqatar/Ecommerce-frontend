@@ -46,11 +46,10 @@ function WishlistButton({
       type="button"
       aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
       onClick={onToggle}
-      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-white/95 shadow-sm transition hover:scale-105"
+      className="flex h-9 w-9 md:h-8 md:w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-white/95 shadow-sm transition hover:scale-105"
     >
       <svg
-        width="15"
-        height="15"
+        className="h-[17px] w-[17px] md:h-[15px] md:w-[15px]"
         viewBox="0 0 24 24"
         fill={isWishlisted ? "#ef4444" : "none"}
         stroke={isWishlisted ? "#ef4444" : "#9ca3af"}
@@ -81,7 +80,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onAdd}
-          className="flex-1 cursor-pointer rounded-lg py-2 text-[11px] font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed"
+          className="flex-1 cursor-pointer rounded-lg py-2.5 md:py-2 text-[12px] md:text-[11px] font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed"
           style={{ background: Colors.base_color }}
         >
           Add to Cart
@@ -91,7 +90,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onBuy}
-          className="flex-1 cursor-pointer rounded-lg bg-gray-900 py-2 text-[11px] font-bold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed"
+          className="flex-1 cursor-pointer rounded-lg bg-gray-900 py-2.5 md:py-2 text-[12px] md:text-[11px] font-bold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed"
         >
           Buy Now
         </button>
@@ -147,10 +146,10 @@ export default function StoreProductCard({
           {image ? (
             <StoreImage src={image} alt={product.name} className="h-full w-full object-contain p-2" />
           ) : (
-            <div className="flex h-full items-center justify-center text-xs text-gray-400">No image</div>
+            <div className="flex h-full items-center justify-center text-sm md:text-xs text-gray-400">No image</div>
           )}
           {discountPct ? (
-            <span className="absolute left-1 top-1 rounded bg-red-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
+            <span className="absolute left-1 top-1 rounded bg-red-600 px-1.5 py-0.5 text-[11px] md:text-[9px] font-bold text-white">
               {discountPct}% OFF
             </span>
           ) : null}
@@ -159,20 +158,20 @@ export default function StoreProductCard({
         <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center sm:gap-4">
           <div className="min-w-0 flex-1">
             {categoryName ? (
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+              <p className="mb-0.5 text-[12px] md:text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                 {categoryName}
               </p>
             ) : null}
             <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900 sm:text-[14px]">
               {product.name}
             </h3>
-            <p className="mt-0.5 text-[11px] text-gray-500">{product.brand ?? "—"} · {product.sku ?? product.slug}</p>
+            <p className="mt-0.5 text-[12px] md:text-[11px] text-gray-500">{product.brand ?? "—"} · {product.sku ?? product.slug}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-[15px] font-bold text-gray-900">{formatPrice(product.price)}</span>
               {compareAt && compareAt > product.price ? (
-                <span className="text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
+                <span className="text-[12px] md:text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
               ) : null}
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${stock.className}`}>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>
                 {stock.text}
               </span>
             </div>
@@ -217,17 +216,17 @@ export default function StoreProductCard({
             className="h-full w-full object-contain p-3 transition group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-gray-400">No image</div>
+          <div className="flex h-full items-center justify-center text-sm md:text-xs text-gray-400">No image</div>
         )}
 
         {discountPct ? (
-          <span className="absolute left-2 top-2 rounded-md bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="absolute left-2 top-2 rounded-md bg-red-600 px-2 py-0.5 text-[11px] md:text-[10px] font-bold text-white">
             {discountPct}% OFF
           </span>
         ) : null}
 
         {product.isNew ? (
-          <span className="absolute right-2 top-2 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="absolute right-2 top-2 rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] md:text-[10px] font-bold text-white">
             NEW
           </span>
         ) : null}
@@ -241,23 +240,23 @@ export default function StoreProductCard({
 
       <div className="flex flex-1 flex-col border-t border-gray-100 p-3">
         {categoryName ? (
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">{categoryName}</p>
+          <p className="mb-1 text-[12px] md:text-[10px] font-semibold uppercase tracking-wide text-gray-400">{categoryName}</p>
         ) : null}
 
         <h3 className="mb-1 line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900">{product.name}</h3>
 
-        <p className="mb-2 text-[11px] text-gray-500">{product.sku ?? product.slug}</p>
+        <p className="mb-2 text-[12px] md:text-[11px] text-gray-500">{product.sku ?? product.slug}</p>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className="text-[15px] font-bold text-gray-900">{formatPrice(product.price)}</span>
           {compareAt && compareAt > product.price ? (
-            <span className="text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
+            <span className="text-[12px] md:text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
           ) : null}
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-          <span className="text-[11px] font-medium text-gray-500">{product.brand ?? "—"}</span>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${stock.className}`}>{stock.text}</span>
+          <span className="text-[12px] md:text-[11px] font-medium text-gray-500">{product.brand ?? "—"}</span>
+          <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>{stock.text}</span>
         </div>
 
         {!outOfStock && (onAddToCart || onBuyNow) ? (

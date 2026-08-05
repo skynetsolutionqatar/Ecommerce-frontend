@@ -23,11 +23,11 @@ export default function HardwarePromoBanner({ onCategoryClick }: HardwarePromoBa
           {/* Copy side */}
           <div className="relative z-[1] flex flex-col justify-center gap-4 px-6 py-8 sm:px-9 sm:py-10 md:py-12">
             <div className="flex items-center gap-2">
-              <span className={`${type.eyebrow} rounded-full bg-accent/12 px-3 py-1 text-[10px] text-accent`}>
+              <span className={`${type.eyebrow} rounded-full bg-accent/12 px-3 py-1 text-[12px] md:text-[10px] text-accent`}>
                 {eyebrow}
               </span>
               {offer && (
-                <span className="font-label rounded-full bg-gradient-to-r from-accent-hover to-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_3px_10px_color-mix(in_srgb,var(--color-accent)_30%,transparent)]">
+                <span className="font-label rounded-full bg-gradient-to-r from-accent-hover to-accent px-3 py-1 text-[12px] md:text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_3px_10px_color-mix(in_srgb,var(--color-accent)_30%,transparent)]">
                   {offer}
                 </span>
               )}
@@ -75,7 +75,7 @@ export default function HardwarePromoBanner({ onCategoryClick }: HardwarePromoBa
             <div className="pointer-events-none absolute h-[280px] w-[280px] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-accent)_18%,transparent),transparent_70%)] sm:h-[360px] sm:w-[360px]" />
             {offer && (
               <span className="absolute right-6 top-6 z-[2] flex h-16 w-16 flex-col items-center justify-center rounded-full bg-sale text-white shadow-[0_6px_18px_color-mix(in_srgb,var(--color-sale)_40%,transparent)] sm:right-9 sm:top-9">
-                <span className="font-label text-[9px] font-semibold uppercase leading-none">Save</span>
+                <span className="font-label text-[11px] md:text-[9px] font-semibold uppercase leading-none">Save</span>
                 <span className="font-display text-lg font-bold leading-none">25%</span>
               </span>
             )}

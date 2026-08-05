@@ -63,10 +63,10 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
       <h2 className="mb-4 text-sm font-bold text-primary">Order Tracking</h2>
 
       {isCancelled ? (
-        <p className="mb-4 text-xs font-medium text-muted">This order was cancelled.</p>
+        <p className="mb-4 text-sm md:text-xs font-medium text-muted">This order was cancelled.</p>
       ) : null}
       {isRefunded ? (
-        <p className="mb-4 text-xs font-medium text-muted">This order has been refunded.</p>
+        <p className="mb-4 text-sm md:text-xs font-medium text-muted">This order has been refunded.</p>
       ) : null}
 
       <div className="flex flex-col sm:flex-row sm:items-start">
@@ -89,7 +89,7 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
                 <div className="flex items-center gap-3 sm:flex-col sm:gap-2">
                   <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    className={`flex h-9 w-9 md:h-8 md:w-8 shrink-0 items-center justify-center rounded-full text-sm md:text-xs font-bold ${
                       state === "done"
                         ? "bg-blue-600 text-white"
                         : state === "current"
@@ -102,16 +102,16 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
                   <div className="min-w-0 pb-4 sm:pb-0 sm:text-center">
                     <p
-                      className={`text-xs font-semibold ${
+                      className={`text-sm md:text-xs font-semibold ${
                         state === "upcoming" ? "text-gray-400" : "text-gray-900"
                       }`}
                     >
                       {ORDER_STATUS_LABEL[step]}
                     </p>
                     {ts ? (
-                      <p className="mt-0.5 text-[10px] text-muted">{formatDate(ts)}</p>
+                      <p className="mt-0.5 text-[12px] md:text-[10px] text-muted">{formatDate(ts)}</p>
                     ) : state === "current" ? (
-                      <p className="mt-0.5 text-[10px] font-medium text-blue-600">In progress</p>
+                      <p className="mt-0.5 text-[12px] md:text-[10px] font-medium text-blue-600">In progress</p>
                     ) : null}
                   </div>
                 </div>
@@ -139,13 +139,13 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
       {isCancelled ? (
         <div className="mt-4 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+          <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-red-500 text-[12px] md:text-[10px] text-white">
             ✕
           </span>
           <div>
-            <p className="text-xs font-bold text-red-700">{ORDER_STATUS_LABEL.cancelled}</p>
+            <p className="text-sm md:text-xs font-bold text-red-700">{ORDER_STATUS_LABEL.cancelled}</p>
             {historyTime(ORDER_STATUS.CANCELLED, order.statusHistory) ? (
-              <p className="text-[10px] text-red-600">
+              <p className="text-[12px] md:text-[10px] text-red-600">
                 {formatDate(historyTime(ORDER_STATUS.CANCELLED, order.statusHistory)!)}
               </p>
             ) : null}
@@ -155,13 +155,13 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
       {isRefunded ? (
         <div className="mt-4 flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-500 text-[10px] text-white">
+          <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-slate-500 text-[12px] md:text-[10px] text-white">
             ↩
           </span>
           <div>
-            <p className="text-xs font-bold text-slate-700">{ORDER_STATUS_LABEL.refunded}</p>
+            <p className="text-sm md:text-xs font-bold text-slate-700">{ORDER_STATUS_LABEL.refunded}</p>
             {historyTime(ORDER_STATUS.REFUNDED, order.statusHistory) ? (
-              <p className="text-[10px] text-slate-600">
+              <p className="text-[12px] md:text-[10px] text-slate-600">
                 {formatDate(historyTime(ORDER_STATUS.REFUNDED, order.statusHistory)!)}
               </p>
             ) : null}
@@ -170,7 +170,7 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
       ) : null}
 
       {order.trackingNumber ? (
-        <p className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-xs font-semibold text-primary">
+        <p className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-sm md:text-xs font-semibold text-primary">
           Tracking number: {order.trackingNumber}
         </p>
       ) : null}

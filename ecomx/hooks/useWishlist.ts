@@ -3,26 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { wishlistApi } from "@/lib/api/wishlist.api";
 import { showError } from "@/lib/toast";
+import { wishlistDocumentToItems } from "@/lib/store/wishlist-helpers";
 import {
-  clearGuestWishlist,
-  loadGuestWishlist,
-  saveGuestWishlist,
-} from "@/lib/store/guest-wishlist";
-import {
-  apiProductToWishlistItem,
-  wishlistDocumentToItems,
-} from "@/lib/store/wishlist-helpers";
+  loadGuestWishlistItems,
+  mergeGuestWishlistToServer,
+} from "@/lib/store/wishlist-sync";
+import { saveGuestWishlist } from "@/lib/store/guest-wishlist";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { WishlistItem } from "@/lib/types";
-
-function applyGuestState(
-  setItems: (items: WishlistItem[]) => void,
-  setIds: (ids: Set<string>) => void
-) {
-  const guest = loadGuestWishlist();
-  setItems(guest.items);
-  setIds(new Set(guest.productIds));
-}
 
 export function useWishlist() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -31,9 +19,8 @@ export function useWishlist() {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistedIds, setWishlistedIds] = useState<Set<string>>(new Set());
   const [isSyncing, setIsSyncing] = useState(false);
-
-  const mergedRef = useRef(false);
-  const syncingRef = useRef(false);
+  const hasMergedGuestWishlist = useRef(false);
+  const isSyncingRef = useRef(false);
 
   const applyServerWishlist = useCallback((nextItems: WishlistItem[]) => {
     setItems(nextItems);
@@ -45,7 +32,7 @@ export function useWishlist() {
     [wishlistedIds]
   );
 
-  const persistGuest = useCallback((nextItems: WishlistItem[], nextIds: Set<string>) => {
+  const persistGuestWishlist = useCallback((nextItems: WishlistItem[], nextIds: Set<string>) => {
     saveGuestWishlist(Array.from(nextIds), nextItems);
   }, []);
 
@@ -54,42 +41,39 @@ export function useWishlist() {
     applyServerWishlist(wishlistDocumentToItems(res.data.wishlist));
   }, [applyServerWishlist]);
 
-  // Guest: load from localStorage
+  // Guest users: read wishlist from local storage.
   useEffect(() => {
     if (!isHydrated || isLoggedIn) return;
-    mergedRef.current = false;
-    applyGuestState(setItems, setWishlistedIds);
+    hasMergedGuestWishlist.current = false;
+
+    const guest = loadGuestWishlistItems();
+    setItems(guest.items);
+    setWishlistedIds(new Set(guest.productIds));
   }, [isHydrated, isLoggedIn]);
 
-  // Logged in: merge guest IDs then fetch full wishlist
+  // Logged-in users: merge guest wishlist once, then load server wishlist.
   useEffect(() => {
-    if (!isHydrated || !isLoggedIn || mergedRef.current || syncingRef.current) return;
+    if (!isHydrated || !isLoggedIn || hasMergedGuestWishlist.current || isSyncingRef.current) return;
 
-    syncingRef.current = true;
+    isSyncingRef.current = true;
     setIsSyncing(true);
 
     void (async () => {
       try {
-        const guestIds = loadGuestWishlist().productIds;
-
-        if (guestIds.length > 0) {
-          const res = await wishlistApi.merge(guestIds);
-          clearGuestWishlist();
-          applyServerWishlist(wishlistDocumentToItems(res.data.wishlist));
-        } else {
-          await fetchServerWishlist();
-        }
-
-        mergedRef.current = true;
-      } catch (err) {
-        applyGuestState(setItems, setWishlistedIds);
-        showError(err, "Could not sync your wishlist");
+        const mergedItems = await mergeGuestWishlistToServer();
+        applyServerWishlist(mergedItems);
+        hasMergedGuestWishlist.current = true;
+      } catch (error) {
+        const guest = loadGuestWishlistItems();
+        setItems(guest.items);
+        setWishlistedIds(new Set(guest.productIds));
+        showError(error, "Could not sync your wishlist");
       } finally {
-        syncingRef.current = false;
+        isSyncingRef.current = false;
         setIsSyncing(false);
       }
     })();
-  }, [isHydrated, isLoggedIn, applyServerWishlist, fetchServerWishlist]);
+  }, [isHydrated, isLoggedIn, applyServerWishlist]);
 
   const toggleWishlist = useCallback(
     async (item: WishlistItem) => {
@@ -110,7 +94,7 @@ export function useWishlist() {
       setItems(nextItems);
 
       if (!isLoggedIn) {
-        persistGuest(nextItems, nextIds);
+        persistGuestWishlist(nextItems, nextIds);
         return;
       }
 
@@ -133,13 +117,13 @@ export function useWishlist() {
             setItems((prev) => prev.filter((entry) => entry.id !== productId));
           }
         }
-      } catch (err) {
+      } catch (error) {
         setWishlistedIds(previousIds);
         setItems(previousItems);
-        showError(err, "Could not update wishlist");
+        showError(error, "Could not update wishlist");
       }
     },
-    [wishlistedIds, items, isLoggedIn, persistGuest]
+    [wishlistedIds, items, isLoggedIn, persistGuestWishlist]
   );
 
   const removeFromWishlist = useCallback(

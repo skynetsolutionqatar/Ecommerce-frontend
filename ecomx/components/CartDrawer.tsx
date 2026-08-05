@@ -48,7 +48,7 @@ export default function CartDrawer({
             <span className="text-base font-bold">Your Cart</span>
             {cart.length > 0 ? (
               <span
-                className="rounded-full px-2.5 py-0.5 text-xs font-bold text-white"
+                className="rounded-full px-2.5 py-0.5 text-sm md:text-xs font-bold text-white"
                 style={{ background: Colors.base_color }}
               >
                 {cart.reduce((s, i) => s + i.qty, 0)}
@@ -96,7 +96,7 @@ export default function CartDrawer({
                   <div className="mb-0.5 text-[13px] text-gray-500">{item.brand}</div>
                   <div className="text-sm font-semibold leading-snug text-gray-900">{item.name}</div>
                   {item.color ? (
-                    <div className="mt-0.5 text-xs text-gray-500">
+                    <div className="mt-0.5 text-sm md:text-xs text-gray-500">
                       {item.color}
                       {item.size ? ` · Size ${item.size}` : ""}
                     </div>
@@ -107,7 +107,7 @@ export default function CartDrawer({
                         <button
                           type="button"
                           onClick={() => onUpdate(item.id, item.qty - 1)}
-                          className="flex h-8 w-8 items-center justify-center border-0 bg-white text-gray-500 cursor-pointer hover:text-[#0a255d]"
+                          className="flex h-9 w-9 md:h-8 md:w-8 items-center justify-center border-0 bg-white text-gray-500 cursor-pointer hover:text-[#0a255d]"
                         >
                           <Icons.Minus />
                         </button>
@@ -116,7 +116,7 @@ export default function CartDrawer({
                           type="button"
                           onClick={() => onUpdate(item.id, item.qty + 1)}
                           disabled={atMaxStock}
-                          className="flex h-8 w-8 items-center justify-center border-0 bg-white cursor-pointer hover:text-[#0a255d] disabled:cursor-not-allowed disabled:opacity-40"
+                          className="flex h-9 w-9 md:h-8 md:w-8 items-center justify-center border-0 bg-white cursor-pointer hover:text-[#0a255d] disabled:cursor-not-allowed disabled:opacity-40"
                           style={{ color: atMaxStock ? undefined : Colors.base_color }}
                           aria-label={atMaxStock ? "Maximum stock reached" : "Increase quantity"}
                         >
@@ -124,7 +124,7 @@ export default function CartDrawer({
                         </button>
                       </div>
                       {atMaxStock ? (
-                        <p className="mt-1 text-[11px] font-medium text-orange-600">
+                        <p className="mt-1 text-[12px] md:text-[11px] font-medium text-orange-600">
                           Only {item.stock} available in stock
                         </p>
                       ) : null}
@@ -136,7 +136,7 @@ export default function CartDrawer({
                       <button
                         type="button"
                         onClick={() => onRemove(item.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 cursor-pointer transition hover:border-red-200 hover:text-red-500"
+                        className="flex h-9 w-9 md:h-8 md:w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 cursor-pointer transition hover:border-red-200 hover:text-red-500"
                         aria-label="Remove item"
                       >
                         <Icons.Trash />
@@ -153,7 +153,7 @@ export default function CartDrawer({
         {cart.length > 0 ? (
           <div className="border-t border-gray-200 p-6">
             <div
-              className="mb-4 rounded-xl px-3.5 py-2.5 text-xs text-white"
+              className="mb-4 rounded-xl px-3.5 py-2.5 text-sm md:text-xs text-white"
               style={{ background: Colors.base_color }}
             >
               🎉 Free installation &amp; delivery included on all orders!

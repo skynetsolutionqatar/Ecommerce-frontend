@@ -51,7 +51,7 @@ export function AuthFormField({
 export function AuthError({ message }: { message: string }) {
   return (
     <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold">
+      <span className="mt-0.5 flex h-5 w-5 md:h-4 md:w-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[12px] md:text-[10px] font-bold">
         !
       </span>
       {message}

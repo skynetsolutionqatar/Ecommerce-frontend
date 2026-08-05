@@ -66,7 +66,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
             ))}
           </div>
           <div className="absolute top-5 left-5">
-            <span className={`rounded-full px-3.5 py-1 text-[11px] font-bold tracking-wide text-white ${badgeBgClass(product.badge)}`}>
+            <span className={`rounded-full px-3.5 py-1 text-[13px] md:text-[11px] font-bold tracking-wide text-white ${badgeBgClass(product.badge)}`}>
               {product.badge}
             </span>
           </div>
@@ -75,7 +75,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
         <div className="flex flex-col gap-5 px-8 py-11 md:px-10">
           <div className="flex items-start justify-between">
             <div>
-              <div className={`mb-2 ${type.eyebrow} text-[11px] tracking-[0.12em] text-accent`}>{product.brand}</div>
+              <div className={`mb-2 ${type.eyebrow} text-[13px] md:text-[11px] tracking-[0.12em] text-accent`}>{product.brand}</div>
               <h2 className="font-display text-[32px] font-bold leading-tight text-primary">{product.name}</h2>
             </div>
             <button type="button" onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-bg-soft text-muted cursor-pointer">
@@ -106,7 +106,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
 
           <div className="flex flex-wrap gap-1.5">
             {product.tags.map(t => (
-              <span key={t} className="rounded-full bg-accent-soft px-3 py-1 text-[11px] font-semibold text-primary">{t}</span>
+              <span key={t} className="rounded-full bg-accent-soft px-3 py-1 text-[13px] md:text-[11px] font-semibold text-primary">{t}</span>
             ))}
           </div>
 

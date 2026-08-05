@@ -3,13 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cartApi } from "@/lib/api/cart.api";
 import { showError } from "@/lib/toast";
-import { clearGuestCart, loadGuestCart, saveGuestCart } from "@/lib/store/guest-cart";
 import {
   apiCartToCartItems,
   isQtyAllowed,
   mergeGuestCartItem,
   productToGuestCartItem,
 } from "@/lib/store/cart-helpers";
+import {
+  loadGuestCartItems,
+  mergeGuestCartToServer,
+} from "@/lib/store/cart-sync";
+import { clearGuestCart, saveGuestCart } from "@/lib/store/guest-cart";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { CartItem, Product } from "@/lib/types";
 
@@ -19,68 +23,51 @@ export function useCart() {
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
-
-  const mergedRef = useRef(false);
-  const syncingRef = useRef(false);
+  const hasMergedGuestCart = useRef(false);
+  const isSyncingRef = useRef(false);
   const itemsRef = useRef<CartItem[]>(items);
 
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  const applyServerCart = useCallback((cartItems: CartItem[]) => {
-    setItems(cartItems);
-  }, []);
-
-  const persistGuest = useCallback((nextItems: CartItem[]) => {
-    saveGuestCart(nextItems);
-  }, []);
-
-  const fetchServerCart = useCallback(async () => {
+  const applyServerCart = useCallback(async () => {
     const res = await cartApi.get();
-    applyServerCart(apiCartToCartItems(res.data.cart));
-  }, [applyServerCart]);
+    setItems(apiCartToCartItems(res.data.cart));
+  }, []);
 
-  // Guest: load from localStorage
+  // Guest users: read cart from local storage.
   useEffect(() => {
     if (!isHydrated || isLoggedIn) return;
-    mergedRef.current = false;
-    setItems(loadGuestCart());
+    hasMergedGuestCart.current = false;
+    setItems(loadGuestCartItems());
   }, [isHydrated, isLoggedIn]);
 
-  // Logged in: merge guest cart then fetch server cart
+  // Logged-in users: merge guest cart once, then load server cart.
   useEffect(() => {
-    if (!isHydrated || !isLoggedIn || mergedRef.current || syncingRef.current) return;
+    if (!isHydrated || !isLoggedIn || hasMergedGuestCart.current || isSyncingRef.current) return;
 
-    syncingRef.current = true;
+    isSyncingRef.current = true;
     setIsSyncing(true);
 
     void (async () => {
       try {
-        const guestItems = loadGuestCart();
-
-        if (guestItems.length > 0) {
-          for (const item of guestItems) {
-            const qty =
-              item.stock != null ? Math.min(item.qty, Math.max(item.stock, 0)) : item.qty;
-            if (qty > 0) {
-              await cartApi.add({ productId: item.productId, quantity: qty });
-            }
-          }
-          clearGuestCart();
-        }
-
-        await fetchServerCart();
-        mergedRef.current = true;
-      } catch (err) {
-        setItems(loadGuestCart());
-        showError(err, "Could not sync your cart");
+        await mergeGuestCartToServer();
+        await applyServerCart();
+        hasMergedGuestCart.current = true;
+      } catch (error) {
+        setItems(loadGuestCartItems());
+        showError(error, "Could not sync your cart");
       } finally {
-        syncingRef.current = false;
+        isSyncingRef.current = false;
         setIsSyncing(false);
       }
     })();
-  }, [isHydrated, isLoggedIn, fetchServerCart]);
+  }, [isHydrated, isLoggedIn, applyServerCart]);
+
+  const persistGuestCart = useCallback((nextItems: CartItem[]) => {
+    saveGuestCart(nextItems);
+  }, []);
 
   const addToCart = useCallback(
     async (product: Product, color?: string, size?: string, quantity = 1) => {
@@ -110,21 +97,21 @@ export function useCart() {
       setItems(optimisticItems);
 
       if (!isLoggedIn) {
-        persistGuest(optimisticItems);
+        persistGuestCart(optimisticItems);
         return true;
       }
 
       try {
         await cartApi.add({ productId: product.id, quantity: qtyToAdd });
-        await fetchServerCart();
+        await applyServerCart();
         return true;
-      } catch (err) {
+      } catch (error) {
         setItems(previousItems);
-        showError(err, "Could not add item to cart");
+        showError(error, "Could not add item to cart");
         return false;
       }
     },
-    [isLoggedIn, persistGuest, fetchServerCart]
+    [isLoggedIn, persistGuestCart, applyServerCart]
   );
 
   const removeFromCart = useCallback(
@@ -134,21 +121,21 @@ export function useCart() {
       setItems(optimisticItems);
 
       if (!isLoggedIn) {
-        persistGuest(optimisticItems);
+        persistGuestCart(optimisticItems);
         return true;
       }
 
       try {
         await cartApi.removeItem(id);
-        await fetchServerCart();
+        await applyServerCart();
         return true;
-      } catch (err) {
+      } catch (error) {
         setItems(previousItems);
-        showError(err, "Could not remove item from cart");
+        showError(error, "Could not remove item from cart");
         return false;
       }
     },
-    [items, isLoggedIn, persistGuest, fetchServerCart]
+    [items, isLoggedIn, persistGuestCart, applyServerCart]
   );
 
   const updateCart = useCallback(
@@ -171,21 +158,21 @@ export function useCart() {
       setItems(optimisticItems);
 
       if (!isLoggedIn) {
-        persistGuest(optimisticItems);
+        persistGuestCart(optimisticItems);
         return true;
       }
 
       try {
         await cartApi.updateItem(id, { quantity: qty });
-        await fetchServerCart();
+        await applyServerCart();
         return true;
-      } catch (err) {
+      } catch (error) {
         setItems(previousItems);
-        showError(err, "Could not update cart quantity");
+        showError(error, "Could not update cart quantity");
         return false;
       }
     },
-    [items, isLoggedIn, persistGuest, fetchServerCart, removeFromCart]
+    [items, isLoggedIn, persistGuestCart, applyServerCart, removeFromCart]
   );
 
   const clearCart = useCallback(async () => {
@@ -201,9 +188,9 @@ export function useCart() {
       await cartApi.clear();
       setItems([]);
       return true;
-    } catch (err) {
+    } catch (error) {
       setItems(previousItems);
-      showError(err, "Could not clear cart");
+      showError(error, "Could not clear cart");
       return false;
     }
   }, [items, isLoggedIn]);
@@ -250,7 +237,7 @@ export function useCart() {
     updateCart,
     removeFromCart,
     clearCart,
-    refreshCart: fetchServerCart,
+    refreshCart: applyServerCart,
     isSyncing,
   };
 }

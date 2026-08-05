@@ -210,7 +210,7 @@ export default function ShopPage({
   return (
     <div className={`${tw.pageTopOffset} min-h-screen`} style={{ background: "#f3f4f6" }}>
       <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px] py-3 sm:py-4">
-        <nav className="mb-4 flex items-center gap-1 text-[11.5px] text-gray-500">
+        <nav className="mb-4 flex items-center gap-1 text-[13px] md:text-[11.5px] text-gray-500">
           <button
             type="button"
             onClick={onHomeClick}
@@ -304,7 +304,7 @@ export default function ShopPage({
                         </option>
                       ))}
                     </select>
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]">
+                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[13px] md:text-[11px]">
                       ▾
                     </span>
                   </div>

@@ -136,7 +136,7 @@ export default function OrdersPage({
         </button>
 
         <div className="mb-8 rounded-3xl bg-footer px-6 py-8 text-white shadow-[0_12px_40px_rgba(0,0,0,0.15)] sm:px-8 sm:py-10">
-          <div className={`mb-2 ${type.eyebrow} text-[11px] text-accent`}>
+          <div className={`mb-2 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}>
             Order History
           </div>
           <h1 className="font-display text-[28px] font-bold sm:text-[32px]">My Orders</h1>

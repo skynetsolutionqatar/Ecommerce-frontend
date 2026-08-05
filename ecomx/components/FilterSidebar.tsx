@@ -72,7 +72,7 @@ export default function FilterSidebar({
           <button
             type="button"
             onClick={onClear}
-            className="cursor-pointer border-0 bg-transparent text-[12px] font-semibold hover:underline"
+            className="cursor-pointer border-0 bg-transparent text-[13px] md:text-[12px] font-semibold hover:underline"
             style={{ color: BRAND }}
           >
             Clear All
@@ -81,7 +81,7 @@ export default function FilterSidebar({
       </div>
 
       <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-        <p className="text-[12px] text-gray-600">
+        <p className="text-[13px] md:text-[12px] text-gray-600">
           {isLoading ? (
             "Loading results..."
           ) : (
@@ -110,7 +110,7 @@ export default function FilterSidebar({
             />
           ))
         ) : (
-          <p className="text-[11px] text-gray-400">No categories</p>
+          <p className="text-[12px] md:text-[11px] text-gray-400">No categories</p>
         )}
       </FilterSection>
 
@@ -128,13 +128,13 @@ export default function FilterSidebar({
             />
           ))
         ) : (
-          <p className="text-[11px] text-gray-400">No brands</p>
+          <p className="text-[12px] md:text-[11px] text-gray-400">No brands</p>
         )}
       </FilterSection>
 
       <FilterSection title="Price Range" open={sections.price} onToggle={() => toggle("price")}>
         <div className="py-1 pb-2">
-          <div className="mb-3 flex justify-between text-[11px] font-semibold text-gray-700">
+          <div className="mb-3 flex justify-between text-[12px] md:text-[11px] font-semibold text-gray-700">
             <span>{formatPrice(filters.priceRange[0])}</span>
             <span>
               {filters.priceRange[1] >= priceMax
@@ -189,12 +189,12 @@ export default function FilterSidebar({
             <FilterCheckBoxVisual checked={filters.minRating === r} />
             <div className="flex gap-0.5">
               {[1, 2, 3, 4, 5].map((i) => (
-                <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill={i <= r ? "#F59E0B" : "#D1D5DB"}>
+                <svg key={i} className="h-[13px] w-[13px] md:h-[11px] md:w-[11px]" viewBox="0 0 24 24" fill={i <= r ? "#F59E0B" : "#D1D5DB"}>
                   <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
                 </svg>
               ))}
             </div>
-            <span className="text-[11px] text-gray-600">& above</span>
+            <span className="text-[12px] md:text-[11px] text-gray-600">& above</span>
           </button>
         ))}
       </FilterSection>
@@ -218,7 +218,7 @@ export default function FilterSidebar({
 function FilterCheckBoxVisual({ checked }: { checked: boolean }) {
   return (
     <div
-      className="flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-all"
+      className="flex h-[18px] w-[18px] md:h-4 md:w-4 shrink-0 items-center justify-center rounded border-2 transition-all"
       style={{
         borderColor: checked ? Colors.base_color : "#d1d5db",
         background: checked ? Colors.base_color : "#ffffff",
@@ -278,9 +278,9 @@ function FilterCheckbox({
       className="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent py-1.5 text-left"
     >
       <FilterCheckBoxVisual checked={checked} />
-      <span className="flex-1 text-[12px] leading-snug text-gray-700">{label}</span>
+      <span className="flex-1 text-[13px] md:text-[12px] leading-snug text-gray-700">{label}</span>
       {count !== undefined && count > 0 ? (
-        <span className="text-[11px] text-gray-400">({count})</span>
+        <span className="text-[12px] md:text-[11px] text-gray-400">({count})</span>
       ) : null}
     </button>
   );

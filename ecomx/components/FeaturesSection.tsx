@@ -16,7 +16,7 @@ export default function FeaturesSection() {
     <section className={`py-24 ${tw.sectionBg}`}>
       <div className="w-full">
         <div className="mb-16 text-center">
-          <div className={`mb-4 ${type.eyebrow} text-[11px] text-accent`}>
+          <div className={`mb-4 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}>
             Why Skynet Solution
           </div>
           <h2 className="font-display text-[clamp(36px,4vw,52px)] font-bold leading-tight text-primary">

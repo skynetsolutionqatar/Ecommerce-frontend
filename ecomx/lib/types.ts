@@ -40,6 +40,13 @@ export interface ProductColor {
   hex: string;
 }
 
+export interface ProductDimensions {
+  weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -58,10 +65,19 @@ export interface Product {
   images: string[];
   tags: string[];
   description: string;
+  shortDescription?: string;
   category?: string;
   categoryId?: string;
   stock?: number;
   sku?: string;
+  barcode?: string;
+  taxPercent?: number;
+  isFreeShipping?: boolean;
+  isDigital?: boolean;
+  hasVariants?: boolean;
+  totalSold?: number;
+  trackInventory?: boolean;
+  dimensions?: ProductDimensions;
   brand_logo?: string;
   discountPct: number;
 }

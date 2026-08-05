@@ -20,14 +20,14 @@ export default function CategoriesSection({ onCategoryClick, onViewAll }: Catego
           <h2 className="font-display text-[19px] font-extrabold text-gray-900 md:text-[21px]">
             Shop by Category
           </h2>
-          <p className="mt-0.5 font-label text-[11px] text-gray-500">
+          <p className="mt-0.5 font-label text-[13px] md:text-[11px] text-gray-500">
             Browse our wide range of product categories
           </p>
         </div>
         <motion.button
           type="button"
           onClick={onViewAll}
-          className="flex items-center gap-1.5 rounded-full border border-gray-800 px-4 py-1.5 font-label text-[12px] font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
+          className="flex items-center gap-1.5 rounded-full border border-gray-800 px-4 py-2 md:py-1.5 font-label text-[13px] md:text-[12px] font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
           whileTap={{ scale: 0.97 }}
         >
           View All Categories
@@ -69,11 +69,11 @@ export default function CategoriesSection({ onCategoryClick, onViewAll }: Catego
               </div>
 
               <div>
-                <span className="block font-label text-[10.5px] font-semibold leading-tight text-gray-800 sm:text-[11px]">
+                <span className="block font-label text-[12px] font-semibold leading-tight text-gray-800 sm:text-[11px]">
                   {cat.name}
                 </span>
                 {typeof cat.productCount === "number" ? (
-                  <span className="mt-0.5 block font-label text-[9px] font-medium text-gray-400">
+                  <span className="mt-0.5 block font-label text-[11px] md:text-[9px] font-medium text-gray-400">
                     {cat.productCount}+ items
                   </span>
                 ) : null}

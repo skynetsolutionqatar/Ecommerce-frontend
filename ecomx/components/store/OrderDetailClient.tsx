@@ -113,10 +113,10 @@ export default function OrderDetailClient({ id }: { id: string }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-gray-900">{item.name}</p>
-                      <p className="text-xs text-muted">Qty: {item.quantity}</p>
+                      <p className="text-sm md:text-xs text-muted">Qty: {item.quantity}</p>
                       {isDelivered ? (
                         reviewedIds.has(item.productId) ? (
-                          <p className="mt-1 text-[11px] font-semibold text-green-600">
+                          <p className="mt-1 text-[13px] md:text-[11px] font-semibold text-green-600">
                             Review submitted
                           </p>
                         ) : (
@@ -128,7 +128,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
                                 productName: item.name,
                               })
                             }
-                            className="mt-2 cursor-pointer rounded-lg border border-blue-600 px-3 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-50"
+                            className="mt-2 cursor-pointer rounded-lg border border-blue-600 px-3 py-1.5 md:py-1 text-[13px] md:text-[11px] font-bold text-blue-600 hover:bg-blue-50"
                           >
                             Write Review
                           </button>
