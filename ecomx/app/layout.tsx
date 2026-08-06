@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ThemeProvider from "@/components/ThemeProvider";
 import QueryProvider from "@/components/QueryProvider";
 import AuthInitializer from "@/components/AuthInitializer";
+import UTMTracker from "@/components/UTMTracker";
 import { getClientConfig } from "@/config/clients";
 import { themeToCssProperties } from "@/lib/theme-css";
 import "./globals.css";
@@ -34,7 +35,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col overflow-x-hidden font-sans antialiased" style={{ background: "#f1f3f6" }}>
         <QueryProvider>
           <AuthInitializer>
-            <ThemeProvider clientId={client.id}>{children}</ThemeProvider>
+            <ThemeProvider clientId={client.id}>
+              <UTMTracker />
+              {children}
+            </ThemeProvider>
           </AuthInitializer>
         </QueryProvider>
       </body>

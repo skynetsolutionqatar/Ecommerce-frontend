@@ -92,6 +92,9 @@ export interface UpdateOrderStatusPayload {
   trackingNumber?: string;
 }
 
+import type { UTMAttribution } from "@/lib/utm";
+export type { UTMAttribution };
+
 export interface PlaceOrderPayload {
   deliveryAddress?: OrderAddress;
   shippingAddressId?: string;
@@ -100,6 +103,10 @@ export interface PlaceOrderPayload {
   customerNote?: string;
   couponCode?: string;
   notes?: string;
+  attribution?: UTMAttribution;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export function orderTotal(order: ApiOrder): number {
