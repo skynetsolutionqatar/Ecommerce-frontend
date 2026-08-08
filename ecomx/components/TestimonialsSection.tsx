@@ -12,11 +12,14 @@ export default function TestimonialsSection() {
 
       <div className="relative z-[1] w-full">
         <div className="mb-16 text-center">
-          <div className={`mb-4 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}>
+          <div
+            className={`mb-4 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}
+          >
             Real Stories
           </div>
           <h2 className="font-display text-[clamp(36px,4vw,56px)] font-bold leading-tight text-primary">
-            Trusted by Businesses,<br />
+            Trusted by Businesses,
+            <br />
             <span className="italic text-accent">Across Qatar</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-muted">
@@ -28,10 +31,14 @@ export default function TestimonialsSection() {
           {TESTIMONIALS.map((t, i) => (
             <div
               key={t.id}
-              className={`rounded-[28px] border border-border bg-white p-7 shadow-[0_8px_32px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 animate-fade-up [animation-delay:${i * 0.12}s]`}
+              className={`rounded-[28px] border border-border bg-white p-7 shadow-[0_8px_32px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 animate-fade-up [animation-delay:${
+                i * 0.12
+              }s]`}
             >
               <div className="mb-5 flex gap-0.5 text-accent">
-                {[1, 2, 3, 4, 5].map(j => <Icons.Star key={j} filled={j <= t.rating} />)}
+                {[1, 2, 3, 4, 5].map((j) => (
+                  <Icons.Star key={j} filled={j <= t.rating} />
+                ))}
               </div>
 
               <p className="mb-7 text-[15px] italic leading-relaxed text-primary/80">
@@ -43,7 +50,9 @@ export default function TestimonialsSection() {
                 <div>
                   <div className="text-sm font-bold text-primary">{t.name}</div>
                   <div className="mt-0.5 text-xs text-accent">{t.role}</div>
-                  <div className="mt-1 text-[13px] md:text-[11px] text-muted">Purchased: {t.product}</div>
+                  <div className="mt-1 text-[13px] md:text-[11px] text-muted">
+                    Purchased: {t.product}
+                  </div>
                 </div>
               </div>
             </div>
@@ -51,9 +60,15 @@ export default function TestimonialsSection() {
         </div>
 
         <div className="mt-16 flex flex-wrap justify-center gap-16">
-          {[["1,300+", "Happy Clients"], ["4.9", "Average Rating"], ["99%", "Would Recommend"]].map(([val, label]) => (
+          {[
+            ["1,300+", "Happy Clients"],
+            ["4.9", "Average Rating"],
+            ["99%", "Would Recommend"],
+          ].map(([val, label]) => (
             <div key={label} className="text-center">
-              <div className="font-display text-5xl font-bold leading-none text-accent">{val}</div>
+              <div className="font-display text-5xl font-bold leading-none text-accent">
+                {val}
+              </div>
               <div className="mt-2 text-[13px] text-muted">{label}</div>
             </div>
           ))}

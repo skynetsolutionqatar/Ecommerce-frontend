@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
-import type { PerformanceMetric } from "@/lib/admin/data";
+import type { PerformanceMetric } from "@/types/dashboard.types";
 import { CHART_COLORS } from "@/lib/admin/chart-utils";
 import { adminType } from "@/lib/admin/typography";
 import ChartContainer from "./ChartContainer";

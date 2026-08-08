@@ -18,7 +18,7 @@ function decodeTokenPayload(token: string): { role?: string; exp?: number } | nu
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAdminRoute = pathname.startsWith(ROUTE_PREFIX.ADMIN);

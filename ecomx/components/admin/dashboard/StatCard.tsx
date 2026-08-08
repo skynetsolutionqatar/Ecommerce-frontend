@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { lazyClient } from "@/lib/lazy";
-import type { DashboardStat } from "@/lib/admin/data";
+import type { DashboardStat } from "@/types/dashboard.types";
 import { adminType } from "@/lib/admin/typography";
 import { formatTrend } from "@/lib/admin/chart-utils";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
@@ -21,16 +21,7 @@ function StatCard({ stat }: StatCardProps) {
 
   return (
     <article className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <p className={adminType.label}>{stat.label}</p>
-        <button
-          type="button"
-          aria-label="More options"
-          className="text-muted-foreground/50 hover:text-muted-foreground"
-        >
-          ···
-        </button>
-      </div>
+      <p className={`mb-3 ${adminType.label}`}>{stat.label}</p>
 
       <div className="flex items-end justify-between gap-3">
         <div>

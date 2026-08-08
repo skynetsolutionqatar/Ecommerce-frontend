@@ -2,7 +2,7 @@
 
 import { memo, useMemo, useState } from "react";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
-import type { CategoryChartItem } from "@/lib/admin/data";
+import type { CategoryChartItem } from "@/types/dashboard.types";
 import { tooltipStyle } from "@/lib/admin/chart-utils";
 import { adminType } from "@/lib/admin/typography";
 import ChartContainer from "./ChartContainer";

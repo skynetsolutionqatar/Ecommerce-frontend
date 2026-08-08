@@ -84,9 +84,17 @@ export const TRANSACTION_STATUS = {
   COMPLETED: "completed",
   PENDING: "pending",
   FAILED: "failed",
+  REFUNDED: "refunded",
 } as const;
 
 export type TransactionStatus = (typeof TRANSACTION_STATUS)[keyof typeof TRANSACTION_STATUS];
+
+export const TRANSACTION_STATUS_LABEL: Record<TransactionStatus, string> = {
+  [TRANSACTION_STATUS.COMPLETED]: "Completed",
+  [TRANSACTION_STATUS.PENDING]: "Pending",
+  [TRANSACTION_STATUS.FAILED]: "Failed",
+  [TRANSACTION_STATUS.REFUNDED]: "Refunded",
+};
 
 /** Product catalog statuses */
 export const PRODUCT_STATUS = {

@@ -3,7 +3,9 @@ export interface ApiResponse<T = unknown> {
   message: string;
   data: T;
   pagination?: PaginationMeta;
-  errors?: Record<string, string[]>;
+  errors?:
+    | Record<string, string[] | string>
+    | Array<{ field?: string; message?: string; msg?: string }>;
 }
 
 export interface PaginationMeta {

@@ -2,8 +2,9 @@
 
 import { memo, useMemo, useState } from "react";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
-import type { SalesDistributionItem } from "@/lib/admin/data";
+import type { SalesDistributionItem } from "@/types/dashboard.types";
 import { tooltipStyle } from "@/lib/admin/chart-utils";
+import { formatPrice } from "@/lib/utils";
 import { adminType } from "@/lib/admin/typography";
 import ChartContainer from "./ChartContainer";
 import { ChartExpandDialog } from "./ChartExpandDialog";
@@ -65,7 +66,10 @@ function SalesDonutBody({
               ))}
             </Pie>
             <Tooltip
-              formatter={(value, _name, item) => [`${value}%`, item.payload?.name ?? ""]}
+              formatter={(value, _name, item) => [
+                formatPrice(Number(value)),
+                item.payload?.name ?? "",
+              ]}
               {...tooltipStyle}
             />
           </PieChart>
@@ -92,7 +96,10 @@ function SalesDonutBody({
               />
               {item.label}
             </span>
-            <span className={`font-semibold ${adminType.tableCellPrimary}`}>{item.percent}%</span>
+            <span className="flex items-center gap-2 font-semibold">
+              <span className={adminType.tableCellPrimary}>{formatPrice(item.amount)}</span>
+              <span className="text-muted-foreground">{item.percent}%</span>
+            </span>
           </li>
         ))}
       </ul>
@@ -106,10 +113,10 @@ function SalesDonutChart({ title, totalLabel, totalValue, items }: SalesDonutCha
   const pieData = useMemo(
     () =>
       items
-        .filter((item) => item.percent > 0)
+        .filter((item) => item.amount > 0)
         .map((item) => ({
           name: item.label,
-          value: item.percent,
+          value: item.amount,
           color: item.color,
         })),
     [items]

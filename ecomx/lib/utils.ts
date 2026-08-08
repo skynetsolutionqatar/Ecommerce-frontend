@@ -54,6 +54,17 @@ export function truncate(str: string, max = 50): string {
   return `${str.slice(0, max)}…`;
 }
 
+/** Normalize Qatar phone for register API (+974 prefix if 8 digits). */
+export function normalizeRegisterPhone(phone: string): string | undefined {
+  const trimmed = phone.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.startsWith("+")) return trimmed.replace(/\s/g, "");
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 8) return `+974${digits}`;
+  if (digits.startsWith("974") && digits.length >= 11) return `+${digits}`;
+  return trimmed;
+}
+
 import { getApiErrorMessage } from "@/lib/api/errors";
 
 export function getErrorMessage(error: unknown, fallback = "Something went wrong"): string {

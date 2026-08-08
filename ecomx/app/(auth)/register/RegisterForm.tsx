@@ -15,7 +15,7 @@ import {
   AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function RegisterForm() {
@@ -45,7 +45,7 @@ export default function RegisterForm() {
           name: form.name,
           email: form.email,
           password: form.password,
-          phone: form.phone || undefined,
+          phone: normalizeRegisterPhone(form.phone),
         },
         redirectParam ?? undefined
       );

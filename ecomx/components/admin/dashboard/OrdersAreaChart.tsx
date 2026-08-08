@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ChartPoint } from "@/lib/admin/data";
+import type { ChartPoint } from "@/types/dashboard.types";
 import {
   CHART_COLORS,
   axisTickStyle,

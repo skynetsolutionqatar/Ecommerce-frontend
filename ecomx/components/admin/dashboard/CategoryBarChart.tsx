@@ -9,13 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ChartPoint } from "@/lib/admin/data";
+import type { ChartPoint } from "@/types/dashboard.types";
 import {
   CHART_COLORS,
   axisTickStyle,
   chartMargin,
+  formatChartAxis,
   tooltipStyle,
 } from "@/lib/admin/chart-utils";
+import { formatPrice } from "@/lib/utils";
 import ChartContainer from "./ChartContainer";
 import { ChartExpandDialog } from "./ChartExpandDialog";
 import DashboardCard from "./DashboardCard";
@@ -51,10 +53,10 @@ function CategoryBarBody({ chartData, height, maxBarSize = 40 }: CategoryBarBody
           axisLine={false}
           tickLine={false}
           tick={axisTickStyle}
-          tickFormatter={(v: number) => `${v}k`}
-          width={36}
+          tickFormatter={formatChartAxis}
+          width={44}
         />
-        <Tooltip formatter={(value) => [`${value}k`, "Revenue"]} {...tooltipStyle} />
+        <Tooltip formatter={(value) => [formatPrice(Number(value)), "Revenue"]} {...tooltipStyle} />
         <Bar
           dataKey="revenue"
           fill={CHART_COLORS.tertiary}

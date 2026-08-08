@@ -6,7 +6,7 @@ import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 import { isAdminRole } from "@/lib/config";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
@@ -69,7 +69,7 @@ export default function LoginModal({
             name: form.name,
             email: form.email,
             password: form.password,
-            phone: form.phone || undefined,
+            phone: normalizeRegisterPhone(form.phone),
           },
           null
         );

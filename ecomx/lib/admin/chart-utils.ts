@@ -1,5 +1,11 @@
 /** Dashboard chart helpers — formatting & data shaping for Recharts. */
 
+export function formatChartAxis(value: number): string {
+  const n = Number(value);
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}k`;
+  return String(n);
+}
 export function formatTrend(value: number, direction: "up" | "down"): string {
   const sign = direction === "up" ? "+" : "-";
   return `${sign}${Math.abs(value).toFixed(1)}%`;
@@ -46,13 +52,3 @@ export const tooltipStyle = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
   },
 };
-
-export function piePercentLabel({
-  name,
-  percent,
-}: {
-  name?: string;
-  percent?: number;
-}) {
-  return `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`;
-}

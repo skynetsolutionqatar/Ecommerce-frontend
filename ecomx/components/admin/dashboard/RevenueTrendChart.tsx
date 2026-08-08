@@ -9,13 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { RevenueTrendPoint } from "@/lib/admin/data";
+import type { RevenueTrendPoint } from "@/types/dashboard.types";
 import {
   CHART_COLORS,
   axisTickStyle,
   chartMargin,
+  formatChartAxis,
   tooltipStyle,
 } from "@/lib/admin/chart-utils";
+import { formatPrice } from "@/lib/utils";
 import ChartContainer from "./ChartContainer";
 import { ChartExpandDialog } from "./ChartExpandDialog";
 import DashboardCard from "./DashboardCard";
@@ -57,12 +59,12 @@ function RevenueChartBody({ chartData, gradientId, height }: RevenueChartBodyPro
           axisLine={false}
           tickLine={false}
           tick={axisTickStyle}
-          tickFormatter={(v: number) => `${v}k`}
-          width={36}
+          tickFormatter={formatChartAxis}
+          width={44}
         />
 
         <Tooltip
-          formatter={(value) => [`${value}k`, "Revenue"]}
+          formatter={(value) => [formatPrice(Number(value)), "Revenue"]}
           labelFormatter={(label) => `Month: ${label}`}
           {...tooltipStyle}
         />

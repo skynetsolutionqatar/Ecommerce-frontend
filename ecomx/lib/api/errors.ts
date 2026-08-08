@@ -6,11 +6,26 @@ type ApiErrorBody = ApiResponse<unknown> & {
   error?: string;
 };
 
-function formatValidationErrors(errors: Record<string, string[]>): string | null {
-  const messages = Object.values(errors)
-    .flat()
-    .map((msg) => msg.trim())
-    .filter(Boolean);
+type ValidationErrors =
+  | Record<string, string[] | string>
+  | Array<{ field?: string; message?: string; msg?: string }>;
+
+function formatValidationErrors(errors: ValidationErrors): string | null {
+  const messages: string[] = [];
+
+  if (Array.isArray(errors)) {
+    for (const item of errors) {
+      const msg = item.message ?? item.msg;
+      if (typeof msg === "string" && msg.trim()) messages.push(msg.trim());
+    }
+  } else {
+    for (const value of Object.values(errors)) {
+      const list = Array.isArray(value) ? value : [value];
+      for (const msg of list) {
+        if (typeof msg === "string" && msg.trim()) messages.push(msg.trim());
+      }
+    }
+  }
 
   if (messages.length === 0) return null;
   return messages.slice(0, 3).join(" · ");

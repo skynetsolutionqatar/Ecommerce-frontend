@@ -2,17 +2,29 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import type { DashboardOrder } from "@/lib/admin/data";
+import type { DashboardOrder } from "@/types/dashboard.types";
+import type { PaginationMeta } from "@/types/api.types";
 import { ORDER_STATUS, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/Constant";
 import { adminType } from "@/lib/admin/typography";
+import ListPagination from "@/components/admin/shared/ListPagination";
 import DashboardCard from "./DashboardCard";
+
+const COLUMNS = [
+  "Order ID",
+  "Customer",
+  "Date",
+  "Items",
+  "Amount",
+  "Status",
+] as const;
 
 interface RecentOrdersTableProps {
   title: string;
   viewAllLabel: string;
   viewAllHref: string;
-  columns: { key: string; label: string }[];
   rows: DashboardOrder[];
+  pagination?: PaginationMeta;
+  onPageChange?: (page: number) => void;
 }
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
@@ -39,8 +51,9 @@ function RecentOrdersTable({
   title,
   viewAllLabel,
   viewAllHref,
-  columns,
   rows,
+  pagination,
+  onPageChange,
 }: RecentOrdersTableProps) {
   return (
     <DashboardCard
@@ -59,9 +72,9 @@ function RecentOrdersTable({
         <table className={`admin-table min-w-[640px] text-left ${adminType.table}`}>
           <thead>
             <tr className="border-b border-border text-muted-foreground">
-              {columns.map((col) => (
-                <th key={col.key} className={`pb-3 pr-4 last:pr-0 ${adminType.tableHead}`}>
-                  {col.label}
+              {COLUMNS.map((label) => (
+                <th key={label} className={`pb-3 pr-4 last:pr-0 ${adminType.tableHead}`}>
+                  {label}
                 </th>
               ))}
             </tr>
@@ -87,6 +100,16 @@ function RecentOrdersTable({
           </tbody>
         </table>
       </div>
+      {pagination && onPageChange && pagination.totalPages > 1 && (
+        <ListPagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          showing={rows.length}
+          onPageChange={onPageChange}
+          hasNext={pagination.hasNextPage}
+        />
+      )}
     </DashboardCard>
   );
 }

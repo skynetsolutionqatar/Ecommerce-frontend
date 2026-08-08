@@ -145,7 +145,7 @@ export default function RelatedProductsSection({
                           p.sizes?.[0] ?? ""
                         )
                       }
-                      className="flex flex-1 cursor-pointer items-center justify-center gap-1 rounded py-2 md:py-1.5 text-[11px] md:text-[10px] font-bold text-white hover:opacity-90"
+                      className="flex min-h-[36px] flex-1 cursor-pointer items-center justify-center rounded px-2.5 py-2 text-center text-[11px] font-bold leading-snug text-white hover:opacity-90 sm:py-1.5 sm:text-[10px]"
                       style={{ background: "#1e3a8a" }}
                     >
                       + Add to Cart

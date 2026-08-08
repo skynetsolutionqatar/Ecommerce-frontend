@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, memo, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import { DASHBOARD_DATA, getDashboardData, type TimeRange } from "@/lib/admin/data";
+import { Suspense, memo, useState } from "react";
+import { getApiErrorMessage } from "@/lib/api/errors";
+import { useDashboard } from "@/hooks/useDashboard";
 import { adminType } from "@/lib/admin/typography";
 import { lazyClient } from "@/lib/lazy";
 import StatCard from "./StatCard";
-import TimeRangeTabs from "./TimeRangeTabs";
 import RecentTransactionsTable from "./RecentTransactionsTable";
 import RecentOrdersTable from "./RecentOrdersTable";
 import LowStockTable from "./LowStockTable";
@@ -25,24 +24,53 @@ function ChartFallback() {
 }
 
 function AdminDashboard() {
-  const [timeRange, setTimeRange] = useState<TimeRange>(DASHBOARD_DATA.defaultTimeRange);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [transactionsPage, setTransactionsPage] = useState(1);
+  const [lowStockPage, setLowStockPage] = useState(1);
 
-  const data = useMemo(() => getDashboardData(timeRange), [timeRange]);
+  const { data, isLoading, isPending, isError, error } = useDashboard({
+    ordersPage,
+    transactionsPage,
+    lowStockPage,
+  });
+
+  if ((isLoading || isPending) && !data) {
+    return (
+      <div className="relative min-h-full p-4 md:p-6">
+        <div className="mx-auto max-w-[1400px] space-y-6">
+          <div className="h-16 animate-pulse rounded-lg bg-muted" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 animate-pulse rounded-xl bg-muted" />
+            ))}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <ChartFallback />
+            <ChartFallback />
+            <ChartFallback />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">
+          {getApiErrorMessage(error, "Failed to load dashboard data.")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-full p-4 md:p-6">
       <div className="mx-auto max-w-[1400px] space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className={adminType.pageTitle}>{data.overview.title}</h1>
-            <p className={adminType.pageDescription}>{data.overview.subtitle}</p>
-          </div>
-          <TimeRangeTabs
-            ranges={data.timeRanges}
-            value={timeRange}
-            onChange={setTimeRange}
-          />
-        </div>
+        <header>
+          <h1 className={adminType.pageTitle}>{data.overview.title}</h1>
+          <p className={adminType.pageDescription}>{data.overview.subtitle}</p>
+        </header>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {data.stats.map((stat) => (
@@ -50,7 +78,6 @@ function AdminDashboard() {
           ))}
         </section>
 
-        {/* Revenue area + sales donut */}
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Suspense fallback={<ChartFallback />}>
@@ -73,7 +100,6 @@ function AdminDashboard() {
           </div>
         </section>
 
-        {/* Labeled pie + order status donut + bar chart */}
         <section className="grid gap-4 lg:grid-cols-3">
           <Suspense fallback={<ChartFallback />}>
             <LabeledPieChart
@@ -99,7 +125,6 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
-        {/* Area + line + performance */}
         <section className="grid gap-4 lg:grid-cols-3">
           <Suspense fallback={<ChartFallback />}>
             <OrdersAreaChart
@@ -120,47 +145,33 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
-        {/* Orders table */}
-        <section>
-          <RecentOrdersTable
-            title={data.recentOrders.title}
-            viewAllLabel={data.recentOrders.viewAllLabel}
-            viewAllHref={data.recentOrders.viewAllHref}
-            columns={data.recentOrders.columns}
-            rows={data.recentOrders.rows}
-          />
-        </section>
+        <RecentOrdersTable
+          title={data.recentOrders.title}
+          viewAllLabel={data.recentOrders.viewAllLabel}
+          viewAllHref={data.recentOrders.viewAllHref}
+          rows={data.recentOrders.rows}
+          pagination={data.recentOrders.pagination}
+          onPageChange={setOrdersPage}
+        />
 
-        {/* Low stock — full width, no scroll */}
-        <section>
-          <LowStockTable
-            title={data.lowStock.title}
-            viewAllLabel={data.lowStock.viewAllLabel}
-            viewAllHref={data.lowStock.viewAllHref}
-            columns={data.lowStock.columns}
-            rows={data.lowStock.rows}
-          />
-        </section>
+        <LowStockTable
+          title={data.lowStock.title}
+          viewAllLabel={data.lowStock.viewAllLabel}
+          viewAllHref={data.lowStock.viewAllHref}
+          rows={data.lowStock.rows}
+          pagination={data.lowStock.pagination}
+          onPageChange={setLowStockPage}
+        />
 
-        {/* Recent transactions */}
-        <section>
-          <RecentTransactionsTable
-            title={data.recentTransactions.title}
-            viewAllLabel={data.recentTransactions.viewAllLabel}
-            viewAllHref={data.recentTransactions.viewAllHref}
-            columns={data.recentTransactions.columns}
-            rows={data.recentTransactions.rows}
-          />
-        </section>
+        <RecentTransactionsTable
+          title={data.recentTransactions.title}
+          viewAllLabel={data.recentTransactions.viewAllLabel}
+          viewAllHref={data.recentTransactions.viewAllHref}
+          rows={data.recentTransactions.rows}
+          pagination={data.recentTransactions.pagination}
+          onPageChange={setTransactionsPage}
+        />
       </div>
-
-      <button
-        type="button"
-        aria-label="Quick action"
-        className="fixed bottom-8 right-8 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-900 text-white shadow-lg transition hover:bg-emerald-800"
-      >
-        <Plus size={22} />
-      </button>
     </div>
   );
 }

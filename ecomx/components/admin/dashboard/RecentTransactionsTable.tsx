@@ -1,30 +1,42 @@
 import { memo } from "react";
 import Link from "next/link";
-import type { DashboardTransaction, TransactionStatus } from "@/lib/admin/data";
-import { TRANSACTION_STATUS } from "@/lib/Constant";
+import type { DashboardTransaction } from "@/types/dashboard.types";
+import type { PaginationMeta } from "@/types/api.types";
+import { TRANSACTION_STATUS, TRANSACTION_STATUS_LABEL, type TransactionStatus } from "@/lib/Constant";
 import { adminType } from "@/lib/admin/typography";
+import ListPagination from "@/components/admin/shared/ListPagination";
 import DashboardCard from "./DashboardCard";
+
+const COLUMNS = [
+  "Transaction ID",
+  "Client",
+  "Date",
+  "Amount",
+  "Status",
+] as const;
 
 interface RecentTransactionsTableProps {
   title: string;
   viewAllLabel: string;
   viewAllHref: string;
-  columns: { key: string; label: string }[];
   rows: DashboardTransaction[];
+  pagination?: PaginationMeta;
+  onPageChange?: (page: number) => void;
 }
 
 const STATUS_STYLES: Record<TransactionStatus, string> = {
   [TRANSACTION_STATUS.COMPLETED]: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400",
   [TRANSACTION_STATUS.PENDING]: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
   [TRANSACTION_STATUS.FAILED]: "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400",
+  [TRANSACTION_STATUS.REFUNDED]: "bg-muted text-muted-foreground",
 };
 
 function StatusBadge({ status }: { status: TransactionStatus }) {
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 capitalize ${adminType.badge} ${STATUS_STYLES[status]}`}
+      className={`inline-flex rounded-full px-2.5 py-0.5 ${adminType.badge} ${STATUS_STYLES[status]}`}
     >
-      {status}
+      {TRANSACTION_STATUS_LABEL[status]}
     </span>
   );
 }
@@ -33,8 +45,9 @@ function RecentTransactionsTable({
   title,
   viewAllLabel,
   viewAllHref,
-  columns,
   rows,
+  pagination,
+  onPageChange,
 }: RecentTransactionsTableProps) {
   return (
     <DashboardCard
@@ -53,9 +66,9 @@ function RecentTransactionsTable({
         <table className={`admin-table min-w-[520px] text-left ${adminType.table}`}>
           <thead>
             <tr className="border-b border-border text-muted-foreground">
-              {columns.map((col) => (
-                <th key={col.key} className={`pb-3 pr-4 last:pr-0 ${adminType.tableHead}`}>
-                  {col.label}
+              {COLUMNS.map((label) => (
+                <th key={label} className={`pb-3 pr-4 last:pr-0 ${adminType.tableHead}`}>
+                  {label}
                 </th>
               ))}
             </tr>
@@ -80,6 +93,16 @@ function RecentTransactionsTable({
           </tbody>
         </table>
       </div>
+      {pagination && onPageChange && pagination.totalPages > 1 && (
+        <ListPagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          showing={rows.length}
+          onPageChange={onPageChange}
+          hasNext={pagination.hasNextPage}
+        />
+      )}
     </DashboardCard>
   );
 }

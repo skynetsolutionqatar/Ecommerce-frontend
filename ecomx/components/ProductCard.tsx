@@ -126,7 +126,7 @@ export default function ProductCard({
           <button
             type="button"
             onClick={handleAddToCart}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded py-2.5 md:py-2 text-[12px] md:text-[11px] font-bold text-white transition-opacity hover:opacity-90"
+            className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded px-3 py-2.5 text-center text-[12px] font-bold leading-snug text-white transition-opacity hover:opacity-90 sm:min-h-0 sm:py-2 sm:text-[11px]"
             style={{ background: addedAnim ? "#15803d" : `${Colors.base_color}` }}
           >
             <AnimatePresence mode="wait">

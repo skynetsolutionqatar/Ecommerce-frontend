@@ -66,21 +66,22 @@ function WishlistButton({
 function ActionButtons({
   onAdd,
   onBuy,
-  compact = false,
 }: {
   onAdd?: (e: React.MouseEvent) => void;
   onBuy?: (e: React.MouseEvent) => void;
-  compact?: boolean;
 }) {
   if (!onAdd && !onBuy) return null;
 
+  const btnBase =
+    "flex min-h-[40px] w-full flex-1 items-center justify-center rounded-lg px-3 py-2.5 text-center text-[12px] font-bold leading-snug sm:min-h-[36px] sm:py-2 sm:text-[11px]";
+
   return (
-    <div className={`flex gap-2 ${compact ? "flex-col sm:flex-row" : ""}`}>
+    <div className="flex flex-col gap-2 sm:flex-row">
       {onAdd ? (
         <button
           type="button"
           onClick={onAdd}
-          className="flex-1 cursor-pointer rounded-lg py-2.5 md:py-2 text-[12px] md:text-[11px] font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed"
+          className={`${btnBase} cursor-pointer text-white transition hover:opacity-90 disabled:cursor-not-allowed`}
           style={{ background: Colors.base_color }}
         >
           Add to Cart
@@ -90,7 +91,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onBuy}
-          className="flex-1 cursor-pointer rounded-lg bg-gray-900 py-2.5 md:py-2 text-[12px] md:text-[11px] font-bold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed"
+          className={`${btnBase} cursor-pointer bg-gray-900 text-white transition hover:bg-gray-800 disabled:cursor-not-allowed`}
         >
           Buy Now
         </button>
@@ -185,7 +186,7 @@ export default function StoreProductCard({
             ) : null}
             {!outOfStock ? (
               <div className="w-full min-w-0 sm:min-w-[200px] md:min-w-[240px]" onClick={stop}>
-                <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} compact />
+                <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} />
               </div>
             ) : null}
           </div>

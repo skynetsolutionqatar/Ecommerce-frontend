@@ -3,16 +3,19 @@
 import { memo } from "react";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import type { DashboardLowStockItem } from "@/lib/admin/data";
+import type { DashboardLowStockItem } from "@/types/dashboard.types";
+import type { PaginationMeta } from "@/types/api.types";
 import { adminType } from "@/lib/admin/typography";
+import ListPagination from "@/components/admin/shared/ListPagination";
 import DashboardCard from "./DashboardCard";
 
 interface LowStockTableProps {
   title: string;
   viewAllLabel: string;
   viewAllHref: string;
-  columns: { key: keyof DashboardLowStockItem; label: string }[];
   rows: DashboardLowStockItem[];
+  pagination?: PaginationMeta;
+  onPageChange?: (page: number) => void;
 }
 
 function StockBadge({ stock, threshold }: { stock: number; threshold: number }) {
@@ -34,6 +37,8 @@ function LowStockTable({
   viewAllLabel,
   viewAllHref,
   rows,
+  pagination,
+  onPageChange,
 }: LowStockTableProps) {
   return (
     <DashboardCard
@@ -74,6 +79,16 @@ function LowStockTable({
           );
         })}
       </div>
+      {pagination && onPageChange && pagination.totalPages > 1 && (
+        <ListPagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          showing={rows.length}
+          onPageChange={onPageChange}
+          hasNext={pagination.hasNextPage}
+        />
+      )}
     </DashboardCard>
   );
 }

@@ -194,12 +194,12 @@ export default function ProductPurchasePanel({
       </div>
 
       {/* CTA Buttons — match screenshot: blue Add to Cart + dark Buy Now */}
-      <div className="flex gap-2.5">
+      <div className="flex flex-col gap-2.5 sm:flex-row">
         <button
           type="button"
           onClick={addToCart}
           disabled={outOfStock}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg border-0 py-3.5 md:py-3 text-[15px] md:text-[14px] font-bold text-white cursor-pointer transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-[44px] w-full flex-1 items-center justify-center gap-2 rounded-lg border-0 px-4 py-3.5 text-[15px] font-bold text-white cursor-pointer transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:py-3 sm:text-[14px]"
           style={{ background: `${Colors.base_color}` }}
         >
           <svg
@@ -222,7 +222,7 @@ export default function ProductPurchasePanel({
           type="button"
           onClick={() => void buyNow()}
           disabled={outOfStock || buying}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg border-0 py-3.5 md:py-3 text-[15px] md:text-[14px] font-bold text-white cursor-pointer transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-[44px] w-full flex-1 items-center justify-center gap-2 rounded-lg border-0 px-4 py-3.5 text-[15px] font-bold text-white cursor-pointer transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:py-3 sm:text-[14px]"
           style={{ background: "#111827" }}
         >
           {buying ? "Processing..." : "⚡ Buy Now"}
