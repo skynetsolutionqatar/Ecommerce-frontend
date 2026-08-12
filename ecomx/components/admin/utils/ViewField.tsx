@@ -69,7 +69,7 @@ export default function ViewField({
         </span>
       ) : isExpandable ? (
         <ExpandableText
-          text={textValue}
+          text={textValue!}
           maxLength={maxLength!}
           className={`${adminType.value} ${capitalize ? "capitalize" : ""}`}
         />
