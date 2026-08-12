@@ -42,7 +42,7 @@ export default function AdminProductsPage() {
 
   const { data, isLoading, isError } = useProducts({
     search: debouncedSearch || undefined,
-    status: status ? (status as ProductStatus) : undefined,
+    status: status ? (status as ProductStatus) : "all",
     page,
     limit: PAGE_SIZE,
     sortBy: "createdAt",

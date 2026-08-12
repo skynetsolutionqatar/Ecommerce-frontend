@@ -78,7 +78,7 @@ export interface ApiProduct {
 
 export interface ProductQueryParams extends PaginationParams {
   categoryId?: string;
-  status?: ProductStatus;
+  status?: ProductStatus | "all";
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
