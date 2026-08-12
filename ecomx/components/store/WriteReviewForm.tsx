@@ -47,7 +47,7 @@ export default function WriteReviewForm({
         title: title.trim() || undefined,
         body: body.trim(),
       });
-      showSuccess("Review submitted! It will appear after admin approval.");
+      showSuccess("Review submitted..!");
       onSuccess?.();
     } catch {
       // Global mutation error toast handles API failures.

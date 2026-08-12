@@ -572,8 +572,8 @@ import { usePathname } from "next/navigation";
 
 import { adminSections, type AdminMenuItem } from "../utils/SideSection";
 import { adminType } from "@/lib/admin/typography";
-import { ADMIN_ROUTES } from "@/lib/config";
 import { colors } from "../utils/Colors";
+import { ADMIN_ROUTES } from "@/lib/config";
 
 export const skynetClient = {
   id: "skynet",

@@ -28,18 +28,18 @@ function ExpandableText({
     expanded || !needsTruncate ? text : `${text.slice(0, maxLength).trimEnd()}…`;
 
   return (
-    <span className={className}>
-      {display}
+    <div className={`min-w-0 flex-1 ${className ?? ""}`}>
+      <p className="whitespace-pre-wrap break-words">{display}</p>
       {needsTruncate ? (
         <button
           type="button"
           onClick={() => setExpanded((open) => !open)}
-          className="ml-1 border-0 bg-transparent p-0 text-[13px] font-semibold text-blue-600 hover:underline"
+          className="mt-1 border-0 bg-transparent p-0 text-[13px] font-semibold text-blue-600 hover:underline"
         >
           {expanded ? "Show less" : "Read more"}
         </button>
       ) : null}
-    </span>
+    </div>
   );
 }
 
@@ -53,24 +53,30 @@ export default function ViewField({
 }: ViewFieldProps) {
   const textValue = value == null || value === "" ? null : String(value);
 
+  const isExpandable = Boolean(maxLength && textValue);
+
   return (
-    <div className="flex w-full items-center">
-      <span className={`w-40 ${adminType.label}`}>{label}</span>
-      <span className="mr-3 text-muted-foreground">:</span>
+    <div className={`flex w-full min-w-0 ${isExpandable ? "items-start" : "items-center"}`}>
+      <span className={`w-40 shrink-0 ${adminType.label} ${isExpandable ? "pt-0.5" : ""}`}>
+        {label}
+      </span>
+      <span className="mr-3 shrink-0 text-muted-foreground">:</span>
       {badge ? (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 ${adminType.badge} ${adminStatusBadge[badgeColor]}`}
         >
           {value || "—"}
         </span>
-      ) : textValue && maxLength ? (
+      ) : isExpandable ? (
         <ExpandableText
           text={textValue}
-          maxLength={maxLength}
-          className={`flex-1 ${adminType.value} ${capitalize ? "capitalize" : ""}`}
+          maxLength={maxLength!}
+          className={`${adminType.value} ${capitalize ? "capitalize" : ""}`}
         />
       ) : (
-        <span className={`flex-1 ${adminType.value} ${capitalize ? "capitalize" : ""}`}>
+        <span
+          className={`min-w-0 flex-1 whitespace-pre-wrap break-words ${adminType.value} ${capitalize ? "capitalize" : ""}`}
+        >
           {textValue || "—"}
         </span>
       )}

@@ -11,6 +11,7 @@ export const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://api-skynet-ecommerce-store.onrender.com/api/v1",
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5050/api/v1",
   tenantId: process.env.NEXT_PUBLIC_TENANT_ID ?? "6a363c2f05587300d65b2720",
+  tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG ?? "skynet",
 } as const;
 
 export const ADMIN_ROUTES = {
@@ -29,6 +30,9 @@ export const ADMIN_ROUTES = {
   reviews: `${ROUTE_PREFIX.ADMIN}/reviews`,
   review: (id: string) => `${ROUTE_PREFIX.ADMIN}/reviews/${id}`,
   customer: (id: string) => `${ROUTE_PREFIX.ADMIN}/customers/${id}`,
+  tenants: `${ROUTE_PREFIX.ADMIN}/tenants`,
+  tenant: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/${slug}`,
+  tenantEdit: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/edit/${slug}`,
 } as const;
 
 export const AUTH_ROUTES = {

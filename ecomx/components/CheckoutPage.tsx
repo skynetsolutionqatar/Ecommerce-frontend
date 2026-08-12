@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CartItem } from "@/lib/types";
 import type { PlaceOrderPayload } from "@/types/order.types";
@@ -9,6 +9,10 @@ import { tw, type } from "@/lib/theme";
 import { showError, showSuccess } from "@/lib/toast";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
+import {
+  loadCheckoutAddress,
+  saveCheckoutAddress,
+} from "@/lib/store/checkout-address-cache";
 
 export interface CheckoutFormData {
   fullName: string;
@@ -26,6 +30,7 @@ interface CheckoutPageProps {
   isLoggedIn: boolean;
   onLoginOpen: () => void;
   onPlaceOrder: (payload: PlaceOrderPayload) => Promise<string>;
+  initialContact?: Pick<CheckoutFormData, "fullName" | "email" | "phone">;
 }
 
 const INITIAL_FORM: CheckoutFormData = {
@@ -48,6 +53,7 @@ export default function CheckoutPage({
   isLoggedIn,
   onLoginOpen,
   onPlaceOrder,
+  initialContact,
 }: CheckoutPageProps) {
   const router = useRouter();
   const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -56,6 +62,29 @@ export default function CheckoutPage({
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
   const [submitError, setSubmitError] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [addressLoaded, setAddressLoaded] = useState(false);
+
+  useEffect(() => {
+    if (addressLoaded) return;
+    const cached = loadCheckoutAddress();
+    if (cached) {
+      setForm((prev) => ({
+        ...prev,
+        ...cached,
+        fullName: initialContact?.fullName || cached.fullName,
+        email: initialContact?.email || cached.email,
+        phone: initialContact?.phone || cached.phone,
+      }));
+    } else if (initialContact) {
+      setForm((prev) => ({
+        ...prev,
+        fullName: initialContact.fullName || prev.fullName,
+        email: initialContact.email || prev.email,
+        phone: initialContact.phone || prev.phone,
+      }));
+    }
+    setAddressLoaded(true);
+  }, [addressLoaded, initialContact]);
 
   const inputClass = (field: keyof CheckoutFormData) =>
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
@@ -134,6 +163,7 @@ export default function CheckoutPage({
         },
         paymentMethod: "cash_on_delivery",
       });
+      saveCheckoutAddress(form);
       router.push(`${ROUTES.orders}?placed=${encodeURIComponent(orderNumber)}`);
       showSuccess(`Order ${orderNumber} placed successfully`);
     } catch (err) {

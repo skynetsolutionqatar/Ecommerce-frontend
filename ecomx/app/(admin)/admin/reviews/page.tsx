@@ -103,7 +103,7 @@ export default function AdminReviewsPage() {
         <table className="admin-table w-full text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-5 py-3 text-left">#</th>
+              <th className="px-2 py-1 text-left">#</th>
               <th className="px-5 py-3 text-left">Product</th>
               <th className="px-5 py-3 text-left">Customer</th>
               <th className="px-5 py-3 text-left">Rating</th>
@@ -118,7 +118,7 @@ export default function AdminReviewsPage() {
               reviews.map((review: ApiReview, index: number) => (
                 <tr key={review._id} className="border-t hover:bg-gray-50">
                   <td
-                    className="cursor-pointer px-5 py-4 text-gray-400"
+                    className="cursor-pointer px-2 py-1 text-gray-400"
                     onClick={() => router.push(ADMIN_ROUTES.review(review._id))}
                   >
                     {(page - 1) * LIST_PAGE_SIZE + index + 1}

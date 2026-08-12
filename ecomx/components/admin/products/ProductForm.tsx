@@ -228,13 +228,14 @@ function ProductForm({
         </FormSection>
 
         <FormSection id="description" title="Description">
-          <div className={`${formGridClass} lg:grid-cols-2`}>
+          <div className="grid grid-cols-1 gap-6">
             <FormTextarea
               label="Short Desc"
               name="shortDescription"
               value={values.shortDescription}
-              placeholder="Brief summary"
-              rows={2}
+              placeholder="Brief summary shown on product cards"
+              rows={3}
+              fullWidth
               error={errors.shortDescription}
               touched={touched.shortDescription}
               onChange={handleChange}
@@ -245,7 +246,8 @@ function ProductForm({
               name="description"
               value={values.description}
               placeholder="Full product description"
-              rows={4}
+              rows={6}
+              fullWidth
               error={errors.description}
               touched={touched.description}
               onChange={handleChange}

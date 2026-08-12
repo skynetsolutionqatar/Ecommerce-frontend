@@ -13,6 +13,7 @@ interface FormTextareaProps {
   placeholder?: string;
   required?: boolean;
   rows?: number;
+  fullWidth?: boolean;
   error?: string;
   touched?: boolean;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -26,6 +27,7 @@ function FormTextarea({
   placeholder,
   required = false,
   rows = 2,
+  fullWidth = false,
   error,
   touched,
   onChange,
@@ -34,7 +36,7 @@ function FormTextarea({
   const hasError = Boolean(touched && error);
 
   return (
-    <div className="flex max-w-md items-start gap-4">
+    <div className={`flex items-start gap-4 ${fullWidth ? "w-full min-w-0" : "max-w-md"}`}>
       <label className={adminFormLabel}>
         {required && <span className="text-red-500">*</span>} {label}
       </label>
@@ -46,7 +48,7 @@ function FormTextarea({
           placeholder={placeholder}
           onChange={onChange}
           onBlur={onBlur}
-          className={`${adminFormInputClass({ hasError })} resize-none`}
+          className={`${adminFormInputClass({ hasError })} min-h-[4.5rem] resize-y whitespace-pre-wrap`}
         />
         {hasError && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </div>

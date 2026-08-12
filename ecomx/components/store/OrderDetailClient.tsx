@@ -14,6 +14,8 @@ import { orderAddress, orderTotal } from "@/types/order.types";
 import StoreImage from "@/components/StoreImage";
 import OrderStatusTracker from "@/components/store/OrderStatusTracker";
 import WriteReviewModal from "@/components/store/WriteReviewModal";
+import CancelOrderDialog from "@/components/store/CancelOrderDialog";
+import { showSuccess } from "@/lib/toast";
 
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-500/15 text-amber-700",
@@ -32,6 +34,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
     productId: string;
     productName: string;
   } | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const isDelivered = order?.status === ORDER_STATUS.DELIVERED;
   const { data: myReviewsData, refetch: refetchMyReviews } = useMyReviews(
@@ -46,9 +49,11 @@ export default function OrderDetailClient({ id }: { id: string }) {
   const canCancel =
     order?.status === ORDER_STATUS.PENDING || order?.status === ORDER_STATUS.CONFIRMED;
 
-  const handleCancel = async () => {
-    if (!order || !window.confirm("Cancel this order?")) return;
+  const handleConfirmCancel = async () => {
+    if (!order) return;
     await cancel.mutateAsync(order._id);
+    showSuccess("Order cancelled");
+    setCancelOpen(false);
   };
 
   if (isLoading) {
@@ -184,11 +189,11 @@ export default function OrderDetailClient({ id }: { id: string }) {
             {canCancel ? (
               <button
                 type="button"
-                onClick={() => void handleCancel()}
+                onClick={() => setCancelOpen(true)}
                 disabled={cancel.isPending}
                 className="rounded-xl border border-red-200 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
               >
-                {cancel.isPending ? "Cancelling..." : "Cancel Order"}
+                Cancel Order
               </button>
             ) : null}
           </div>
@@ -205,6 +210,14 @@ export default function OrderDetailClient({ id }: { id: string }) {
           onSuccess={() => void refetchMyReviews()}
         />
       ) : null}
+
+      <CancelOrderDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        orderNumber={order.orderNumber}
+        onConfirm={handleConfirmCancel}
+        loading={cancel.isPending}
+      />
     </div>
   );
 }

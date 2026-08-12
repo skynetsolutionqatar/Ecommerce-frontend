@@ -10,6 +10,7 @@ import {
   Ticket,
   Star,
   Boxes,
+  Settings,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 
@@ -72,6 +73,18 @@ export const adminSections: AdminMenuSection[] = [
           { name: "Inventory", path: ADMIN_ROUTES.inventory, icon: <BarChart3 size={16} /> },
           { name: "Coupons", path: ADMIN_ROUTES.coupons, icon: <Ticket size={16} /> },
           { name: "Reviews", path: ADMIN_ROUTES.reviews, icon: <Star size={16} /> },
+        ],
+      },
+    ],
+  },
+  {
+    title: "SETTINGS",
+    items: [
+      {
+        name: "General Settings",
+        icon: <Boxes size={18} />,
+        subMenu: [
+          // { name: "Tenants", path: ADMIN_ROUTES.tenants, icon: <Settings size={16} /> },
         ],
       },
     ],

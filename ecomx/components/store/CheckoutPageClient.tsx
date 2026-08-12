@@ -16,6 +16,11 @@ export default function CheckoutPageClient() {
   const { place } = useMyOrderMutations();
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const isLoggedIn = useAuthStore(selectIsAuthenticated);
+  const user = useAuthStore((s) => s.user);
+
+  const initialContact = user
+    ? { fullName: user.name, email: user.email, phone: user.phone ?? "" }
+    : undefined;
 
   useEffect(() => {
     if (isHydrated && !isLoggedIn) setLoginOpen(true);
@@ -41,6 +46,7 @@ export default function CheckoutPageClient() {
       isLoggedIn={isLoggedIn}
       onLoginOpen={() => setLoginOpen(true)}
       onPlaceOrder={handlePlaceOrder}
+      initialContact={initialContact}
     />
   );
 }

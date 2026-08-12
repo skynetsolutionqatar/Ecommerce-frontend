@@ -48,6 +48,42 @@ export function AuthFormField({
   );
 }
 
+export function AuthPhoneField({
+  id = "phone",
+  label = "Phone (Qatar)",
+  value,
+  onChange,
+  required = true,
+}: {
+  id?: string;
+  label?: string;
+  value: string;
+  onChange: (digits: string) => void;
+  required?: boolean;
+}) {
+  return (
+    <AuthFormField label={label} icon={<Icons.Phone />}>
+      <div className="flex overflow-hidden rounded-xl border border-border/80 bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04)] focus-within:border-[#0a255d] focus-within:shadow-[0_0_0_3px_rgba(10,37,93,0.1)]">
+        <span className="flex items-center border-r border-border/80 bg-bg-soft px-3 text-sm font-semibold text-primary">
+          +974
+        </span>
+        <input
+          id={id}
+          type="tel"
+          inputMode="numeric"
+          required={required}
+          maxLength={8}
+          value={value}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 8))}
+          className="w-full border-0 bg-transparent px-4 py-3.5 text-sm text-primary outline-none placeholder:text-muted/50"
+          placeholder="51882350"
+          autoComplete="tel-national"
+        />
+      </div>
+    </AuthFormField>
+  );
+}
+
 export function AuthError({ message }: { message: string }) {
   return (
     <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">

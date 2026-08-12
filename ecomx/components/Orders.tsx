@@ -13,6 +13,7 @@ import {
 } from "@/lib/Constant";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { orderTotal, type ApiOrder } from "@/types/order.types";
+import CancelOrderDialog from "@/components/store/CancelOrderDialog";
 
 const STATUS_CLASS: Record<string, string> = {
   [ORDER_STATUS.PENDING]: "bg-amber-500/15 text-amber-700 border border-amber-200",
@@ -27,6 +28,13 @@ const STATUS_CLASS: Record<string, string> = {
 function canCancel(status: string) {
   return status === ORDER_STATUS.PENDING || status === ORDER_STATUS.CONFIRMED;
 }
+
+type OrderFilter = "all" | "cancelled";
+
+const ORDER_FILTERS: { key: OrderFilter; label: string }[] = [
+  { key: "all", label: "All Orders" },
+  { key: "cancelled", label: "Cancelled" },
+];
 
 function OrderCard({
   order,
@@ -100,10 +108,17 @@ export default function OrdersPage({
 }: OrdersPageProps) {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<OrderFilter>("all");
+  const [cancelTarget, setCancelTarget] = useState<ApiOrder | null>(null);
 
   const { data, isLoading, isError, refetch } = useMyOrders(
-    { page, limit: 10, sortBy: "createdAt", sortOrder: "desc" },
+    {
+      page,
+      limit: 10,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      ...(filter === "cancelled" ? { status: ORDER_STATUS.CANCELLED } : {}),
+    },
     isHydrated && isLoggedIn
   );
 
@@ -113,15 +128,16 @@ export default function OrdersPage({
   const total = data?.pagination?.total ?? orders.length;
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  const handleCancel = async (id: string) => {
-    if (!window.confirm("Cancel this order?")) return;
-    setCancellingId(id);
-    try {
-      await cancel.mutateAsync(id);
-      showSuccess("Order cancelled");
-    } finally {
-      setCancellingId(null);
-    }
+  const handleFilterChange = (next: OrderFilter) => {
+    setFilter(next);
+    setPage(1);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelTarget) return;
+    await cancel.mutateAsync(cancelTarget._id);
+    showSuccess("Order cancelled");
+    setCancelTarget(null);
   };
 
   return (
@@ -165,21 +181,51 @@ export default function OrdersPage({
           </div>
         ) : orders.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-8 text-center">
-            <p className="mb-4 text-sm text-muted">You haven&apos;t placed any orders yet.</p>
-            <button type="button" onClick={() => router.push(ROUTES.shop)} className={tw.btnPrimary}>
-              Browse Products
-            </button>
+            <p className="mb-4 text-sm text-muted">
+              {filter === "cancelled"
+                ? "You don't have any cancelled orders."
+                : "You haven't placed any orders yet."}
+            </p>
+            {filter === "cancelled" ? (
+              <button
+                type="button"
+                onClick={() => handleFilterChange("all")}
+                className={tw.btnOutline}
+              >
+                View All Orders
+              </button>
+            ) : (
+              <button type="button" onClick={() => router.push(ROUTES.shop)} className={tw.btnPrimary}>
+                Browse Products
+              </button>
+            )}
           </div>
         ) : (
           <>
+            <div className="mb-5 flex flex-wrap gap-2">
+              {ORDER_FILTERS.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => handleFilterChange(item.key)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    filter === item.key
+                      ? "bg-primary text-white"
+                      : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
             <div className="flex flex-col gap-4">
               {orders.map((order) => (
                 <OrderCard
                   key={order._id}
                   order={order}
                   onView={() => router.push(ROUTES.orderDetail(order._id))}
-                  onCancel={() => void handleCancel(order._id)}
-                  cancelling={cancellingId === order._id}
+                  onCancel={() => setCancelTarget(order)}
+                  cancelling={cancel.isPending && cancelTarget?._id === order._id}
                 />
               ))}
             </div>
@@ -209,6 +255,16 @@ export default function OrdersPage({
           </>
         )}
       </div>
+
+      <CancelOrderDialog
+        open={Boolean(cancelTarget)}
+        onOpenChange={(open) => {
+          if (!open) setCancelTarget(null);
+        }}
+        orderNumber={cancelTarget?.orderNumber}
+        onConfirm={handleConfirmCancel}
+        loading={cancel.isPending}
+      />
     </div>
   );
 }

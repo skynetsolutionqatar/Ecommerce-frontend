@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { STORAGE_KEYS, isAdminRole } from "@/lib/Constant";
+import { canManageTenants } from "@/lib/admin/tenant-access";
 import { TOKEN_KEYS } from "@/lib/config";
 import type { AuthUser } from "@/types/auth.types";
 
@@ -65,3 +66,4 @@ export const useAuthStore = create<AuthState>()(
 
 export const selectIsAuthenticated = (s: AuthState) => !!s.accessToken && !!s.user;
 export const selectIsAdmin = (s: AuthState) => isAdminRole(s.user?.role);
+export const selectCanManageTenants = (s: AuthState) => canManageTenants(s.user?.role);

@@ -10,12 +10,13 @@ import {
   AuthFormField,
   AuthGoToStoreLink,
   AuthPasswordField,
+  AuthPhoneField,
   AuthShell,
   AuthSubmitButton,
   AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
-import { getErrorMessage, normalizeRegisterPhone } from "@/lib/utils";
+import { getErrorMessage, getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function RegisterForm() {
@@ -39,11 +40,18 @@ export default function RegisterForm() {
     e.preventDefault();
     setLocalError(null);
     setSuccess(false);
+
+    const validationError = getRegisterFieldError(form);
+    if (validationError) {
+      setLocalError(validationError);
+      return;
+    }
+
     try {
       await register(
         {
-          name: form.name,
-          email: form.email,
+          name: form.name.trim(),
+          email: form.email.trim(),
           password: form.password,
           phone: normalizeRegisterPhone(form.phone),
         },
@@ -70,7 +78,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <AuthShell title="Create account" subtitle="Register to get access to the Skynet admin panel.">
+    <AuthShell title="Create account" subtitle="Register with your email and Qatar mobile number.">
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
         <AuthFormField label="Full Name" icon={<Icons.User />}>
           <input
@@ -98,17 +106,10 @@ export default function RegisterForm() {
           />
         </AuthFormField>
 
-        <AuthFormField label="Phone" icon={<Icons.Phone />}>
-          <input
-            id="phone"
-            type="text"
-            value={form.phone}
-            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-            className={authInputClass}
-            placeholder="+974 XXXX XXXX (optional)"
-            autoComplete="tel"
-          />
-        </AuthFormField>
+        <AuthPhoneField
+          value={form.phone}
+          onChange={(phone) => setForm((f) => ({ ...f, phone }))}
+        />
 
         <AuthPasswordField
           id="password"

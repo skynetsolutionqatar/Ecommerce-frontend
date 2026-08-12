@@ -27,7 +27,7 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
-  phone?: string;
+  phone: string;
 }
 
 export interface AuthResponse {

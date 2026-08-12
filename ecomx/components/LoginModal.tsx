@@ -6,7 +6,7 @@ import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 import { isAdminRole } from "@/lib/config";
-import { getErrorMessage, normalizeRegisterPhone } from "@/lib/utils";
+import { getErrorMessage, getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
@@ -64,10 +64,17 @@ export default function LoginModal({
       let storeUser: StoreUser;
 
       if (mode === "register") {
+        const validationError = getRegisterFieldError(form);
+        if (validationError) {
+          setError(validationError);
+          setLoading(false);
+          return;
+        }
+
         const result = await register(
           {
-            name: form.name,
-            email: form.email,
+            name: form.name.trim(),
+            email: form.email.trim(),
             password: form.password,
             phone: normalizeRegisterPhone(form.phone),
           },
@@ -306,12 +313,27 @@ export default function LoginModal({
 
                 {mode === "register" && (
                   <FormField label="Phone (Qatar)" icon={<Icons.Phone />}>
-                    <input
-                      value={form.phone}
-                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                      placeholder="+974 XXXX XXXX"
-                      className={inputClass}
-                    />
+                    <div className="flex overflow-hidden rounded-xl border border-gray-200 bg-white focus-within:border-blue-500">
+                      <span className="flex items-center border-r border-gray-200 bg-gray-50 px-3 text-sm font-semibold text-gray-700">
+                        +974
+                      </span>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        required
+                        maxLength={8}
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            phone: e.target.value.replace(/\D/g, "").slice(0, 8),
+                          }))
+                        }
+                        placeholder="51882350"
+                        autoComplete="tel-national"
+                        className={`${inputClass} rounded-none border-0 shadow-none focus:shadow-none`}
+                      />
+                    </div>
                   </FormField>
                 )}
 
