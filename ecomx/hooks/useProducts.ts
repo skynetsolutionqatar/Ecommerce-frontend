@@ -22,7 +22,6 @@ export function useProducts(params?: ProductQueryParams, enabled = true) {
     queryFn: () => fetchProducts(params),
     staleTime: 60_000,
     enabled,
-    placeholderData: (prev) => prev,
   });
 }
 

@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 export default function ShopPageClient() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") ?? undefined;
-  const search = searchParams.get("search") ?? undefined;
   const { addToCart, buyNow, toggleWishlist, isWishlisted, openProduct, goToShop } = useStore();
 
   return (
@@ -18,7 +17,6 @@ export default function ShopPageClient() {
       isWishlisted={isWishlisted}
       onProductClick={openProduct}
       initialCategory={category}
-      initialSearch={search}
       onHomeClick={() => goToShop()}
     />
   );

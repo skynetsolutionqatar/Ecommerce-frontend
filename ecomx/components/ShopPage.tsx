@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import FilterSidebar from "./FilterSidebar";
 import StoreProductCard, { type ShopViewMode } from "./store/StoreProductCard";
@@ -39,7 +40,6 @@ interface ShopPageProps {
   isWishlisted: (productId: string) => boolean;
   onProductClick: (product: Product) => void;
   initialCategory?: string;
-  initialSearch?: string;
   onHomeClick?: () => void;
 }
 
@@ -67,14 +67,28 @@ export default function ShopPage({
   isWishlisted,
   onProductClick,
   initialCategory,
-  initialSearch,
   onHomeClick,
 }: ShopPageProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { priceMax, brands } = useShopFilterMeta();
   const [filters, setFilters] = useState<FilterState>(() => createDefaultFilters());
   const [appliedFilters, setAppliedFilters] = useState<FilterState>(() => createDefaultFilters());
   const [sort, setSort] = useState<SortOption>("relevance");
-  const [search, setSearch] = useState(initialSearch ?? "");
+  const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
+
+  const updateUrlSearch = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const trimmed = value.trim();
+      if (trimmed) params.set("search", trimmed);
+      else params.delete("search");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
   const [viewMode, setViewMode] = useState<ShopViewMode>("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,8 +144,23 @@ export default function ShopPage({
   }, [initialCategory, priceMax]);
 
   useEffect(() => {
-    if (initialSearch != null) setSearch(initialSearch);
-  }, [initialSearch]);
+    setSearch(searchParams.get("search") ?? "");
+  }, [searchParams]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearch(value);
+      if (!value.trim()) updateUrlSearch("");
+    },
+    [updateUrlSearch]
+  );
+
+  useEffect(() => {
+    const next = debouncedSearch.trim();
+    if (!next) return;
+    if ((searchParams.get("search") ?? "") === next) return;
+    updateUrlSearch(next);
+  }, [debouncedSearch, searchParams, updateUrlSearch]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
@@ -150,7 +179,9 @@ export default function ShopPage({
     const defaults = createDefaultFilters(priceMax);
     setFilters(defaults);
     setAppliedFilters(defaults);
-  }, [priceMax]);
+    setSearch("");
+    updateUrlSearch("");
+  }, [priceMax, updateUrlSearch]);
 
   const handleFilterChange = useCallback(
     (next: FilterState) => {
@@ -285,7 +316,7 @@ export default function ShopPage({
                 <input
                   type="search"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Search products..."
                   className="hidden h-9 w-48 rounded-lg border border-gray-200 bg-white px-3 text-[12px] outline-none focus:border-blue-400 sm:block"
                 />
