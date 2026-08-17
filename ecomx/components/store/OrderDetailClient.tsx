@@ -17,6 +17,7 @@ import StoreImage from "@/components/StoreImage";
 import OrderStatusTracker from "@/components/store/OrderStatusTracker";
 import WriteReviewModal from "@/components/store/WriteReviewModal";
 import CancelOrderDialog from "@/components/store/CancelOrderDialog";
+import DownloadInvoiceButton from "@/components/store/DownloadInvoiceButton";
 import { showInfo, showSuccess } from "@/lib/toast";
 
 const STATUS_CLASS: Record<string, string> = {
@@ -209,6 +210,10 @@ export default function OrderDetailClient({ id }: { id: string }) {
               >
                 Cancel Order
               </button>
+            ) : null}
+
+            {isDelivered ? (
+              <DownloadInvoiceButton orderId={order._id} orderNumber={order.orderNumber} />
             ) : null}
           </div>
         </div>

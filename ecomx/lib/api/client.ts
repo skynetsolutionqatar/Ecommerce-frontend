@@ -115,3 +115,53 @@ export async function apiDelete<T>(url: string) {
   const { data } = await apiClient.delete<ApiResponse<T>>(url);
   return data;
 }
+
+function parseContentDispositionFilename(
+  header: string | undefined,
+  fallback: string
+): string {
+  if (!header) return fallback;
+  const quoted = /filename="([^"]+)"/i.exec(header);
+  if (quoted?.[1]) return quoted[1];
+  const unquoted = /filename=([^;]+)/i.exec(header);
+  return unquoted?.[1]?.trim() ?? fallback;
+}
+
+export function triggerBrowserDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** GET binary response (e.g. PDF) with auth + tenant headers. */
+export async function apiGetBlob(url: string, fallbackFilename: string) {
+  try {
+    const response = await apiClient.get(url, { responseType: "blob" });
+    const filename = parseContentDispositionFilename(
+      response.headers["content-disposition"] as string | undefined,
+      fallbackFilename
+    );
+    return { blob: response.data as Blob, filename };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      const text = await error.response.data.text();
+      try {
+        const json = JSON.parse(text) as { message?: string };
+        if (typeof json.message === "string" && json.message.trim()) {
+          throw new Error(json.message);
+        }
+      } catch (parseError) {
+        if (parseError instanceof SyntaxError) {
+          throw error;
+        }
+        throw parseError;
+      }
+    }
+    throw error;
+  }
+}

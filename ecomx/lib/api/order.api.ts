@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost } from "./client";
+import { apiGet, apiPatch, apiPost, apiGetBlob, triggerBrowserDownload } from "./client";
 import type { PaginationMeta } from "@/types/api.types";
 import type {
   ApiOrder,
@@ -42,6 +42,22 @@ export const orderApi = {
 
   updateStatus: (id: string, payload: UpdateOrderStatusPayload) =>
     apiPatch<{ order: ApiOrder }>(`/orders/${id}/status`, payload),
+
+  downloadMyInvoice: async (id: string, orderNumber: string) => {
+    const { blob, filename } = await apiGetBlob(
+      `/orders/my/${id}/invoice`,
+      `invoice-${orderNumber}.pdf`
+    );
+    triggerBrowserDownload(blob, filename);
+  },
+
+  downloadInvoice: async (id: string, orderNumber: string) => {
+    const { blob, filename } = await apiGetBlob(
+      `/orders/${id}/invoice`,
+      `invoice-${orderNumber}.pdf`
+    );
+    triggerBrowserDownload(blob, filename);
+  },
 };
 
 export type OrdersResult = { orders: ApiOrder[]; pagination?: PaginationMeta };
