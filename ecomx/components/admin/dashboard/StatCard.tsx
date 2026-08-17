@@ -33,7 +33,7 @@ function StatCard({ stat }: StatCardProps) {
         </div>
 
         {stat.ringPercent != null ? (
-          <ProgressRing percent={stat.ringPercent} label={`${stat.ringPercent}%`} />
+          <ProgressRing percent={stat.ringPercent} />
         ) : (
           <Sparkline
             data={stat.sparkline}

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Icons from "@/components/Icons";
 import { tw } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
-import { useMyOrder, useMyOrderMutations } from "@/hooks/useOrders";
+import { useMyOrder, useMyOrderMutations, MY_ORDER_KEY } from "@/hooks/useOrders";
+import { useOrderTracking } from "@/hooks/useOrderTracking";
 import { useMyReviews } from "@/hooks/useReviews";
 import { ORDER_STATUS, ORDER_STATUS_LABEL } from "@/lib/Constant";
 import { reviewedProductIds } from "@/lib/store/review-eligibility";
@@ -15,7 +17,7 @@ import StoreImage from "@/components/StoreImage";
 import OrderStatusTracker from "@/components/store/OrderStatusTracker";
 import WriteReviewModal from "@/components/store/WriteReviewModal";
 import CancelOrderDialog from "@/components/store/CancelOrderDialog";
-import { showSuccess } from "@/lib/toast";
+import { showInfo, showSuccess } from "@/lib/toast";
 
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-500/15 text-amber-700",
@@ -28,7 +30,10 @@ const STATUS_CLASS: Record<string, string> = {
 
 export default function OrderDetailClient({ id }: { id: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: order, isLoading, isError } = useMyOrder(id);
+  const { lastUpdate } = useOrderTracking(order?.orderNumber ?? null);
+  const lastNotifiedRef = useRef<string | null>(null);
   const { cancel } = useMyOrderMutations();
   const [reviewTarget, setReviewTarget] = useState<{
     productId: string;
@@ -45,6 +50,15 @@ export default function OrderDetailClient({ id }: { id: string }) {
     () => reviewedProductIds(myReviewsData?.reviews ?? []),
     [myReviewsData?.reviews]
   );
+
+  useEffect(() => {
+    if (!lastUpdate || !order) return;
+    const key = `${lastUpdate.orderNumber}:${lastUpdate.status}:${lastUpdate.updatedAt}`;
+    if (lastNotifiedRef.current === key) return;
+    lastNotifiedRef.current = key;
+    showInfo(lastUpdate.message ?? `Order status: ${lastUpdate.status}`);
+    void queryClient.invalidateQueries({ queryKey: [MY_ORDER_KEY, id] });
+  }, [lastUpdate, order, id, queryClient]);
 
   const canCancel =
     order?.status === ORDER_STATUS.PENDING || order?.status === ORDER_STATUS.CONFIRMED;

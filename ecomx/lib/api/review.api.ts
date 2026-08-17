@@ -12,7 +12,7 @@ import type {
 /** Requires /reviews route mounted on backend */
 export const reviewApi = {
   getProductReviews: (productId: string, params?: ProductReviewQuery) =>
-    apiGet<{ reviews: ApiReview[] }>(
+    apiGet<{ reviews: ApiReview[]; ratingBreakdown?: Record<number, number> }>(
       `/reviews/products/${productId}`,
       params as Record<string, unknown>
     ),
@@ -35,6 +35,7 @@ export const reviewApi = {
 export type ReviewsResult = {
   reviews: ApiReview[];
   pagination?: PaginationMeta;
+  ratingBreakdown?: Record<number, number>;
 };
 
 export async function fetchReviews(params?: ReviewQueryParams): Promise<ReviewsResult> {
@@ -47,7 +48,11 @@ export async function fetchProductReviews(
   params?: ProductReviewQuery
 ): Promise<ReviewsResult> {
   const res = await reviewApi.getProductReviews(productId, params);
-  return { reviews: res.data.reviews, pagination: res.pagination };
+  return {
+    reviews: res.data.reviews,
+    pagination: res.pagination,
+    ratingBreakdown: res.data.ratingBreakdown,
+  };
 }
 
 export async function fetchMyReviews(params?: MyReviewQuery): Promise<ReviewsResult> {

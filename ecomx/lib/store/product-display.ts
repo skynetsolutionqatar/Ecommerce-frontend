@@ -6,18 +6,24 @@ export interface ProductTrustBadge {
   sub: string;
 }
 
-export function buildProductSpecs(product: Product): { label: string; value: string }[] {
+export function buildProductSpecs(
+  product: Product
+): { label: string; value: string }[] {
   const specs: { label: string; value: string }[] = [];
 
   if (product.sku) specs.push({ label: "SKU", value: product.sku });
   if (product.barcode) specs.push({ label: "Barcode", value: product.barcode });
   if (product.brand) specs.push({ label: "Brand", value: product.brand });
-  if (product.category) specs.push({ label: "Category", value: product.category });
+  if (product.category)
+    specs.push({ label: "Category", value: product.category });
 
   if (product.stock != null) {
     specs.push({
       label: "Availability",
-      value: product.stock > 0 ? `In stock (${product.stock} units)` : "Out of stock",
+      value:
+        product.stock > 0
+          ? `In stock (${product.stock} units)`
+          : "Out of stock",
     });
   }
 
@@ -49,10 +55,14 @@ export function buildProductSpecs(product: Product): { label: string; value: str
   }
 
   const { dimensions } = product;
-  if (dimensions?.weight) specs.push({ label: "Weight", value: `${dimensions.weight} g` });
-  if (dimensions?.length) specs.push({ label: "Length", value: `${dimensions.length} cm` });
-  if (dimensions?.width) specs.push({ label: "Width", value: `${dimensions.width} cm` });
-  if (dimensions?.height) specs.push({ label: "Height", value: `${dimensions.height} cm` });
+  if (dimensions?.weight)
+    specs.push({ label: "Weight", value: `${dimensions.weight} g` });
+  if (dimensions?.length)
+    specs.push({ label: "Length", value: `${dimensions.length} cm` });
+  if (dimensions?.width)
+    specs.push({ label: "Width", value: `${dimensions.width} cm` });
+  if (dimensions?.height)
+    specs.push({ label: "Height", value: `${dimensions.height} cm` });
 
   if (product.totalSold != null && product.totalSold > 0) {
     specs.push({ label: "Total sold", value: String(product.totalSold) });
@@ -70,6 +80,12 @@ export function buildProductSpecs(product: Product): { label: string; value: str
 }
 
 export function getProductTrustBadges(product: Product): ProductTrustBadge[] {
+  console.log(
+    "Building trust badges for product:",
+    product.name,
+    product.totalSold
+  );
+
   const badges: ProductTrustBadge[] = [];
 
   if (product.isFreeShipping) {
@@ -86,18 +102,36 @@ export function getProductTrustBadges(product: Product): ProductTrustBadge[] {
       title: "Best Seller",
       sub: product.totalSold ? `${product.totalSold}+ sold` : "Popular choice",
     });
+  } else if (product.totalSold && product.totalSold > 0) {
+    badges.push({
+      icon: "🔥",
+      title: "Popular Choice",
+      sub: `${product.totalSold}+ sold`,
+    });
   }
 
   if (product.taxPercent != null && product.taxPercent > 0) {
-    badges.push({ icon: "📋", title: "VAT Ready", sub: `${product.taxPercent}% tax included` });
+    badges.push({
+      icon: "📋",
+      title: "VAT Ready",
+      sub: `${product.taxPercent}% tax included`,
+    });
   }
 
   if (product.stock != null && product.stock > 0) {
-    badges.push({ icon: "📦", title: "In Stock", sub: `${product.stock} units available` });
+    badges.push({
+      icon: "📦",
+      title: "In Stock",
+      sub: `${product.stock} units available`,
+    });
   }
 
   if (product.brand) {
-    badges.push({ icon: "🏷️", title: product.brand, sub: "Official brand product" });
+    badges.push({
+      icon: "🏷️",
+      title: product.brand,
+      sub: "Official brand product",
+    });
   }
 
   return badges.slice(0, 4);

@@ -156,11 +156,13 @@ export default function ShopPage({
   );
 
   useEffect(() => {
+    // Wait until debounce catches up — avoids re-adding search after user clears input
+    if (search !== debouncedSearch) return;
     const next = debouncedSearch.trim();
-    if (!next) return;
-    if ((searchParams.get("search") ?? "") === next) return;
+    const urlSearch = searchParams.get("search") ?? "";
+    if (next === urlSearch) return;
     updateUrlSearch(next);
-  }, [debouncedSearch, searchParams, updateUrlSearch]);
+  }, [search, debouncedSearch, searchParams, updateUrlSearch]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });

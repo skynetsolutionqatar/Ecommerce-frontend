@@ -51,7 +51,7 @@ export default function ProductPage({
   const gallery = useProductGallery(product.id, product.images.length);
   const purchase = useProductPurchase({ product, onAddToCart, onBuyNow });
   const reviews = useProductReviews(product.id, {
-    limit: 20,
+    limit: 5,
     sortBy: "createdAt",
     sortOrder: "desc",
   });

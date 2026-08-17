@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Edit3, LogOut, Menu, RefreshCcw, Store, User } from "lucide-react";
+import { Edit3, LogOut, Menu, RefreshCcw, Store, User } from "lucide-react";
+import NotificationBell from "@/components/admin/main/Notification";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
 import LiveClock from "@/components/admin/main/LiveClock";
@@ -54,10 +55,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
         <AdminThemeToggle />
 
-        <div className="relative">
-          <Bell className="cursor-pointer text-muted-foreground" size={22} />
-          <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500" />
-        </div>
+        <NotificationBell />
 
         <div
           ref={dropdownRef}

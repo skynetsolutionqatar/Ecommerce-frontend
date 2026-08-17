@@ -6,6 +6,7 @@ export const ROUTES = {
   orderDetail: (id: string) => `/orders/${id}`,
   checkout: "/checkout",
   product: (slug: string) => `/product/${slug}`,
+  productReviews: (slug: string) => `/product/${slug}/reviews`,
 } as const;
 
 export function shopUrl(options?: { categoryId?: string; search?: string }) {

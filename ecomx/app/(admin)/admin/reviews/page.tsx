@@ -23,6 +23,18 @@ const STATUS_OPTIONS = [
   { label: "Rejected", value: REVIEW_STATUS.REJECTED },
 ];
 
+function reviewDateCell(iso: string) {
+  const d = new Date(iso);
+  return (
+    <div className="flex min-w-[5.5rem] flex-col gap-0.5 text-xs leading-tight">
+      <span className="whitespace-nowrap">{formatDate(iso)}</span>
+      <span className="whitespace-nowrap text-gray-400">
+        {d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+      </span>
+    </div>
+  );
+}
+
 export default function AdminReviewsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -100,17 +112,17 @@ export default function AdminReviewsPage() {
           />
         }
       >
-        <table className="admin-table w-full text-sm">
+        <table className="admin-table w-full min-w-[960px] text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-2 py-1 text-left">#</th>
+              <th className="px-2 py-3 text-left">#</th>
               <th className="px-5 py-3 text-left">Product</th>
               <th className="px-5 py-3 text-left">Customer</th>
               <th className="px-5 py-3 text-left">Rating</th>
               <th className="px-5 py-3 text-left">Review</th>
               <th className="px-5 py-3 text-left">Status</th>
-              <th className="px-5 py-3 text-left">Date</th>
-              <th className="px-5 py-3 text-left">Action</th>
+              <th className="min-w-[6.5rem] whitespace-nowrap px-4 py-3 text-left">Date</th>
+              <th className="min-w-[9rem] whitespace-nowrap px-4 py-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -154,12 +166,12 @@ export default function AdminReviewsPage() {
                     {review.status}
                   </td>
                   <td
-                    className="cursor-pointer px-5 py-4 text-gray-500"
+                    className="min-w-[6.5rem] whitespace-nowrap px-4 py-4 align-top text-gray-500"
                     onClick={() => router.push(ADMIN_ROUTES.review(review._id))}
                   >
-                    {formatDate(review.createdAt)}
+                    {reviewDateCell(review.createdAt)}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="min-w-[9rem] whitespace-nowrap px-4 py-4 align-top">
                     {review.status === REVIEW_STATUS.PENDING && (
                       <div className="flex gap-2">
                         <button
