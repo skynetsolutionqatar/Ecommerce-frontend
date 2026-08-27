@@ -3,6 +3,7 @@
 import { fmt } from "@/lib/data";
 import type { Product, WishlistItem } from "@/lib/types";
 import { tw } from "@/lib/theme";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "../../StoreImage";
 
 interface RelatedProductsSectionProps {
@@ -60,7 +61,7 @@ export default function RelatedProductsSection({
                 className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
                 style={{ width: "170px" }}
               >
-                <div className="relative flex h-[110px] items-center justify-center overflow-hidden bg-gray-50">
+                <div className={`relative flex h-[110px] items-center justify-center overflow-hidden ${productImageSurfaceClass}`}>
                   {pd ? (
                     <span
                       className="absolute left-1.5 top-1.5 z-10 rounded px-1.5 py-0.5 text-[10px] md:text-[9px] font-bold text-white"

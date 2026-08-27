@@ -3,6 +3,8 @@
 import { fmt } from "@/lib/data";
 import { Colors, tw } from "@/lib/theme";
 import type { WishlistItem } from "@/lib/types";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
+import StoreImage from "./StoreImage";
 import * as Icons from "./Icons";
 
 interface WishlistDrawerProps {
@@ -72,12 +74,9 @@ export default function WishlistDrawer({
                 key={item.id}
                 className="mb-4 flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="h-[72px] w-[72px] shrink-0 rounded-xl object-cover bg-gray-50"
-                />
+                <div className={`h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl ${productImageSurfaceClass}`}>
+                  <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-0.5 text-[12px] md:text-[11px] text-gray-500">{item.brand}</div>
                   <div className="mb-2 text-sm font-semibold text-gray-900">{item.name}</div>

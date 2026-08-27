@@ -5,6 +5,8 @@ import { fmt } from "@/lib/data";
 import { ROUTES } from "@/lib/routes";
 import { Colors, tw } from "@/lib/theme";
 import type { CartItem } from "@/lib/types";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
+import StoreImage from "./StoreImage";
 import * as Icons from "./Icons";
 
 interface CartDrawerProps {
@@ -86,12 +88,9 @@ export default function CartDrawer({
 
               return (
               <div key={item.id} className="mb-5 flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="h-20 w-20 shrink-0 rounded-xl object-cover bg-gray-50"
-                />
+                <div className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl ${productImageSurfaceClass}`}>
+                  <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-0.5 text-[13px] text-gray-500">{item.brand}</div>
                   <div className="text-sm font-semibold leading-snug text-gray-900">{item.name}</div>

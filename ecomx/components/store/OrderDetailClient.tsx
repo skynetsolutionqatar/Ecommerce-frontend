@@ -13,6 +13,7 @@ import { ORDER_STATUS, ORDER_STATUS_LABEL } from "@/lib/Constant";
 import { reviewedProductIds } from "@/lib/store/review-eligibility";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { orderAddress, orderTotal } from "@/types/order.types";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "@/components/StoreImage";
 import OrderStatusTracker from "@/components/store/OrderStatusTracker";
 import WriteReviewModal from "@/components/store/WriteReviewModal";
@@ -124,7 +125,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
               <div className="flex flex-col gap-4">
                 {order.items.map((item, i) => (
                   <div key={`${item.productId}-${i}`} className="flex gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-50">
+                    <div className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg ${productImageSurfaceClass}`}>
                       <StoreImage
                         src={item.thumbnail ?? item.image ?? "/images/products/placeholder.png"}
                         alt={item.name}

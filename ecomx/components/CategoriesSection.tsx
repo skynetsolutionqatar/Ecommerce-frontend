@@ -3,15 +3,28 @@
 import { motion } from "framer-motion";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { resolveCategoryIcon } from "@/lib/store/category-icons";
+import type { ApiCategory } from "@/types/category.types";
 
 interface CategoriesSectionProps {
+  categories?: ApiCategory[];
+  isLoading?: boolean;
   onCategoryClick?: (categoryId: string) => void;
   onViewAll?: () => void;
 }
 
-export default function CategoriesSection({ onCategoryClick, onViewAll }: CategoriesSectionProps) {
-  const { data, isLoading } = useCategories(STORE_CATEGORY_QUERY);
-  const categories = data?.categories ?? [];
+export default function CategoriesSection({
+  categories: categoriesProp,
+  isLoading: isLoadingProp,
+  onCategoryClick,
+  onViewAll,
+}: CategoriesSectionProps) {
+  const shouldFetch = categoriesProp === undefined;
+  const { data, isLoading: queryLoading } = useCategories(
+    STORE_CATEGORY_QUERY,
+    shouldFetch
+  );
+  const categories = categoriesProp ?? data?.categories ?? [];
+  const isLoading = isLoadingProp ?? (shouldFetch ? queryLoading : false);
 
   return (
     <section className="rounded-2xl border border-gray-100 bg-white px-4 pb-4 shadow-sm sm:px-5 md:px-6">

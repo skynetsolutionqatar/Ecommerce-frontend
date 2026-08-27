@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost, apiGetBlob, triggerBrowserDownload } from "./client";
+import { apiGet, apiPatch, apiPost, triggerBrowserDownload } from "./client";
 import type { PaginationMeta } from "@/types/api.types";
 import type {
   ApiOrder,
@@ -43,20 +43,24 @@ export const orderApi = {
   updateStatus: (id: string, payload: UpdateOrderStatusPayload) =>
     apiPatch<{ order: ApiOrder }>(`/orders/${id}/status`, payload),
 
-  downloadMyInvoice: async (id: string, orderNumber: string) => {
-    const { blob, filename } = await apiGetBlob(
-      `/orders/my/${id}/invoice`,
-      `invoice-${orderNumber}.pdf`
-    );
-    triggerBrowserDownload(blob, filename);
+  downloadMyInvoice: async (id: string) => {
+    const { buildInvoicePayload } = await import("@/lib/invoice/invoice-utils");
+    const { generateInvoicePdfBlob } = await import("@/lib/invoice/generate-invoice-pdf");
+    const res = await orderApi.getMyOrder(id);
+    const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+    const payload = buildInvoicePayload(res.data.order);
+    const blob = await generateInvoicePdfBlob(payload, { origin });
+    triggerBrowserDownload(blob, payload.filename);
   },
 
-  downloadInvoice: async (id: string, orderNumber: string) => {
-    const { blob, filename } = await apiGetBlob(
-      `/orders/${id}/invoice`,
-      `invoice-${orderNumber}.pdf`
-    );
-    triggerBrowserDownload(blob, filename);
+  downloadInvoice: async (id: string) => {
+    const { buildInvoicePayload } = await import("@/lib/invoice/invoice-utils");
+    const { generateInvoicePdfBlob } = await import("@/lib/invoice/generate-invoice-pdf");
+    const res = await orderApi.getById(id);
+    const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+    const payload = buildInvoicePayload(res.data.order);
+    const blob = await generateInvoicePdfBlob(payload, { origin });
+    triggerBrowserDownload(blob, payload.filename);
   },
 };
 

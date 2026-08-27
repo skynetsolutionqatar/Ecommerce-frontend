@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { fmt } from "@/lib/data";
 import { tw, badgeBgClass, swatchBgClass, type } from "@/lib/theme";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "./StoreImage";
 import type { Product, WishlistItem } from "@/lib/types";
 import * as Icons from "./Icons";
@@ -43,25 +44,31 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[400] flex items-center justify-center bg-black/65 backdrop-blur-md p-6 animate-fade-in"
+      className="fixed inset-0 z-[400] flex items-center justify-center bg-black/65 backdrop-blur-md p-3 sm:p-6 animate-fade-in"
     >
       <div
         onClick={e => e.stopPropagation()}
         className={`${tw.glassCard} grid w-full max-w-[960px] max-h-[90vh] grid-cols-1 md:grid-cols-2 overflow-auto rounded-[32px] animate-fade-up ${tw.scrollbarThin}`}
       >
-        <div className="relative min-h-[480px] overflow-hidden rounded-t-[32px] md:rounded-l-[32px] md:rounded-tr-none bg-bg-soft">
-          <StoreImage src={product.images[imgIdx] || product.images[0]} alt={product.name} className="block h-full w-full object-cover" />
+        <div className={`relative min-h-[240px] sm:min-h-[360px] md:min-h-[480px] overflow-hidden rounded-t-[32px] md:rounded-l-[32px] md:rounded-tr-none ${productImageSurfaceClass}`}>
+          <div className="flex h-full min-h-[240px] sm:min-h-[360px] md:min-h-[480px] items-center justify-center p-4 sm:p-8">
+            <StoreImage
+              src={product.images[imgIdx] || product.images[0]}
+              alt={product.name}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
             {product.images.map((img, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setImgIdx(i)}
-                className={`h-12 w-12 overflow-hidden rounded-[10px] border-0 p-0 cursor-pointer ${
+                className={`h-12 w-12 overflow-hidden rounded-[10px] border-0 p-0 cursor-pointer ${productImageSurfaceClass} ${
                   imgIdx === i ? "outline outline-2 outline-primary outline-offset-0" : "outline-none"
                 }`}
               >
-                <StoreImage src={img} alt="" className="h-full w-full object-cover" />
+                <StoreImage src={img} alt="" className="h-full w-full object-contain p-1" />
               </button>
             ))}
           </div>
@@ -72,7 +79,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
           </div>
         </div>
 
-        <div className="flex flex-col gap-5 px-8 py-11 md:px-10">
+        <div className="flex flex-col gap-5 px-5 py-8 sm:px-8 sm:py-11 md:px-10">
           <div className="flex items-start justify-between">
             <div>
               <div className={`mb-2 ${type.eyebrow} text-[13px] md:text-[11px] tracking-[0.12em] text-accent`}>{product.brand}</div>

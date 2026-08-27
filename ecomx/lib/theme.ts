@@ -15,7 +15,7 @@ export const tw = {
   storeBackLink:
     "inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm cursor-pointer transition hover:bg-gray-50",
   heroSlider:
-    "min-h-[320px] sm:min-h-[340px] md:min-h-[380px] lg:min-h-[420px] xl:min-h-[460px]",
+    "min-h-[320px] sm:min-h-[360px] md:min-h-[400px] lg:min-h-[420px]",
   scrollbarHide:
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   scrollbarThin:

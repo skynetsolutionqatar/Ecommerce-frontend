@@ -7,6 +7,7 @@ import {
   fetchDeliverableAreas,
   fetchDistricts,
   validateLocation,
+  checkDelivery,
 } from "@/lib/api/location.api";
 import { DEFAULT_COUNTRY_ID } from "@/types/location.types";
 
@@ -49,6 +50,23 @@ export function useDeliverableAreas(countryId: string = DEFAULT_COUNTRY_ID) {
 
 export function useValidateLocationMutation() {
   return useMutation({
-    mutationFn: ({ lat, lng }: { lat: number; lng: number }) => validateLocation(lat, lng),
+    mutationFn: ({
+      lat,
+      lng,
+      districtId,
+      countryId,
+    }: {
+      lat: number;
+      lng: number;
+      districtId?: string;
+      countryId?: string;
+    }) => validateLocation(lat, lng, districtId, countryId),
+  });
+}
+
+export function useCheckDeliveryMutation() {
+  return useMutation({
+    mutationFn: ({ countryId, q }: { countryId: string; q: string }) =>
+      checkDelivery(countryId, q),
   });
 }

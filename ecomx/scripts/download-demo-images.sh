@@ -20,7 +20,13 @@ download() {
   echo "OK $out"
 }
 
-# ── Hero banners (servers, networking, laptops, CCTV) ─────────────────────────
+# ── Hero banners (POS + printers — premium promotion) ─────────────────────────
+download "photo-1556742049-0cfed4f6a45d" 1600 "$IMG/hero/premium-pos.jpg"
+download "photo-1612298498547-b4e9975a83be" 1600 "$IMG/hero/premium-thermal.jpg"
+download "photo-1581092580497-e0d23cbdf1dc" 1600 "$IMG/hero/premium-barcode.jpg"
+download "photo-1612815154858-60aa4c59eaa6" 1600 "$IMG/hero/premium-printer.jpg"
+
+# Legacy hero slides (fallback)
 download "photo-1558494949-ef0d38d3f7d7" 1600 "$IMG/hero/slide-1.jpg"   # server room
 download "photo-1544197150-b99a580bb7a8" 1600 "$IMG/hero/slide-2.jpg"   # networking cables
 download "photo-1496181133206-80ce9b88a853" 1600 "$IMG/hero/slide-3.jpg" # laptop workspace

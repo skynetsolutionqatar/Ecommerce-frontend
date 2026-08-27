@@ -60,6 +60,7 @@ export interface ApiOrder {
   notes?: string;
   createdAt: string;
   updatedAt?: string;
+  deliveredAt?: string;
 }
 
 export interface OrderStats {

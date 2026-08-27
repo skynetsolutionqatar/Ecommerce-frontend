@@ -2,6 +2,7 @@
 
 import { NAV_MENUS } from "@/lib/data";
 import { type } from "@/lib/theme";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "./StoreImage";
 
 interface MegaMenuProps {
@@ -56,7 +57,9 @@ export default function MegaMenu({ section, onClose }: MegaMenuProps) {
             onClick={onClose}
             className="w-[148px] overflow-hidden rounded-2xl border border-accent/15 bg-accent-soft/30 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
           >
-            <StoreImage src={img.url} alt={img.label} className="block h-[110px] w-full object-cover" />
+            <div className={`overflow-hidden ${productImageSurfaceClass}`}>
+              <StoreImage src={img.url} alt={img.label} className="block h-[110px] w-full object-contain p-2" />
+            </div>
             <div className="px-3 pb-3 pt-2.5">
               <div className="text-[12.5px] font-semibold text-primary">{img.label}</div>
               <div className="mt-0.5 text-[13px] md:text-[11px] font-bold text-accent">{img.price}</div>

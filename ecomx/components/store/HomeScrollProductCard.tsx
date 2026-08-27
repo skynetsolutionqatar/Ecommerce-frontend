@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "@/components/StoreImage";
 import { formatPrice } from "@/lib/utils";
 import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
@@ -95,11 +96,10 @@ export default function HomeScrollProductCard({
       whileTap={{ scale: 0.99 }}
     >
       <div
-        className="relative mx-2 mt-2 flex items-center justify-center overflow-hidden"
+        className={`relative mx-2 mt-2 flex items-center justify-center overflow-hidden ${productImageSurfaceClass}`}
         style={{
           borderRadius: "10px",
           height: imageHeight,
-          background: "linear-gradient(135deg, #f8f9fa, #f3f4f6)",
         }}
       >
         {image ? (

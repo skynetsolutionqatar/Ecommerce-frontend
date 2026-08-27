@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { fmt } from "@/lib/data";
 import type { Product } from "@/lib/types";
 import type { ProductTrustBadge } from "@/lib/store/product-display";
 import type { useProductPurchase } from "@/hooks/useProductPurchase";
 import { Colors } from "@/lib/theme";
+import DeliveryCheckPanel from "@/components/store/DeliveryCheckPanel";
 import StarRating from "./StarRating";
 
 interface ProductPurchasePanelProps {
@@ -23,9 +23,6 @@ export default function ProductPurchasePanel({
   trustBadges,
   purchase,
 }: ProductPurchasePanelProps) {
-  const [pincode, setPincode] = useState("");
-  const [pincodeChecked, setPincodeChecked] = useState(false);
-
   const {
     selectedSize,
     setSelectedSize,
@@ -232,36 +229,7 @@ export default function ProductPurchasePanel({
         <p className="text-[12px] font-medium text-red-600">{buyError}</p>
       ) : null}
 
-      {/* Delivery checker */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-        <div className="mb-2 text-[13px] md:text-[12px] font-bold text-gray-700">
-          🚚 Check Delivery to Qatar
-        </div>
-        <div className="flex gap-2">
-          <input
-            value={pincode}
-            onChange={(e) => {
-              setPincode(e.target.value);
-              setPincodeChecked(false);
-            }}
-            placeholder="Enter city or area (e.g. Lusail)"
-            className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2.5 md:py-2 text-[13px] md:text-[12px] outline-none focus:border-blue-400"
-          />
-          <button
-            type="button"
-            onClick={() => setPincodeChecked(true)}
-            className="shrink-0 rounded-lg border-0 px-4 py-2.5 md:py-2 text-[13px] md:text-[12px] font-bold text-white cursor-pointer transition hover:opacity-90"
-            style={{ background: Colors.base_color }}
-          >
-            Check
-          </button>
-        </div>
-        {pincodeChecked && pincode ? (
-          <p className="mt-1.5 text-[12px] md:text-[11px] font-medium text-green-600">
-            ✓ Delivery available · 1–2 business days
-          </p>
-        ) : null}
-      </div>
+      <DeliveryCheckPanel />
 
       {/* Trust badges */}
       {trustBadges.length > 0 ? (

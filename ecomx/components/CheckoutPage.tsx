@@ -5,17 +5,29 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CartItem } from "@/lib/types";
 import type { PlaceOrderPayload } from "@/types/order.types";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
+import StoreImage from "@/components/StoreImage";
 import * as Icons from "@/components/Icons";
 import { tw, type } from "@/lib/theme";
 import { showError, showSuccess } from "@/lib/toast";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
 import {
+  clearDeliverySelection,
+  hasVerifiedDeliverySelection,
   loadCheckoutAddress,
   saveCheckoutAddress,
 } from "@/lib/store/checkout-address-cache";
-import { useAreas, useCountries, useDistricts, useValidateLocationMutation } from "@/hooks/useLocations";
-import { DEFAULT_COUNTRY_ID, MAP_PICK_AREA_ID } from "@/types/location.types";
+import {
+  useCheckDeliveryMutation,
+  useCountries,
+  useValidateLocationMutation,
+} from "@/hooks/useLocations";
+import { DEFAULT_COUNTRY_ID, QATAR_ONLY_LOCATION_ERROR } from "@/types/location.types";
+import type { ApiAreaSearchResult } from "@/types/location.types";
+import LocationAreaSearchInput, {
+  formatAreaSearchLabel,
+} from "@/components/store/LocationAreaSearchInput";
 
 const DeliveryMapPicker = dynamic(() => import("@/components/store/DeliveryMapPicker"), {
   ssr: false,
@@ -39,15 +51,25 @@ export interface CheckoutFormData {
   locationMode: DeliveryLocationMode;
   mapLat: number | null;
   mapLng: number | null;
+  districtName?: string;
+  areaName?: string;
 }
 
-interface MapValidation {
+interface DeliveryStatus {
   deliverable: boolean;
   message: string;
   districtId: string;
   areaId: string;
   districtName: string;
   areaName: string;
+}
+
+function formatLocationLabel(areaName?: string, districtName?: string) {
+  if (!areaName && !districtName) return "";
+  if (areaName && districtName) {
+    return formatAreaSearchLabel({ name: areaName, districtName });
+  }
+  return areaName ?? districtName ?? "";
 }
 
 interface CheckoutPageProps {
@@ -92,92 +114,164 @@ export default function CheckoutPage({
   const [submitError, setSubmitError] = useState("");
   const [placing, setPlacing] = useState(false);
   const [addressLoaded, setAddressLoaded] = useState(false);
-  const [mapValidation, setMapValidation] = useState<MapValidation | null>(null);
-  const [mapChecking, setMapChecking] = useState(false);
+  const [locationQuery, setLocationQuery] = useState("");
+  const [showMap, setShowMap] = useState(false);
+  const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
+  const [locationChecking, setLocationChecking] = useState(false);
 
   const { data: countries = [] } = useCountries();
-  const { data: districts = [], isLoading: districtsLoading } = useDistricts(form.countryId);
-  const { data: areas = [], isLoading: areasLoading } = useAreas(form.districtId);
   const validateLocationMut = useValidateLocationMutation();
+  const checkDeliveryMut = useCheckDeliveryMutation();
   const validateLocationRef = useRef(validateLocationMut.mutateAsync);
   validateLocationRef.current = validateLocationMut.mutateAsync;
-  const lastValidatedCoordsRef = useRef<string | null>(null);
+  const checkDeliveryRef = useRef(checkDeliveryMut.mutateAsync);
+  checkDeliveryRef.current = checkDeliveryMut.mutateAsync;
+  const lastValidatedKeyRef = useRef<string | null>(null);
+  const debounceTimerRef = useRef<number | null>(null);
   const formRef = useRef(form);
   formRef.current = form;
-  const isMapMode = form.locationMode === "map";
+  const locationQueryRef = useRef(locationQuery);
+  locationQueryRef.current = locationQuery;
   const selectedCountry = countries.find((c) => c._id === form.countryId);
-  const selectedDistrict = districts.find((d) => d._id === form.districtId);
-  const selectedArea = areas.find((a) => a._id === form.areaId);
-  const resolvedDistrictName = selectedDistrict?.name ?? mapValidation?.districtName ?? "";
-  const resolvedAreaName = selectedArea?.name ?? mapValidation?.areaName ?? "";
-  const deliveryReady = isMapMode
-    ? mapValidation?.deliverable === true
-    : !!form.districtId && !!form.areaId && form.areaId !== MAP_PICK_AREA_ID;
+  const resolvedDistrictName = deliveryStatus?.districtName ?? form.districtName ?? "";
+  const resolvedAreaName = deliveryStatus?.areaName ?? form.areaName ?? "";
+  const deliveryReady =
+    deliveryStatus?.deliverable === true &&
+    !!form.districtId &&
+    !!form.areaId;
 
-  const runMapValidation = useCallback(async (lat: number, lng: number) => {
-    const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
-    if (lastValidatedCoordsRef.current === key) return;
-    lastValidatedCoordsRef.current = key;
-
-    setMapChecking(true);
-    setMapValidation(null);
-    try {
-      const result = await validateLocationRef.current({ lat, lng });
+  const applyDeliveryResult = useCallback(
+    (
+      result: {
+        deliverable: boolean;
+        message: string;
+        area?: { _id: string; name: string };
+        district?: { _id: string; name: string };
+      },
+      coords?: { lat: number | null; lng: number | null }
+    ) => {
       if (result.deliverable && result.area && result.district) {
-        const preselectedDistrict = formRef.current.districtId;
-        if (preselectedDistrict && preselectedDistrict !== result.district._id) {
-          setMapValidation({
-            deliverable: false,
-            message:
-              "This location is outside your selected district. Pick a point inside your district or change district first.",
-            districtId: "",
-            areaId: "",
-            districtName: "",
-            areaName: "",
-          });
-          setForm((prev) => ({ ...prev, areaId: "" }));
-          return;
-        }
+        const { area, district } = result;
+        const label = formatLocationLabel(area.name, district.name);
+        setLocationQuery(label);
         setForm((prev) => ({
           ...prev,
-          districtId: result.district!._id,
-          areaId: result.area!._id,
+          districtId: district._id,
+          areaId: area._id,
           locationMode: "list",
+          mapLat: coords?.lat ?? prev.mapLat,
+          mapLng: coords?.lng ?? prev.mapLng,
+          districtName: district.name,
+          areaName: area.name,
         }));
-        setMapValidation({
+        setDeliveryStatus({
           deliverable: true,
           message: result.message,
-          districtId: result.district._id,
-          areaId: result.area._id,
-          districtName: result.district.name,
-          areaName: result.area.name,
+          districtId: district._id,
+          areaId: area._id,
+          districtName: district.name,
+          areaName: area.name,
         });
-        setErrors((prev) => ({ ...prev, areaId: undefined, districtId: undefined }));
+        saveCheckoutAddress({
+          ...formRef.current,
+          districtId: district._id,
+          areaId: area._id,
+          locationMode: "list",
+          mapLat: coords?.lat ?? formRef.current.mapLat,
+          mapLng: coords?.lng ?? formRef.current.mapLng,
+          districtName: district.name,
+          areaName: area.name,
+        });
+        setErrors((prev) => ({ ...prev, areaId: undefined }));
       } else {
-        setForm((prev) => ({ ...prev, areaId: "" }));
-        setMapValidation({
+        setForm((prev) => ({
+          ...prev,
+          districtId: "",
+          areaId: "",
+          districtName: "",
+          areaName: "",
+        }));
+        setDeliveryStatus({
           deliverable: false,
-          message: result.message,
+          message: QATAR_ONLY_LOCATION_ERROR,
           districtId: "",
           areaId: "",
           districtName: "",
           areaName: "",
         });
+        setErrors((prev) => ({ ...prev, areaId: QATAR_ONLY_LOCATION_ERROR }));
       }
-    } catch {
-      setMapValidation({
-        deliverable: false,
-        message: "Could not verify this location. Please try again.",
-        districtId: "",
-        areaId: "",
-        districtName: "",
-        areaName: "",
-      });
-      setForm((prev) => ({ ...prev, areaId: "" }));
-    } finally {
-      setMapChecking(false);
-    }
-  }, []);
+    },
+    []
+  );
+
+  const runDeliveryValidation = useCallback(
+    async (override?: { mapLat?: number | null; mapLng?: number | null; query?: string }) => {
+      const currentForm = formRef.current;
+      const query = (override?.query ?? locationQueryRef.current).trim();
+      const mapLat = override?.mapLat ?? currentForm.mapLat;
+      const mapLng = override?.mapLng ?? currentForm.mapLng;
+      const hasCoords = mapLat != null && mapLng != null;
+      const key = hasCoords
+        ? `map:${mapLat.toFixed(5)},${mapLng.toFixed(5)}`
+        : `text:${query.toLowerCase()}`;
+
+      if (!hasCoords && !query) {
+        lastValidatedKeyRef.current = null;
+        setDeliveryStatus(null);
+        setForm((prev) => ({
+          ...prev,
+          districtId: "",
+          areaId: "",
+          districtName: "",
+          areaName: "",
+        }));
+        return;
+      }
+
+      if (lastValidatedKeyRef.current === key) return;
+      lastValidatedKeyRef.current = key;
+
+      setLocationChecking(true);
+      setDeliveryStatus(null);
+      try {
+        if (hasCoords) {
+          const result = await validateLocationRef.current({
+            lat: mapLat,
+            lng: mapLng,
+            countryId: currentForm.countryId || DEFAULT_COUNTRY_ID,
+          });
+          applyDeliveryResult(result, { lat: mapLat, lng: mapLng });
+          return;
+        }
+
+        const result = await checkDeliveryRef.current({
+          countryId: currentForm.countryId || DEFAULT_COUNTRY_ID,
+          q: query,
+        });
+        applyDeliveryResult(result);
+      } catch {
+        setDeliveryStatus({
+          deliverable: false,
+          message: "Could not verify this location. Please try again.",
+          districtId: "",
+          areaId: "",
+          districtName: "",
+          areaName: "",
+        });
+        setForm((prev) => ({
+          ...prev,
+          districtId: "",
+          areaId: "",
+          districtName: "",
+          areaName: "",
+        }));
+      } finally {
+        setLocationChecking(false);
+      }
+    },
+    [applyDeliveryResult]
+  );
 
   useEffect(() => {
     if (addressLoaded) return;
@@ -190,12 +284,27 @@ export default function CheckoutPage({
         email: initialContact?.email || cached.email,
         phone: initialContact?.phone || cached.phone,
       }));
-      if (
-        cached.locationMode === "map" &&
+      const label = formatLocationLabel(cached.areaName, cached.districtName);
+      if (hasVerifiedDeliverySelection(cached) && label) {
+        setLocationQuery(label);
+        setDeliveryStatus({
+          deliverable: true,
+          message: `Delivery available in ${label}`,
+          districtId: cached.districtId,
+          areaId: cached.areaId,
+          districtName: cached.districtName ?? "",
+          areaName: cached.areaName ?? "",
+        });
+      } else if (
         cached.mapLat != null &&
-        cached.mapLng != null
+        cached.mapLng != null &&
+        hasVerifiedDeliverySelection(cached)
       ) {
-        void runMapValidation(cached.mapLat, cached.mapLng);
+        setShowMap(true);
+        void runDeliveryValidation({
+          mapLat: cached.mapLat,
+          mapLng: cached.mapLng,
+        });
       }
     } else if (initialContact) {
       setForm((prev) => ({
@@ -213,67 +322,81 @@ export default function CheckoutPage({
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
       errors[field] ? "border-red-400" : "border-border"
     }`;
-  const selectClass = (field: keyof CheckoutFormData) =>
-    `${inputClass(field)} cursor-pointer appearance-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-muted`;
   const labelClass = "mb-1.5 block text-sm md:text-xs font-bold text-primary/80";
 
-  const handleDistrictChange = (districtId: string) => {
-    lastValidatedCoordsRef.current = null;
+  const scheduleLocationValidation = () => {
+    if (debounceTimerRef.current != null) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+    lastValidatedKeyRef.current = null;
+    debounceTimerRef.current = window.setTimeout(() => {
+      void runDeliveryValidation();
+    }, 500);
+  };
+
+  const handleLocationQueryChange = (value: string) => {
+    setLocationQuery(value);
+    setDeliveryStatus(null);
+    lastValidatedKeyRef.current = null;
+    clearDeliverySelection();
     setForm((prev) => ({
       ...prev,
-      districtId,
+      mapLat: null,
+      mapLng: null,
+      districtId: "",
       areaId: "",
-      locationMode: "list",
-      mapLat: null,
-      mapLng: null,
+      districtName: "",
+      areaName: "",
     }));
-    setMapValidation(null);
-    setErrors((prev) => ({ ...prev, districtId: undefined, areaId: undefined }));
+    if (errors.areaId) {
+      setErrors((prev) => ({ ...prev, areaId: undefined }));
+    }
+    scheduleLocationValidation();
   };
 
-  const handleAreaChange = (areaId: string) => {
-    lastValidatedCoordsRef.current = null;
-    if (areaId === MAP_PICK_AREA_ID) {
-      setForm((prev) => ({
-        ...prev,
-        areaId: MAP_PICK_AREA_ID,
-        locationMode: "map",
-        mapLat: null,
-        mapLng: null,
-      }));
-      setMapValidation(null);
+  const handleAreaSelect = (area: ApiAreaSearchResult) => {
+    const label = formatAreaSearchLabel(area);
+    setLocationQuery(label);
+    setDeliveryStatus(null);
+    lastValidatedKeyRef.current = null;
+    if (errors.areaId) {
       setErrors((prev) => ({ ...prev, areaId: undefined }));
-      return;
     }
     setForm((prev) => ({
       ...prev,
-      areaId,
-      locationMode: "list",
-      mapLat: null,
-      mapLng: null,
+      mapLat: area.lat,
+      mapLng: area.lng,
+      locationMode: "map",
+      districtId: "",
+      areaId: "",
+      districtName: "",
+      areaName: "",
     }));
-    setMapValidation(null);
-    setErrors((prev) => ({ ...prev, areaId: undefined }));
+    void runDeliveryValidation({
+      mapLat: area.lat,
+      mapLng: area.lng,
+      query: label,
+    });
   };
 
-  const handleOpenMap = () => {
-    if (!form.districtId) {
-      setErrors((prev) => ({ ...prev, districtId: "Select district first" }));
-      return;
+  const handleLocationBlur = () => {
+    if (debounceTimerRef.current != null) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
-    handleAreaChange(MAP_PICK_AREA_ID);
+    lastValidatedKeyRef.current = null;
+    void runDeliveryValidation();
   };
 
   const handleMapPick = (lat: number, lng: number) => {
-    lastValidatedCoordsRef.current = null;
+    lastValidatedKeyRef.current = null;
     setForm((prev) => ({
       ...prev,
       mapLat: lat,
       mapLng: lng,
       locationMode: "map",
-      areaId: MAP_PICK_AREA_ID,
     }));
-    void runMapValidation(lat, lng);
+    void runDeliveryValidation({ mapLat: lat, mapLng: lng });
   };
 
   const handleUseMyLocation = () => {
@@ -307,17 +430,12 @@ export default function CheckoutPage({
   const validateStep2 = () => {
     const next: Partial<Record<keyof CheckoutFormData, string>> = {};
     if (!form.line1.trim()) next.line1 = "Street address is required";
-    if (isMapMode) {
-      if (form.mapLat == null || form.mapLng == null) {
-        next.areaId = "Pick your delivery location on the map";
-      } else if (!mapValidation?.deliverable) {
-        next.areaId =
-          mapValidation?.message ??
-          "This location is outside our delivery zone. Pick a deliverable area to continue.";
-      }
-    } else {
-      if (!form.districtId) next.districtId = "District is required";
-      if (!form.areaId || form.areaId === MAP_PICK_AREA_ID) next.areaId = "Area is required";
+    if (!locationQuery.trim() && form.mapLat == null) {
+      next.areaId = "Enter your delivery location or pick on the map";
+    } else if (!deliveryReady) {
+      next.areaId =
+        deliveryStatus?.message ??
+        QATAR_ONLY_LOCATION_ERROR;
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -514,98 +632,50 @@ export default function CheckoutPage({
                   ) : null}
                 </div>
                 <div>
-                  <label className={labelClass} htmlFor="country">
-                    Country <span className="text-red-500">*</span>
+                  <label className={labelClass} htmlFor="locationQuery">
+                    Delivery Location <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    id="country"
-                    value={form.countryId}
-                    disabled
-                    className={selectClass("countryId")}
-                  >
-                    {countries.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
-                    {countries.length === 0 ? (
-                      <option value={DEFAULT_COUNTRY_ID}>Qatar</option>
-                    ) : null}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="district">
-                    District <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="district"
-                    value={form.districtId}
-                    onChange={(e) => handleDistrictChange(e.target.value)}
-                    disabled={districtsLoading}
-                    className={selectClass("districtId")}
-                  >
-                    <option value="">
-                      {districtsLoading ? "Loading districts..." : "Select district"}
-                    </option>
-                    {districts.map((d) => (
-                      <option key={d._id} value={d._id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.districtId ? (
-                    <p className="mt-1 text-sm md:text-xs text-red-600">{errors.districtId}</p>
-                  ) : null}
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="area">
-                    Area <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="area"
-                    value={isMapMode ? "" : form.areaId}
-                    onChange={(e) => handleAreaChange(e.target.value)}
-                    disabled={!form.districtId || areasLoading}
-                    className={selectClass("areaId")}
-                  >
-                    <option value="">
-                      {!form.districtId
-                        ? "Select district first"
-                        : areasLoading
-                          ? "Loading areas..."
-                          : "Select area"}
-                    </option>
-                    {areas.map((a) => (
-                      <option key={a._id} value={a._id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-                  {mapValidation?.deliverable && !isMapMode ? (
-                    <p className="mt-1 text-sm md:text-xs text-green-600">{mapValidation.message}</p>
-                  ) : null}
-                  {!isMapMode ? (
-                    <button
-                      type="button"
-                      onClick={handleOpenMap}
-                      className="mt-2 text-xs font-semibold text-blue-600 hover:underline"
-                    >
-                      Can&apos;t find your area? Pick on map
-                    </button>
-                  ) : null}
-                  {!isMapMode && errors.areaId ? (
+                  <LocationAreaSearchInput
+                    id="locationQuery"
+                    value={locationQuery}
+                    onChange={handleLocationQueryChange}
+                    onSelect={handleAreaSelect}
+                    onBlur={handleLocationBlur}
+                    showSearchIcon
+                    className={inputClass("areaId")}
+                  />
+                  {locationChecking ? (
+                    <p className="mt-1 text-sm md:text-xs text-muted">
+                      Checking delivery availability...
+                    </p>
+                  ) : deliveryStatus?.deliverable ? (
+                    <p className="mt-1 text-sm md:text-xs text-green-600">
+                      ✓ {deliveryStatus.message}
+                    </p>
+                  ) : deliveryStatus && !deliveryStatus.deliverable ? (
+                    <p className="mt-1 text-sm md:text-xs text-red-600">
+                      {deliveryStatus.message}
+                    </p>
+                  ) : errors.areaId ? (
                     <p className="mt-1 text-sm md:text-xs text-red-600">{errors.areaId}</p>
                   ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setShowMap((v) => !v)}
+                    className="mt-2 text-xs font-semibold text-blue-600 hover:underline"
+                  >
+                    {showMap ? "Hide map" : "Pick location on map"}
+                  </button>
                 </div>
 
-                {isMapMode ? (
+                {showMap ? (
                   <div className="rounded-xl border border-border bg-gray-50 p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-primary">Pick delivery location</p>
                       <button
                         type="button"
                         onClick={handleUseMyLocation}
-                        disabled={mapChecking}
+                        disabled={locationChecking}
                         className="rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-gray-100 disabled:opacity-50"
                       >
                         Use my location
@@ -614,37 +684,9 @@ export default function CheckoutPage({
                     <DeliveryMapPicker
                       lat={form.mapLat}
                       lng={form.mapLng}
-                      districtId={form.districtId}
-                      districtName={selectedDistrict?.name}
+                      countryId={form.countryId}
                       onPick={handleMapPick}
                     />
-                    {mapChecking ? (
-                      <p className="mt-2 text-sm text-muted">Checking delivery availability...</p>
-                    ) : mapValidation?.deliverable ? (
-                      <p className="mt-2 text-sm text-green-600">✓ {mapValidation.message}</p>
-                    ) : mapValidation && !mapValidation.deliverable ? (
-                      <p className="mt-2 text-sm text-red-600">{mapValidation.message}</p>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted">
-                        Tap the map to choose your location inside {selectedDistrict?.name ?? "the selected district"}.
-                      </p>
-                    )}
-                    {errors.areaId ? (
-                      <p className="mt-2 text-sm md:text-xs text-red-600">{errors.areaId}</p>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          locationMode: "list",
-                          areaId: mapValidation?.areaId ?? "",
-                        }))
-                      }
-                      className="mt-3 text-xs font-semibold text-muted hover:text-primary"
-                    >
-                      ← Back to area list
-                    </button>
                   </div>
                 ) : null}
 
@@ -662,7 +704,7 @@ export default function CheckoutPage({
                   <button
                     type="button"
                     className={`${tw.btnPrimary} flex-[2] justify-center disabled:opacity-50`}
-                    disabled={isMapMode && !deliveryReady}
+                    disabled={!deliveryReady || locationChecking}
                     onClick={() => validateStep2() && setStep(3)}
                   >
                     Continue to Payment <Icons.ArrowRight />
@@ -732,14 +774,9 @@ export default function CheckoutPage({
             </div>
             {cart.slice(0, 3).map((item) => (
               <div key={item.id} className="mb-3 flex gap-2.5 border-b border-bg-soft pb-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="h-12 w-12 shrink-0 rounded-[10px] object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
+                <div className={`h-12 w-12 shrink-0 overflow-hidden rounded-[10px] ${productImageSurfaceClass}`}>
+                  <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain" />
+                </div>
                 <div className="flex-1">
                   <div className="text-sm md:text-xs font-semibold leading-snug text-primary">{item.name}</div>
                   <div className="text-[13px] md:text-[11px] text-muted">Qty: {item.qty}</div>

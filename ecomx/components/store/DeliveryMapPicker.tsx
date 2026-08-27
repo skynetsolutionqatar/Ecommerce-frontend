@@ -4,14 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map, Marker } from "leaflet";
 import { Search } from "lucide-react";
 import { searchAreas } from "@/lib/api/location.api";
-import { MAP_DEFAULT_CENTER } from "@/types/location.types";
+import { MAP_DEFAULT_CENTER, DISTRICT_MAP_CENTERS } from "@/types/location.types";
 import type { ApiAreaSearchResult } from "@/types/location.types";
 import "leaflet/dist/leaflet.css";
 
 interface DeliveryMapPickerProps {
   lat: number | null;
   lng: number | null;
-  districtId: string;
+  countryId?: string;
+  districtId?: string;
   districtName?: string;
   onPick: (lat: number, lng: number) => void;
 }
@@ -19,6 +20,7 @@ interface DeliveryMapPickerProps {
 export default function DeliveryMapPicker({
   lat,
   lng,
+  countryId,
   districtId,
   districtName,
   onPick,
@@ -37,6 +39,8 @@ export default function DeliveryMapPicker({
   const [openResults, setOpenResults] = useState(false);
 
   onPickRef.current = onPick;
+
+  const canSearch = !!(districtId || countryId);
 
   const syncPosition = useCallback((pickedLat: number, pickedLng: number, zoom = 15) => {
     const map = mapRef.current;
@@ -83,9 +87,13 @@ export default function DeliveryMapPicker({
         mapRef.current = null;
       }
 
+      const center =
+        districtId && DISTRICT_MAP_CENTERS[districtId]
+          ? DISTRICT_MAP_CENTERS[districtId]
+          : { ...MAP_DEFAULT_CENTER, zoom: 11 };
       const map = leaflet.map(containerRef.current, { preferCanvas: true }).setView(
-        [MAP_DEFAULT_CENTER.lat, MAP_DEFAULT_CENTER.lng],
-        11
+        [center.lat, center.lng],
+        center.zoom
       );
 
       leaflet
@@ -123,7 +131,7 @@ export default function DeliveryMapPicker({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [flushPendingPosition, syncPosition]);
+  }, [districtId, flushPendingPosition, syncPosition]);
 
   useEffect(() => {
     if (lat == null || lng == null) return;
@@ -131,7 +139,8 @@ export default function DeliveryMapPicker({
   }, [lat, lng, syncPosition]);
 
   useEffect(() => {
-    if (!districtId || query.trim().length < 2) {
+    const term = query.trim();
+    if (!canSearch || term.length < 2) {
       setResults([]);
       setSearching(false);
       return;
@@ -139,7 +148,10 @@ export default function DeliveryMapPicker({
 
     setSearching(true);
     const timer = window.setTimeout(() => {
-      void searchAreas(districtId, query.trim())
+      void searchAreas({
+        ...(countryId ? { countryId } : districtId ? { districtId } : {}),
+        q: term,
+      })
         .then((areas) => {
           setResults(areas);
           setOpenResults(true);
@@ -149,7 +161,7 @@ export default function DeliveryMapPicker({
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [districtId, query]);
+  }, [canSearch, countryId, districtId, query]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -162,7 +174,7 @@ export default function DeliveryMapPicker({
   }, []);
 
   const handleSelectResult = (area: ApiAreaSearchResult) => {
-    setQuery(area.name);
+    setQuery(area.districtName ? `${area.name}, ${area.districtName}` : area.name);
     setOpenResults(false);
     syncPosition(area.lat, area.lng, 15);
     onPick(area.lat, area.lng);
@@ -175,44 +187,48 @@ export default function DeliveryMapPicker({
 
   return (
     <div className="flex flex-col gap-2">
-      <div ref={searchWrapRef} className="relative">
-        <form onSubmit={handleSearchSubmit} className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOpenResults(true);
-            }}
-            onFocus={() => results.length > 0 && setOpenResults(true)}
-            placeholder={
-              districtName ? `Search area in ${districtName}...` : "Search area..."
-            }
-            className="w-full rounded-xl border border-border bg-white py-2.5 pl-9 pr-3 text-sm text-primary outline-none focus:border-accent"
-          />
-        </form>
-        {openResults && query.trim().length >= 2 ? (
-          <div className="absolute z-20 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-border bg-white shadow-lg">
-            {searching ? (
-              <p className="px-3 py-2.5 text-sm text-muted">Searching...</p>
-            ) : results.length === 0 ? (
-              <p className="px-3 py-2.5 text-sm text-muted">No areas found</p>
-            ) : (
-              results.map((area) => (
-                <button
-                  key={area._id}
-                  type="button"
-                  onClick={() => handleSelectResult(area)}
-                  className="flex w-full px-3 py-2.5 text-left text-sm text-primary hover:bg-gray-50"
-                >
-                  {area.name}
-                </button>
-              ))
-            )}
-          </div>
-        ) : null}
-      </div>
+      {canSearch ? (
+        <div ref={searchWrapRef} className="relative">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpenResults(true);
+              }}
+              onFocus={() => results.length > 0 && setOpenResults(true)}
+              placeholder={
+                districtName
+                  ? `Search area in ${districtName}...`
+                  : "Search deliverable area..."
+              }
+              className="w-full rounded-xl border border-border bg-white py-2.5 pl-9 pr-3 text-sm text-primary outline-none focus:border-accent"
+            />
+          </form>
+          {openResults && query.trim().length >= 2 ? (
+            <div className="absolute z-[1000] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-border bg-white shadow-lg">
+              {searching ? (
+                <p className="px-3 py-2.5 text-sm text-muted">Searching...</p>
+              ) : results.length === 0 ? (
+                <p className="px-3 py-2.5 text-sm text-muted">No areas found</p>
+              ) : (
+                results.map((area) => (
+                  <button
+                    key={area._id}
+                    type="button"
+                    onClick={() => handleSelectResult(area)}
+                    className="flex w-full px-3 py-2.5 text-left text-sm text-primary hover:bg-gray-50"
+                  >
+                    {area.districtName ? `${area.name}, ${area.districtName}` : area.name}
+                  </button>
+                ))
+              )}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div
         ref={containerRef}

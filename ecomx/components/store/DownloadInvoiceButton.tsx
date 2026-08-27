@@ -23,9 +23,9 @@ export default function DownloadInvoiceButton({
     setLoading(true);
     try {
       if (admin) {
-        await orderApi.downloadInvoice(orderId, orderNumber);
+        await orderApi.downloadInvoice(orderId);
       } else {
-        await orderApi.downloadMyInvoice(orderId, orderNumber);
+        await orderApi.downloadMyInvoice(orderId);
       }
       showSuccess("Invoice downloaded");
     } catch (err) {
