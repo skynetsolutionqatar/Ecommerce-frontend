@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "@/components/StoreImage";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { Colors } from "@/lib/theme";
@@ -143,7 +144,7 @@ export default function StoreProductCard({
         transition={{ delay: index * 0.02, duration: 0.25 }}
         onClick={() => onClick(product)}
       >
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-50 sm:h-28 sm:w-28">
+        <div className={`relative h-24 w-24 shrink-0 overflow-hidden rounded-lg ${productImageSurfaceClass} sm:h-28 sm:w-28`}>
           {image ? (
             <StoreImage src={image} alt={product.name} className="h-full w-full object-contain p-2" />
           ) : (
@@ -209,7 +210,7 @@ export default function StoreProductCard({
       transition={{ delay: index * 0.03, duration: 0.25 }}
       onClick={() => onClick(product)}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+      <div className={`relative aspect-[4/3] overflow-hidden ${productImageSurfaceClass}`}>
         {image ? (
           <StoreImage
             src={image}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fmt } from "@/lib/data";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "./StoreImage";
 import type { Product, WishlistItem } from "@/lib/types";
 import { Colors } from "@/lib/theme";
@@ -44,7 +45,7 @@ export default function ProductCard({
       onClick={() => onClick(product)}
     >
       {/* ── Image ── */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: "4/3", background: "#f3f4f6" }}>
+      <div className={`relative overflow-hidden ${productImageSurfaceClass}`} style={{ aspectRatio: "4/3" }}>
         {/* Discount badge — dark navy like screenshot */}
         {discountPct && (
           <span

@@ -1,15 +1,19 @@
 "use client";
 
 import { Suspense, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import HeroSection from "@/components/HeroSection";
 import FlashSaleSection from "@/components/FlashSaleSection";
 import LazyMount from "@/components/LazyMount";
 import { useStore } from "@/components/StoreProvider";
 import { useProducts } from "@/hooks/useProducts";
+import { useStorefront } from "@/hooks/useStorefront";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { ROUTES } from "@/lib/routes";
 import { tw, type } from "@/lib/theme";
 import type { ApiProduct } from "@/types/product.types";
+import type { HeroSlide } from "@/types/storefront.types";
 import dynamic from "next/dynamic";
 
 const PromoBannerStrip = dynamic(() => import("@/components/PromoBannerStrip"));
@@ -18,7 +22,10 @@ const CategoriesSection = dynamic(() => import("@/components/CategoriesSection")
 const NewsletterSection = dynamic(() => import("@/components/NewsletterSection"));
 
 export default function StoreHomePage() {
+  const router = useRouter();
   const { openProduct, goToShop, toggleWishlist, isWishlisted } = useStore();
+
+  const { heroSlides, isLoading: heroLoading } = useStorefront();
 
   const { data: dealData, isLoading: dealsLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
@@ -68,6 +75,17 @@ export default function StoreHomePage() {
     [openProduct]
   );
 
+  const handleHeroSlideAction = useCallback(
+    (slide: HeroSlide) => {
+      if (slide.slug) {
+        router.push(ROUTES.product(slide.slug));
+        return;
+      }
+      goToShop();
+    },
+    [goToShop, router]
+  );
+
   useEffect(() => {
     void import("@/components/ShopPage");
     void import("@/components/ProductPage");
@@ -77,7 +95,12 @@ export default function StoreHomePage() {
     <div className={`${tw.pageTopOffset} min-h-screen`} style={{ background: "#f1f3f6" }}>
       <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px]">
         <div className="mb-2">
-          <HeroSection onViewAll={() => goToShop()} />
+          <HeroSection
+            slides={heroSlides}
+            isLoading={heroLoading}
+            onSlideAction={handleHeroSlideAction}
+            onViewAll={() => goToShop()}
+          />
         </div>
 
         <div className="mb-2 bg-white">

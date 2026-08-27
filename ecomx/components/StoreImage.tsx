@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IMAGE_FALLBACK } from "@/lib/images";
+import { withProductImageBlend } from "@/lib/store/product-image-utils";
 
 interface StoreImageProps {
   src: string;
@@ -13,6 +14,11 @@ interface StoreImageProps {
   "aria-hidden"?: boolean;
   /** Set true for above-the-fold hero images */
   priority?: boolean;
+  /**
+   * Knocks out white JPG backgrounds via `mix-blend-multiply`.
+   * Pair with {@link productImageSurfaceClass} on the parent frame.
+   */
+  blend?: boolean;
 }
 
 /** Image with local fallback — no external CDN dependency at runtime */
@@ -25,6 +31,7 @@ export default function StoreImage({
   draggable,
   "aria-hidden": ariaHidden,
   priority = false,
+  blend = true,
 }: StoreImageProps) {
   const [current, setCurrent] = useState(src);
 
@@ -39,7 +46,7 @@ export default function StoreImage({
       alt={alt}
       aria-hidden={ariaHidden}
       draggable={draggable}
-      className={className}
+      className={blend ? withProductImageBlend(className) : className}
       style={style}
       loading={priority ? "eager" : "lazy"}
       decoding="async"

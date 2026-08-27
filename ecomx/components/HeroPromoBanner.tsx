@@ -1,6 +1,7 @@
 "use client";
 
 import { PRODUCTS } from "@/lib/data";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "./StoreImage";
 import { type } from "@/lib/theme";
 
@@ -46,13 +47,13 @@ export default function HeroPromoBanner({ onExplore }: HeroPromoBannerProps) {
           {SHOWCASE.map((item, i) => (
             <div
               key={item.name}
-              className={`overflow-hidden rounded-2xl border border-white/10 bg-white shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition-transform duration-300 hover:-translate-y-1 ${
+              className={`overflow-hidden rounded-2xl border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.35)] transition-transform duration-300 hover:-translate-y-1 ${productImageSurfaceClass} ${
                 i === 1
                   ? "z-[2] h-32 w-28 sm:h-40 sm:w-36"
                   : "z-[1] h-24 w-24 sm:h-32 sm:w-28"
               } ${i === 0 ? "-mr-5 -rotate-6" : ""} ${i === 2 ? "-ml-5 rotate-6" : ""}`}
             >
-              <StoreImage src={item.img} alt={item.name} className="h-full w-full object-cover" />
+              <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain p-1.5" />
             </div>
           ))}
         </div>

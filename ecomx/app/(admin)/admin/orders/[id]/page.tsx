@@ -14,6 +14,8 @@ import {
 import { useOrder, useOrderMutations } from "@/hooks/useOrders";
 import { formatDateTime, formatPrice } from "@/lib/utils";
 import { orderAddress, orderTotal } from "@/types/order.types";
+import DownloadInvoiceButton from "@/components/store/DownloadInvoiceButton";
+import { ORDER_STATUS } from "@/lib/Constant";
 
 const TABS = [
   { key: "summary", label: "Summary" },
@@ -73,6 +75,7 @@ export default function AdminOrderDetailPage({
   }
 
   const address = orderAddress(order);
+  const isDelivered = order.status === ORDER_STATUS.DELIVERED;
 
   // const toUpdateStatus = useMemo(() => {
   //   if (!order?.status) return [];
@@ -84,6 +87,16 @@ export default function AdminOrderDetailPage({
     <BackPanel tabs={TABS}>
       <div className="space-y-6">
         <ViewSection id="summary" title="Order Summary">
+          {isDelivered ? (
+            <div className="mb-4">
+              <DownloadInvoiceButton
+                orderId={order._id}
+                orderNumber={order.orderNumber}
+                admin
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+              />
+            </div>
+          ) : null}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <ViewField label="Order Number" value={order.orderNumber} />
             <ViewField

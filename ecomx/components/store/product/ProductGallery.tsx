@@ -2,6 +2,7 @@
 
 import type { Product, WishlistItem } from "@/lib/types";
 import type { useProductGallery } from "@/hooks/useProductGallery";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "../../StoreImage";
 import * as Icons from "../../Icons";
 
@@ -68,7 +69,7 @@ export default function ProductGallery({
                   key={actualIndex}
                   type="button"
                   onClick={() => selectImage(actualIndex)}
-                  className={`h-[72px] w-[72px] overflow-hidden rounded-md border-2 bg-white p-1.5 transition-all cursor-pointer ${
+                  className={`h-[72px] w-[72px] overflow-hidden rounded-md border-2 p-1.5 transition-all cursor-pointer ${productImageSurfaceClass} ${
                     activeIndex === actualIndex
                       ? "border-blue-600"
                       : "border-gray-200 hover:border-gray-400"
@@ -108,7 +109,7 @@ export default function ProductGallery({
 
       {/* Main image + controls */}
       <div className="flex flex-1 flex-col gap-2">
-        <div className="relative flex flex-1 overflow-hidden rounded-xl border border-gray-200 bg-[#fafafa] min-h-[280px] md:min-h-[420px]">
+        <div className={`relative flex flex-1 overflow-hidden rounded-xl border border-gray-200 min-h-[280px] md:min-h-[420px] ${productImageSurfaceClass}`}>
           {/* Badges — same row */}
           <div className="absolute left-3 top-3 z-10 flex flex-row flex-wrap items-center gap-1.5">
             {discount ? (

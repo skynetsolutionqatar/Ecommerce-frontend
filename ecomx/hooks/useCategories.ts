@@ -20,12 +20,13 @@ export const STORE_CATEGORY_QUERY: CategoryQuery = {
   sortOrder: "asc",
 };
 
-export function useCategories(params?: CategoryQuery) {
+export function useCategories(params?: CategoryQuery, enabled = true) {
   return useQuery({
     queryKey: [CATEGORIES_KEY, params],
     queryFn: () => fetchCategories(params),
     staleTime: 120_000,
     placeholderData: (prev) => prev,
+    enabled,
   });
 }
 

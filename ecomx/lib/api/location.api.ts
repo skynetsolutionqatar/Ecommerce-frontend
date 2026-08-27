@@ -1,0 +1,99 @@
+import { apiGet } from "./client";
+import type {
+  ApiArea,
+  ApiAreaSearchResult,
+  ApiCountry,
+  ApiDeliverableArea,
+  ApiDistrict,
+  LocationValidationResult,
+} from "@/types/location.types";
+
+export const locationApi = {
+  getCountries: () => apiGet<{ countries: ApiCountry[] }>("/locations/countries"),
+
+  getDistricts: (countryId: string, deliverableOnly = true) =>
+    apiGet<{ districts: ApiDistrict[] }>("/locations/districts", {
+      countryId,
+      deliverableOnly: deliverableOnly ? "true" : "false",
+    }),
+
+  getAreas: (districtId: string, deliverableOnly = true) =>
+    apiGet<{ areas: ApiArea[] }>("/locations/areas", {
+      districtId,
+      deliverableOnly: deliverableOnly ? "true" : "false",
+    }),
+
+  getDeliverableAreas: (countryId: string) =>
+    apiGet<{ areas: ApiDeliverableArea[] }>("/locations/deliverable-areas", { countryId }),
+
+  searchAreas: (params: { districtId?: string; countryId?: string; q: string }) =>
+    apiGet<{ areas: ApiAreaSearchResult[] }>("/locations/search", {
+      ...(params.districtId ? { districtId: params.districtId } : {}),
+      ...(params.countryId ? { countryId: params.countryId } : {}),
+      q: params.q,
+    }),
+
+  validate: (lat: number, lng: number, districtId?: string, countryId?: string) =>
+    apiGet<LocationValidationResult>("/locations/validate", {
+      lat,
+      lng,
+      ...(districtId ? { districtId } : {}),
+      ...(countryId ? { countryId } : {}),
+    }),
+
+  checkDelivery: (countryId: string, q: string) =>
+    apiGet<LocationValidationResult>("/locations/check-delivery", { countryId, q }),
+};
+
+export async function fetchCountries(): Promise<ApiCountry[]> {
+  const res = await locationApi.getCountries();
+  return res.data.countries;
+}
+
+export async function fetchDistricts(
+  countryId: string,
+  deliverableOnly = true
+): Promise<ApiDistrict[]> {
+  const res = await locationApi.getDistricts(countryId, deliverableOnly);
+  return res.data.districts;
+}
+
+export async function fetchAreas(
+  districtId: string,
+  deliverableOnly = true
+): Promise<ApiArea[]> {
+  const res = await locationApi.getAreas(districtId, deliverableOnly);
+  return res.data.areas;
+}
+
+export async function fetchDeliverableAreas(countryId: string): Promise<ApiDeliverableArea[]> {
+  const res = await locationApi.getDeliverableAreas(countryId);
+  return res.data.areas;
+}
+
+export async function searchAreas(params: {
+  districtId?: string;
+  countryId?: string;
+  q: string;
+}): Promise<ApiAreaSearchResult[]> {
+  const res = await locationApi.searchAreas(params);
+  return res.data.areas;
+}
+
+export async function validateLocation(
+  lat: number,
+  lng: number,
+  districtId?: string,
+  countryId?: string
+): Promise<LocationValidationResult> {
+  const res = await locationApi.validate(lat, lng, districtId, countryId);
+  return res.data;
+}
+
+export async function checkDelivery(
+  countryId: string,
+  q: string
+): Promise<LocationValidationResult> {
+  const res = await locationApi.checkDelivery(countryId, q);
+  return res.data;
+}

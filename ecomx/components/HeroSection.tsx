@@ -1,31 +1,353 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import StoreImage from "./StoreImage";
-import { HERO_SLIDER_SLIDES } from "@/lib/data";
-import { type, tw } from "@/lib/theme";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { tw, type } from "@/lib/theme";
+import {
+  formatHeroTitle,
+  getSlideAccent,
+  getEyebrowBadgeStyle,
+  getHeroImageClass,
+  HERO_IMAGE_INNER,
+  HERO_SLIDE_MIN_H,
+  getHeroSurfaceStyle,
+  getHeroMeshOrbs,
+  getHeroAuroraGradient,
+  getHeroBeamGradient,
+  HERO_NOISE_URL,
+  buildHeroSlides,
+  HERO_TRUST_BADGES,
+  HERO_SLIDE_LABELS,
+  type HeroAccent,
+} from "@/lib/store/hero-utils";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useMotionTemplate,
+  useSpring,
+  useTransform,
+  AnimatePresence,
+  MotionConfig,
+  type MotionValue,
+  type Transition,
+  type Variants,
+  type PanInfo,
+} from "framer-motion";
+import type { HeroSlide } from "@/types/storefront.types";
 
-const SLIDES = HERO_SLIDER_SLIDES;
 const AUTO_MS = 5500;
+const SLIDE_COUNT = 4;
+const SWIPE_THRESHOLD = 48;
 
-const ACCENTS = [
-  { color: "#111827", soft: "#E5E7EB", dark: "#030712", glow: "rgba(17,24,39,0.18)" },
-  { color: "#0891b2", soft: "#cffafe", dark: "#164e63", glow: "rgba(8,145,178,0.16)" },
-  { color: "#1F2937", soft: "#F3F4F6", dark: "#111827", glow: "rgba(17,24,39,0.18)" },
-  { color: "#7c3aed", soft: "#ede9fe", dark: "#4c1d95", glow: "rgba(124,58,237,0.14)" },
-];
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 380, damping: 32 };
+const SPRING_SMOOTH = { type: "spring" as const, stiffness: 260, damping: 28 };
+const SPRING_MAGNET = { stiffness: 300, damping: 18, mass: 0.4 };
+const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
+const SLIDE_TRANSITION: Transition = { duration: 0.6, ease: [0.32, 0.72, 0, 1] };
+const INSTANT_TRANSITION: Transition = { duration: 0 };
 
-/* ── Animated title lines ── */
-function SlideTitle({ text }: { text: string }) {
+const contentStagger: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.06 } },
+};
+
+const contentUp: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT_EXPO } },
+};
+
+const productEnter: Variants = {
+  hidden: { opacity: 0, x: 56, scale: 1.05 },
+  show: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] } },
+};
+
+const trustStagger: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const trustUp: Variants = {
+  hidden: { opacity: 0, y: 16, filter: "blur(4px)" },
+  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: SPRING_SMOOTH },
+};
+
+/** Counts up to the target price whenever the slide becomes active. */
+function AnimatedPrice({ value, isActive }: { value: number; isActive: boolean }) {
+  const count = useMotionValue(value);
+  const formatted = useTransform(count, (v) => Math.round(v).toLocaleString());
+
+  useEffect(() => {
+    if (!isActive) {
+      count.set(value);
+      return;
+    }
+    count.set(0);
+    const controls = animate(count, value, { duration: 0.9, ease: EASE_OUT_EXPO });
+    return () => controls.stop();
+  }, [value, isActive, count]);
+
+  return <motion.span>{formatted}</motion.span>;
+}
+
+/** Button that leans toward the cursor while hovered. */
+function MagneticButton({
+  children,
+  onClick,
+  className,
+  style,
+  strength = 0.3,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  strength?: number;
+}) {
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const x = useSpring(mx, SPRING_MAGNET);
+  const y = useSpring(my, SPRING_MAGNET);
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      className={className}
+      style={{ ...style, x, y }}
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        mx.set((e.clientX - r.left - r.width / 2) * strength);
+        my.set((e.clientY - r.top - r.height / 2) * strength);
+      }}
+      onMouseLeave={() => {
+        mx.set(0);
+        my.set(0);
+      }}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.96 }}
+      transition={SPRING_SNAPPY}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+function HeroAtmosphere({
+  accent,
+  parallaxX,
+  parallaxY,
+  spotlight,
+}: {
+  accent: HeroAccent;
+  parallaxX: MotionValue<number>;
+  parallaxY: MotionValue<number>;
+  spotlight: MotionValue<string>;
+}) {
+  const orbs = getHeroMeshOrbs(accent);
+  const orbX = useTransform(parallaxX, [-1, 1], [-22, 22]);
+  const orbY = useTransform(parallaxY, [-1, 1], [-14, 14]);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {orbs.map((orb, i) => (
+        <MeshOrb key={`orb-${i}`} orb={orb} orbX={orbX} orbY={orbY} />
+      ))}
+
+      {/* Aurora sweep */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 aspect-square w-[130%] opacity-50 blur-2xl"
+        style={{ background: getHeroAuroraGradient(accent), x: "-50%", y: "-50%" }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 44, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Cursor spotlight */}
+      <motion.div className="absolute inset-0 hidden md:block" style={{ background: spotlight }} />
+
+      {/* Grid */}
+      <div
+        className="absolute inset-0 opacity-[0.45]"
+        style={{
+          backgroundImage: `linear-gradient(${accent.color}0a 1px, transparent 1px), linear-gradient(90deg, ${accent.color}0a 1px, transparent 1px)`,
+          backgroundSize: "52px 52px",
+          maskImage: "radial-gradient(ellipse 85% 75% at 50% 45%, black 15%, transparent 78%)",
+          WebkitMaskImage: "radial-gradient(ellipse 85% 75% at 50% 45%, black 15%, transparent 78%)",
+        }}
+      />
+
+      {/* Glass shimmer sweep */}
+      <motion.div
+        className="absolute inset-0 opacity-[0.18]"
+        style={{
+          background:
+            "linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.6) 50%, transparent 58%)",
+          x: "-120%",
+        }}
+        animate={{ x: ["-120%", "220%"] }}
+        transition={{ duration: 5.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
+      />
+
+      {/* Film grain */}
+      <div
+        className="absolute inset-0 opacity-[0.035] mix-blend-overlay"
+        style={{ backgroundImage: HERO_NOISE_URL, backgroundSize: "180px 180px" }}
+      />
+
+      {/* Edge vignette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse 100% 100% at 50% 50%, transparent 55%, ${accent.color}0f 100%)`,
+        }}
+      />
+    </div>
+  );
+}
+
+function MeshOrb({
+  orb,
+  orbX,
+  orbY,
+}: {
+  orb: ReturnType<typeof getHeroMeshOrbs>[number];
+  orbX: MotionValue<number>;
+  orbY: MotionValue<number>;
+}) {
+  const x = useTransform(orbX, (v) => v * orb.depth);
+  const y = useTransform(orbY, (v) => v * orb.depth);
+
+  return (
+    <motion.div
+      className="absolute rounded-full blur-3xl"
+      style={{
+        width: orb.size,
+        height: orb.size,
+        left: orb.x,
+        top: orb.y,
+        background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+        x,
+        y,
+      }}
+      animate={{ scale: [1, 1.14, 1.05, 1], opacity: [0.5, 0.78, 0.62, 0.5] }}
+      transition={{ duration: orb.duration, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
+function HeroTrustBadges({ isActive, accent }: { isActive: boolean; accent: HeroAccent }) {
+  return (
+    <motion.div
+      className="absolute bottom-2 right-2 z-30 hidden flex-col gap-1.5 md:bottom-4 md:right-4 md:flex"
+      initial="hidden"
+      animate={isActive ? "show" : "hidden"}
+      variants={trustStagger}
+    >
+      {HERO_TRUST_BADGES.map((b) => (
+        <motion.div
+          key={b.title}
+          className="flex items-center gap-2 rounded-xl border border-white/70 bg-white/70 px-2.5 py-1.5 backdrop-blur-xl sm:px-3 sm:py-2"
+          style={{
+            boxShadow: `0 6px 24px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.9)`,
+          }}
+          variants={trustUp}
+          whileHover={{ scale: 1.04, y: -2, boxShadow: `0 10px 30px ${accent.glow}` }}
+          transition={SPRING_SNAPPY}
+        >
+          <span className="text-sm">{b.icon}</span>
+          <div>
+            <div className="font-label text-[9px] font-bold text-gray-900 sm:text-[10px]">{b.title}</div>
+            <div className="font-label text-[7px] text-gray-500 sm:text-[8px]">{b.sub}</div>
+          </div>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+function HeroSlideTimer({
+  displayIndex,
+  slideCount,
+  progress,
+  accent,
+  onSeek,
+}: {
+  displayIndex: number;
+  slideCount: number;
+  progress: MotionValue<number>;
+  accent: HeroAccent;
+  onSeek: (index: number) => void;
+}) {
+  return (
+    <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+      <div className="hidden sm:block">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={displayIndex}
+            className="block font-mono text-[10px] font-medium tracking-widest text-slate-400"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.2 }}
+          >
+            {String(displayIndex + 1).padStart(2, "0")} / {String(slideCount).padStart(2, "0")}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <div className="flex items-center gap-1">
+        {Array.from({ length: slideCount }, (_, i) => {
+          const active = i === displayIndex;
+          return (
+            <motion.button
+              key={`prog-${i}`}
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => onSeek(i)}
+              className="group relative h-[3px] cursor-pointer overflow-hidden rounded-full bg-slate-200/90"
+              animate={{ width: active ? 48 : 12 }}
+              transition={SPRING_SNAPPY}
+              whileHover={{ scaleY: 1.8 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {active ? (
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${accent.color}, ${accent.neon})`,
+                    scaleX: progress,
+                    originX: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  style={{ background: `${accent.color}50` }}
+                />
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SlideTitle({ text, animateIn }: { text: string; animateIn: boolean }) {
+  const lines = formatHeroTitle(text, 18).split("\n").slice(0, 2);
+
   return (
     <div>
-      {text.split("\n").map((line, i) => (
-        <div key={i} className="overflow-hidden leading-[1.08]">
+      {lines.map((line, i) => (
+        <div key={i} className="overflow-hidden leading-[1.12]">
           <motion.span
-            className="block"
-            initial={{ y: "110%" }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.06 + i * 0.1 }}
+            className="block text-gray-950"
+            initial={animateIn ? { y: "110%", opacity: 0 } : false}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{
+              duration: 0.6,
+              ease: EASE_OUT_EXPO,
+              delay: animateIn ? 0.08 + i * 0.09 : 0,
+            }}
           >
             {line}
           </motion.span>
@@ -35,387 +357,524 @@ function SlideTitle({ text }: { text: string }) {
   );
 }
 
-export default function HeroSection({ onViewAll }: { onViewAll?: () => void }) {
-  const [slide, setSlide] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
-  const [prog, setProg] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const ix = useTransform(mx, [-400, 400], [-8, 8]);
-  const iy = useTransform(my, [-200, 200], [-4, 4]);
-
-  const go = useCallback((n: number) => {
-    setDirection(n > slide || (slide === SLIDES.length - 1 && n === 0) ? 1 : -1);
-    setSlide(n);
-    setProg(0);
-  }, [slide]);
-
-  useEffect(() => {
-    setProg(0);
-    const step = 100 / (AUTO_MS / 60);
-    timerRef.current = setInterval(() => {
-      setProg(p => {
-        if (p >= 100) {
-          setDirection(1);
-          setSlide(s => (s + 1) % SLIDES.length);
-          return 0;
-        }
-        return p + step;
-      });
-    }, 60);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slide]);
-
-  const s = SLIDES[slide];
-  const ac = ACCENTS[slide % ACCENTS.length];
-
-  /* Slide animation variants — smooth crossfade + subtle directional movement */
-  const imageVariants = {
-    enter: (d: number) => ({ opacity: 0, scale: 1.06, x: d > 0 ? 40 : -40 }),
-    center: { opacity: 1, scale: 1, x: 0 },
-    exit: (d: number) => ({ opacity: 0, scale: 0.97, x: d > 0 ? -30 : 30 }),
-  };
-
-  const contentVariants = {
-    enter: { opacity: 0, y: 18 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -12 },
-  };
+function HeroSlidePanel({
+  slide,
+  index,
+  isActive,
+  direction,
+  parallaxX,
+  parallaxY,
+  spotX,
+  spotY,
+  onPrimaryAction,
+  onViewAll,
+}: {
+  slide: HeroSlide;
+  index: number;
+  isActive: boolean;
+  direction: number;
+  parallaxX: MotionValue<number>;
+  parallaxY: MotionValue<number>;
+  spotX: MotionValue<number>;
+  spotY: MotionValue<number>;
+  onPrimaryAction: (slide: HeroSlide) => void;
+  onViewAll?: () => void;
+}) {
+  const ac = getSlideAccent(index, slide.slideKind);
+  const slideSurface = getHeroSurfaceStyle(ac);
+  const badge = getEyebrowBadgeStyle(slide.eyebrow, ac);
+  const animateIn = isActive;
+  const slideSpotlight = useMotionTemplate`radial-gradient(340px circle at ${spotX}px ${spotY}px, ${ac.neon}1f, transparent 72%)`;
 
   return (
-    <div className="pb-2 pt-1">
-      <div
-        className={`${tw.heroSlider} relative w-full overflow-hidden rounded-2xl md:rounded-3xl`}
-        style={{
-          background: "#ffffff",
-          boxShadow: "0 2px 24px rgba(0,0,0,0.07), 0 0 0 1.5px rgba(0,0,0,0.05)",
-        }}
-        onMouseMove={e => {
-          const r = e.currentTarget.getBoundingClientRect();
-          mx.set(e.clientX - r.left - r.width / 2);
-          my.set(e.clientY - r.top - r.height / 2);
-        }}
-        onMouseLeave={() => { mx.set(0); my.set(0); }}
+    <div
+      className={`${HERO_SLIDE_MIN_H} relative grid h-full w-full shrink-0 basis-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:block`}
+    >
+      {/* Single unified mesh — full slide, no left/right split */}
+      <div className="pointer-events-none absolute inset-0 z-0" style={slideSurface} aria-hidden />
+      <div className="pointer-events-none absolute inset-0 z-[1]">
+        <HeroAtmosphere
+          accent={ac}
+          parallaxX={parallaxX}
+          parallaxY={parallaxY}
+          spotlight={slideSpotlight}
+        />
+      </div>
+
+      {/* Product floats on the same background — no separate panel */}
+      <motion.div
+        className="pointer-events-none relative order-2 z-[2] flex min-h-[200px] items-center justify-center px-4 pb-2 sm:absolute sm:inset-0 sm:order-none sm:min-h-0 sm:justify-end sm:px-8 sm:pb-0 sm:pl-[42%] md:pl-[40%] lg:pr-12"
+        variants={productEnter}
+        initial="hidden"
+        animate={isActive ? "show" : "hidden"}
       >
-        {/* ── Dot grid background ── */}
         <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            background: "#fafbfc",
-            backgroundImage: `radial-gradient(circle, ${ac.color}18 1.2px, transparent 1.2px)`,
-            backgroundSize: "26px 26px",
-            transition: "background-image 0.5s ease",
-          }}
-        />
-
-        {/* ── Accent glow blob ── */}
-        <motion.div
-          className="pointer-events-none absolute z-[1]"
-          style={{
-            right: "-5%", top: "10%",
-            width: "55%", height: "80%",
-          }}
-          animate={{
-            background: `radial-gradient(ellipse at center, ${ac.glow} 0%, transparent 68%)`,
-          }}
-          transition={{ duration: 0.8 }}
-        />
-
-        {/* ═══════════════════════════════════════════════
-            LAYOUT: stacked on mobile, side-by-side on md+
-        ═══════════════════════════════════════════════ */}
-        <div className="relative z-[5] flex flex-col md:flex-row md:items-stretch"
-          style={{ minHeight: "clamp(260px, 42vw, 480px)" }}
+          className={`${HERO_IMAGE_INNER} h-[120px] w-full max-w-[220px] sm:h-[72%] sm:max-w-[240px] md:max-w-[280px] lg:max-w-[320px] xl:max-w-[340px]`}
         >
-          {/* ── LEFT: Content ── */}
-          <div className="relative z-10 flex flex-1 items-center px-5 pt-6 pb-2 sm:px-7 sm:pt-8 md:w-[56%] md:flex-none md:px-10 md:py-8 lg:px-14 lg:py-10">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={`c-${slide}`}
-                className="w-full max-w-[460px]"
-                variants={contentVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                custom={direction}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-              >
-                {/* Eyebrow */}
-                <motion.div
-                  className="mb-3 flex items-center gap-2 md:mb-4"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: ac.color }} />
-                    <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: ac.color }} />
-                  </span>
-                  <span
-                    className={`rounded-full border px-2.5 py-0.5 ${type.eyebrow} text-[9px] tracking-[0.14em] sm:px-3 sm:py-1 sm:text-[10px]`}
-                    style={{ background: ac.soft, color: ac.dark, borderColor: `${ac.color}25` }}
-                  >
-                    {s.eyebrow}
-                  </span>
-                </motion.div>
-
-                {/* Title */}
-                <h2
-                  className="mb-3 font-display font-extrabold tracking-tight text-gray-950 md:mb-4"
-                  style={{ fontSize: "clamp(20px, 3.5vw, 44px)" }}
-                >
-                  <SlideTitle text={s.title} />
-                </h2>
-
-                {/* Divider */}
-                <motion.div
-                  className="mb-3 h-[3px] w-8 rounded-full md:mb-4 md:w-10"
-                  style={{ background: `linear-gradient(90deg, ${ac.color}, ${ac.soft})` }}
-                  initial={{ scaleX: 0, originX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.5, delay: 0.25 }}
-                />
-
-                {/* Subtitle */}
-                <motion.p
-                  className="mb-4 max-w-[280px] text-[12px] leading-relaxed text-slate-500 sm:text-[13px] md:mb-6 md:max-w-[300px] md:text-[14px]"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                >
-                  {s.sub}
-                </motion.p>
-
-                {/* CTAs */}
-                <motion.div
-                  className="flex flex-wrap items-center gap-2 sm:gap-3"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.38 }}
-                >
-                  <motion.button
-                    type="button"
-                    onClick={onViewAll}
-                    className="relative flex items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 font-label text-[12px] font-bold text-white sm:gap-2 sm:px-7 sm:py-3 sm:text-[13px] md:text-[14px]"
-                    style={{
-                      background: `linear-gradient(135deg, ${ac.color}, ${ac.color}bb)`,
-                      boxShadow: `0 6px 22px ${ac.glow}`,
-                    }}
-                    whileHover={{ scale: 1.04, y: -2 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <motion.span
-                      className="pointer-events-none absolute inset-0"
-                      style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)" }}
-                      animate={{ x: ["-100%", "200%"] }}
-                      transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.8 }}
-                    />
-                    {s.cta}
-                    <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  </motion.button>
-
-                  <motion.button
-                    type="button"
-                    onClick={onViewAll}
-                    className="hidden rounded-full px-4 py-2.5 font-label text-[12px] font-medium transition-all sm:inline-flex sm:px-5 sm:py-3 sm:text-[13px]"
-                    style={{ border: `1.5px solid ${ac.color}28`, color: ac.dark, background: "white" }}
-                    whileHover={{ borderColor: ac.color, background: ac.soft }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    View all deals
-                  </motion.button>
-                </motion.div>
-
-                <motion.p
-                  className="mt-2 font-label text-[9px] text-slate-400 sm:mt-3 sm:text-[10px]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  {s.note}
-                </motion.p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* ── RIGHT: Image ── */}
-          <div className="relative flex-1 md:w-[44%] md:flex-none">
-            {/* Fade divider — only on desktop */}
-            <div
-              className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-20 md:block"
-              style={{ background: "linear-gradient(90deg, #fafbfc 0%, transparent 100%)" }}
-            />
-            {/* Fade divider — top on mobile (stacked layout) */}
-            <div
-              className="pointer-events-none absolute left-0 right-0 top-0 z-10 h-8 md:hidden"
-              style={{ background: "linear-gradient(180deg, #fafbfc 0%, transparent 100%)" }}
-            />
-
-            <div className="relative h-[180px] w-full overflow-hidden sm:h-[220px] md:h-full">
-              <AnimatePresence initial={false} custom={direction} mode="popLayout">
-                <motion.div
-                  key={`img-${slide}`}
-                  className="absolute inset-0"
-                  variants={imageVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  custom={direction}
-                  transition={{ duration: 0.65, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  <motion.div className="h-full w-full" style={{ x: ix, y: iy }}>
-                    <StoreImage
-                      src={s.img}
-                      alt={s.title}
-                      className="h-full w-full object-cover object-center"
-                    />
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Top-right accent tag — desktop only */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`tag-${slide}`}
-                  className="absolute right-3 top-3 z-20 hidden md:block md:right-4 md:top-4"
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div
-                    className="rounded-xl px-3 py-1.5 text-center shadow-md backdrop-blur-md"
-                    style={{ background: "rgba(255,255,255,0.88)", border: `1px solid ${ac.color}20` }}
-                  >
-                    <div className="font-label text-[9px] font-bold uppercase tracking-widest" style={{ color: ac.color }}>
-                      {s.eyebrow}
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
+          <StoreImage
+            src={slide.img}
+            alt={formatHeroTitle(slide.title).replace("\n", " ")}
+            priority
+            blend={false}
+            className={getHeroImageClass()}
+            style={{ background: "transparent" }}
+          />
         </div>
+      </motion.div>
 
-        {/* ═══════════════════════════════════════════════
-            BOTTOM BAR — thumbnails + progress
-        ═══════════════════════════════════════════════ */}
-        <div className="relative z-20 flex items-center justify-between border-t border-gray-100/60 px-4 py-2.5 sm:px-5 sm:py-3 md:px-8 md:py-3.5">
-          {/* Thumbnail dots / strip */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {SLIDES.map((sl, i) => (
-              <motion.button
-                key={i}
-                onClick={() => go(i)}
-                aria-label={`Slide ${i + 1}`}
-                className="relative shrink-0 overflow-hidden rounded-md sm:rounded-lg"
-                style={{
-                  width: i === slide ? 44 : 30,
-                  height: 30,
-                  border: `2px solid ${i === slide ? ac.color : "rgba(0,0,0,0.08)"}`,
-                  background: "#f1f5f9",
-                  transition: "width 0.35s ease, border-color 0.35s ease",
-                  boxShadow: i === slide ? `0 2px 10px ${ac.glow}` : "none",
-                }}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.93 }}
-              >
-                <StoreImage src={sl.img} alt="" className="h-full w-full object-cover" />
-                {i === slide && (
-                  <motion.div
-                    className="absolute inset-0"
-                    style={{ background: `${ac.color}18` }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
+      <HeroTrustBadges isActive={isActive} accent={ac} />
 
-          {/* Progress + counter */}
-          <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
-            <span className="font-mono text-[9px] tracking-widest text-slate-400 sm:text-[10px]">
-              {String(slide + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
-            </span>
-            <div className="h-[3px] w-[52px] overflow-hidden rounded-full bg-gray-200 sm:w-[72px]">
-              <motion.div
-                className="h-full rounded-full"
-                style={{
-                  width: `${prog}%`,
-                  background: `linear-gradient(90deg, ${ac.color}, ${ac.soft})`,
-                }}
+      <div className="relative z-10 order-1 flex items-start px-3 pt-3 sm:absolute sm:inset-0 sm:order-none sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
+        <motion.div
+          className="w-full max-w-[380px]"
+          variants={contentStagger}
+          initial="hidden"
+          animate={isActive ? "show" : "hidden"}
+        >
+          <motion.div className="mb-2 flex items-center gap-1.5" variants={contentUp}>
+            <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
+              <motion.span
+                className="absolute inline-flex h-full w-full rounded-full"
+                style={{ background: badge.dot }}
+                animate={{ scale: [1, 1.9, 1], opacity: [0.9, 0, 0.9] }}
+                transition={{ duration: 1.9, repeat: Infinity, ease: "easeOut" }}
               />
-            </div>
-          </div>
-        </div>
-
-        {/* ── Trust badges — desktop only ── */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`b-${slide}`}
-            className="absolute bottom-20 right-4 z-20 hidden flex-col gap-2 lg:flex lg:right-5"
-            initial={{ opacity: 0, x: 14 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: 0.45 }}
-          >
-            {[
-              { icon: "⚡", t: "Express Delivery", s: "Fast & Reliable" },
-              { icon: "🛡️", t: "Official Warranty", s: "Brand Warranty Products" },
-            ].map((b, i) => (
-              <motion.div
-                key={b.t}
-                className="flex items-center gap-2 rounded-xl px-3 py-2"
-                style={{
-                  background: "rgba(255,255,255,0.90)",
-                  border: `1px solid ${ac.color}18`,
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                  backdropFilter: "blur(12px)",
-                }}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.52 + i * 0.1 }}
-                whileHover={{ scale: 1.03 }}
-              >
-                <span className="text-sm">{b.icon}</span>
-                <div>
-                  <div className="font-label text-[10px] font-bold text-gray-800">{b.t}</div>
-                  <div className="font-label text-[9px] text-gray-400">{b.s}</div>
-                </div>
-              </motion.div>
-            ))}
+              <span className="relative inline-flex h-full w-full rounded-full" style={{ background: badge.dot }} />
+            </span>
+            <span
+              className={`rounded-full border px-2 py-0.5 ${type.eyebrow} text-[8px] tracking-[0.12em] backdrop-blur-sm sm:text-[9px]`}
+              style={{ background: badge.bg, color: badge.color, borderColor: badge.border }}
+            >
+              {slide.eyebrow}
+            </span>
           </motion.div>
-        </AnimatePresence>
 
-        {/* ── Prev / Next arrows ── */}
-        {[
-          { d: -1, lbl: "Prev", side: "left-2 sm:left-3" },
-          { d: 1, lbl: "Next", side: "right-2 sm:right-3" },
-        ].map(({ d, lbl, side }) => (
-          <motion.button
-            key={lbl}
-            onClick={() => go((slide + d + SLIDES.length) % SLIDES.length)}
-            className={`absolute ${side} top-[40%] z-30 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full sm:h-9 sm:w-9 md:top-[45%]`}
-            style={{
-              background: "rgba(255,255,255,0.90)",
-              border: "1.5px solid rgba(0,0,0,0.08)",
-              backdropFilter: "blur(8px)",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0 }}
-            whileHover={{ opacity: 1, scale: 1.12 }}
-            whileTap={{ scale: 0.92 }}
-            aria-label={lbl}
+          <motion.div variants={contentUp}>
+            <h2 className="mb-1.5 line-clamp-2 max-w-[240px] font-display text-[14px] font-bold leading-[1.25] text-gray-950 sm:max-w-[260px] sm:text-[15px] md:text-[16px]">
+              <SlideTitle text={slide.title} animateIn={animateIn} />
+            </h2>
+          </motion.div>
+
+          <motion.div
+            className="mb-2 h-[3px] w-10 rounded-full md:mb-2.5"
+            style={{ background: `linear-gradient(90deg, ${ac.color}, ${ac.neon}, transparent)` }}
+            variants={contentUp}
+          />
+
+          {slide.price != null && slide.price > 0 ? (
+            <motion.div
+              className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 md:mb-2.5"
+              variants={contentUp}
+            >
+              <span
+                className="font-display text-[15px] font-extrabold tabular-nums sm:text-[16px] md:text-[18px]"
+                style={{ color: ac.dark }}
+              >
+                QAR <AnimatedPrice value={slide.price} isActive={isActive} />
+              </span>
+              {slide.compareAtPrice != null && slide.compareAtPrice > slide.price ? (
+                <span className="font-label text-[10px] text-slate-400 line-through sm:text-[11px]">
+                  QAR {slide.compareAtPrice.toLocaleString()}
+                </span>
+              ) : null}
+              {slide.discount != null && slide.discount > 0 ? (
+                <span className="rounded-full bg-red-500/10 px-2 py-0.5 font-label text-[9px] font-bold text-red-600 ring-1 ring-red-500/25">
+                  -{slide.discount}%
+                </span>
+              ) : null}
+            </motion.div>
+          ) : null}
+
+          <motion.p
+            className="mb-3 line-clamp-2 max-w-[300px] text-[11px] leading-relaxed text-slate-600 sm:text-[12px] md:mb-3"
+            variants={contentUp}
           >
-            <svg className="h-3.5 w-3.5 text-gray-700 sm:h-4 sm:w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d={d === -1 ? "M15.75 19.5L8.25 12l7.5-7.5" : "M8.25 4.5l7.5 7.5-7.5 7.5"} />
-            </svg>
-          </motion.button>
-        ))}
+            {slide.sub}
+          </motion.p>
+
+          <motion.div className="flex flex-wrap items-center gap-2" variants={contentUp}>
+            <MagneticButton
+              onClick={() => onPrimaryAction(slide)}
+              className="group/cta relative flex cursor-pointer items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 font-label text-[11px] font-bold text-white sm:px-6 sm:text-[12px]"
+              style={{
+                background: `linear-gradient(135deg, ${ac.color} 0%, ${ac.neon} 100%)`,
+                boxShadow: `0 6px 24px ${ac.glow}, inset 0 1px 0 rgba(255,255,255,0.28)`,
+              }}
+            >
+              <motion.span
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: "linear-gradient(100deg,transparent,rgba(255,255,255,0.42),transparent)",
+                }}
+                animate={{ x: ["-110%", "210%"] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1.8, ease: "easeInOut" }}
+              />
+              <span className="relative z-[1]">{slide.cta}</span>
+              <motion.svg
+                className="relative z-[1] h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                viewBox="0 0 24 24"
+                animate={{ x: [0, 3, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </motion.svg>
+            </MagneticButton>
+
+            <MagneticButton
+              onClick={onViewAll}
+              strength={0.18}
+                className="hidden cursor-pointer rounded-full border border-gray-200/80 bg-transparent px-4 py-2.5 font-label text-[11px] font-semibold text-gray-700 md:inline-flex md:text-[12px]"
+            >
+              View all deals
+            </MagneticButton>
+          </motion.div>
+
+          {slide.note ? (
+            <motion.p className="mt-2 hidden font-label text-[8px] text-slate-400 sm:block sm:text-[9px]" variants={contentUp}>
+              {slide.note}
+            </motion.p>
+          ) : null}
+        </motion.div>
       </div>
     </div>
+  );
+}
+
+function HeroSkeleton() {
+  return (
+    <div
+      className={`${HERO_SLIDE_MIN_H} relative grid w-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-2xl bg-[#f8fafc] sm:block md:rounded-3xl`}
+      style={{ boxShadow: "0 2px 24px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05)" }}
+    >
+      <motion.div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%)",
+        }}
+        animate={{ x: ["-120%", "220%"] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
+      />
+      <div className="relative z-10 flex flex-col gap-2 px-4 pt-4 sm:absolute sm:inset-0 sm:max-w-[48%] sm:justify-center sm:px-5 md:max-w-[46%] md:px-8">
+        <div className="h-3 w-24 rounded-full bg-slate-200/80" />
+        <div className="h-8 w-full max-w-sm rounded-lg bg-slate-200/80" />
+        <div className="h-9 w-32 rounded-full bg-slate-200/80" />
+      </div>
+      <div className="relative flex min-h-0 items-center justify-center px-4 pb-4 sm:absolute sm:inset-0 sm:pb-0 sm:pl-[44%] md:pl-[42%]">
+        <motion.div
+          className="h-full w-full max-w-[240px] sm:h-[230px] sm:w-[270px] sm:max-w-none md:h-[280px] md:w-[340px]"
+          animate={{ opacity: [0.5, 0.85, 0.5] }}
+          transition={{ duration: 1.6, repeat: Infinity }}
+        />
+      </div>
+    </div>
+  );
+}
+
+interface HeroSectionProps {
+  slides?: HeroSlide[];
+  isLoading?: boolean;
+  onSlideAction?: (slide: HeroSlide) => void;
+  onViewAll?: () => void;
+}
+
+export default function HeroSection({
+  slides: apiSlides = [],
+  isLoading = false,
+  onSlideAction,
+  onViewAll,
+}: HeroSectionProps) {
+  const slides = useMemo(() => buildHeroSlides(apiSlides), [apiSlides]);
+  const trackSlides = useMemo(() => [...slides, slides[0]], [slides]);
+
+  const [trackIndex, setTrackIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [instant, setInstant] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const trackIndexRef = useRef(0);
+  const remainingRef = useRef(AUTO_MS);
+
+  useEffect(() => {
+    trackIndexRef.current = trackIndex;
+  }, [trackIndex]);
+
+  const displayIndex = trackIndex % SLIDE_COUNT;
+  const accent = getSlideAccent(displayIndex, slides[displayIndex]?.slideKind);
+
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const spotX = useMotionValue(-500);
+  const spotY = useMotionValue(-500);
+  const progress = useMotionValue(0);
+  const parallaxX = useSpring(mx, { stiffness: 140, damping: 22 });
+  const parallaxY = useSpring(my, { stiffness: 140, damping: 22 });
+  const smoothSpotX = useSpring(spotX, { stiffness: 220, damping: 30 });
+  const smoothSpotY = useSpring(spotY, { stiffness: 220, damping: 30 });
+
+  const goTo = useCallback((index: number) => {
+    setDirection(index >= trackIndexRef.current ? 1 : -1);
+    setInstant(false);
+    setTrackIndex(index);
+  }, []);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setInstant(false);
+    setTrackIndex((i) => (i >= SLIDE_COUNT ? SLIDE_COUNT : i + 1));
+  }, []);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setInstant(false);
+    setTrackIndex((i) => (i <= 0 ? SLIDE_COUNT - 1 : i - 1));
+  }, []);
+
+  const handleTrackComplete = useCallback(() => {
+    if (trackIndexRef.current !== SLIDE_COUNT) return;
+    setInstant(true);
+    setTrackIndex(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (_: unknown, info: PanInfo) => {
+      setIsDragging(false);
+      const { offset, velocity } = info;
+      if (offset.x < -SWIPE_THRESHOLD || velocity.x < -400) {
+        next();
+        return;
+      }
+      if (offset.x > SWIPE_THRESHOLD || velocity.x > 400) {
+        prev();
+      }
+    },
+    [next, prev]
+  );
+
+  const autoPlayActive = !isHovering && !isDragging;
+
+  useEffect(() => {
+    if (trackIndex !== SLIDE_COUNT) return;
+    const id = window.setTimeout(handleTrackComplete, 650);
+    return () => window.clearTimeout(id);
+  }, [trackIndex, handleTrackComplete]);
+
+  /** Fresh countdown for each slide; pausing keeps whatever time is left. */
+  useEffect(() => {
+    progress.set(0);
+    remainingRef.current = AUTO_MS;
+  }, [trackIndex, progress]);
+
+  useEffect(() => {
+    if (!autoPlayActive) return;
+    const duration = remainingRef.current;
+    const startedAt = Date.now();
+    const controls = animate(progress, 1, { duration: duration / 1000, ease: "linear" });
+    const timer = window.setTimeout(next, duration);
+    return () => {
+      controls.stop();
+      window.clearTimeout(timer);
+      remainingRef.current = Math.max(0, duration - (Date.now() - startedAt));
+    };
+  }, [trackIndex, autoPlayActive, next, progress]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [next, prev]);
+
+  const handlePrimaryAction = useCallback(
+    (slide: HeroSlide) => {
+      if (slide.slug && onSlideAction) {
+        onSlideAction(slide);
+        return;
+      }
+      onViewAll?.();
+    },
+    [onSlideAction, onViewAll]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="pb-2 pt-1">
+        <HeroSkeleton />
+      </div>
+    );
+  }
+
+  return (
+    /**
+     * `reducedMotion="user"` is handled inside Motion's animation layer, so the
+     * rendered markup stays identical between server and client. Branching on
+     * `useReducedMotion()` here instead would hydrate-mismatch, because the hook
+     * reads the media query during the first render.
+     */
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        className="pb-2 pt-1"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
+      >
+        {/* Animated gradient border */}
+        <div className="relative overflow-hidden rounded-[18px] p-[1.5px] md:rounded-[26px]">
+          <motion.div
+            className="absolute left-1/2 top-1/2 aspect-square w-[160%]"
+            style={{ background: getHeroBeamGradient(accent), opacity: 0.55, x: "-50%", y: "-50%" }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+          />
+
+          <motion.div
+            className="group relative flex w-full flex-col overflow-hidden rounded-[17px] md:rounded-[25px]"
+            style={{
+              boxShadow: `0 18px 50px -12px ${accent.glow}, 0 2px 8px rgba(15,23,42,0.06)`,
+            }}
+            onMouseMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              mx.set((e.clientX - r.left - r.width / 2) / (r.width / 2));
+              my.set((e.clientY - r.top - r.height / 2) / (r.height / 2));
+              spotX.set(e.clientX - r.left);
+              spotY.set(e.clientY - r.top);
+            }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => {
+              mx.set(0);
+              my.set(0);
+              spotX.set(-500);
+              spotY.set(-500);
+              setIsHovering(false);
+            }}
+            tabIndex={0}
+            role="region"
+            aria-label="Featured products carousel"
+            aria-roledescription="carousel"
+          >
+            {/* <AnimatePresence>
+              {isHovering ? (
+                <motion.div
+                  className="pointer-events-none absolute left-1/2 top-3 z-30 hidden items-center gap-1.5 rounded-full border border-white/70 bg-white/75 px-3 py-1 font-label text-[10px] font-semibold text-slate-600 shadow-sm backdrop-blur-xl md:flex"
+                  style={{ x: "-50%" }}
+                  initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                  transition={SPRING_SNAPPY}
+                >
+                  <motion.span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ background: accent.color }}
+                    animate={{ opacity: [1, 0.25, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  />
+                  Swipe or drag to browse
+                </motion.div>
+              ) : null}
+            </AnimatePresence> */}
+
+            <div className={`relative min-h-0 flex-1 overflow-hidden ${HERO_SLIDE_MIN_H}`}>
+              <motion.div
+                className="flex h-full min-h-[inherit] w-full cursor-grab active:cursor-grabbing"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.14}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={handleDragEnd}
+                animate={{ x: `-${trackIndex * 100}%` }}
+                transition={instant || isDragging ? INSTANT_TRANSITION : SLIDE_TRANSITION}
+                onAnimationComplete={handleTrackComplete}
+              >
+                {trackSlides.map((s, i) => (
+                  <div key={`track-${i}`} className="flex h-full min-h-[inherit] w-full shrink-0 basis-full">
+                    <HeroSlidePanel
+                      slide={s}
+                      index={i < SLIDE_COUNT ? i : 0}
+                      isActive={trackIndex === i}
+                      direction={direction}
+                      parallaxX={parallaxX}
+                      parallaxY={parallaxY}
+                      spotX={smoothSpotX}
+                      spotY={smoothSpotY}
+                      onPrimaryAction={handlePrimaryAction}
+                      onViewAll={onViewAll}
+                    />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            <div className="relative z-20 flex shrink-0 items-center justify-between gap-2 border-t border-white/60 bg-white/40 px-2.5 py-2 backdrop-blur-xl sm:gap-3 sm:px-5 sm:py-2.5 md:px-7">
+              <div className={`flex min-w-0 items-center gap-1.5 overflow-x-auto sm:gap-2 ${tw.scrollbarHide}`}>
+                {slides.map((sl, i) => {
+                  const ta = getSlideAccent(i, sl.slideKind);
+                  const active = i === displayIndex;
+                  const label = HERO_SLIDE_LABELS[i] ?? `Slide ${i + 1}`;
+                  return (
+                    <motion.button
+                      key={`thumb-${i}`}
+                      type="button"
+                      onClick={() => goTo(i)}
+                      aria-label={`${label}: ${formatHeroTitle(sl.title).replace("\n", " ")}`}
+                      aria-current={active ? "true" : undefined}
+                      className="group relative flex shrink-0 cursor-pointer flex-col items-center gap-1"
+                      whileHover={{ y: -3 }}
+                      whileTap={{ scale: 0.94 }}
+                      transition={SPRING_SNAPPY}
+                    >
+                      <motion.div
+                        className="relative overflow-hidden rounded-[10px] border-2 bg-transparent"
+                        animate={{
+                          width: active ? 44 : 28,
+                          height: 28,
+                          borderColor: active ? ta.color : "rgba(15,23,42,0.08)",
+                          boxShadow: active ? `0 6px 18px ${ta.glow}` : "0 0 0 rgba(0,0,0,0)",
+                        }}
+                        transition={SPRING_SNAPPY}
+                      >
+                        <StoreImage
+                          src={sl.img}
+                          alt=""
+                          blend={false}
+                          className="h-full w-full object-contain p-0.5"
+                        />
+                        {active ? (
+                          <motion.div
+                            className="absolute inset-x-0 bottom-0 h-[3px]"
+                            layoutId="thumb-active-bar"
+                            style={{ background: `linear-gradient(90deg, ${ta.color}, ${ta.neon})` }}
+                            transition={SPRING_SNAPPY}
+                          />
+                        ) : null}
+                      </motion.div>
+                      <motion.span
+                        className="hidden font-label text-[8px] font-semibold uppercase tracking-wider sm:block"
+                        animate={{ color: active ? ta.dark : "#94a3b8", opacity: active ? 1 : 0.65 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {label}
+                      </motion.span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              <HeroSlideTimer
+                displayIndex={displayIndex}
+                slideCount={SLIDE_COUNT}
+                progress={progress}
+                accent={accent}
+                onSeek={goTo}
+              />
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </MotionConfig>
   );
 }

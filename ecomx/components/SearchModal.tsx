@@ -10,6 +10,7 @@ import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "./StoreImage";
 import type { Product } from "@/lib/types";
 import * as Icons from "./Icons";
@@ -122,11 +123,13 @@ export default function SearchModal({ open, onClose, onProductSelect }: SearchMo
                     onClick={() => onProductSelect?.(mapped)}
                     className="flex w-full gap-4 border-b border-black/5 px-6 py-4 text-left cursor-pointer transition-colors hover:bg-accent-soft/50"
                   >
-                    <StoreImage
-                      src={img}
-                      alt={mapped.name}
-                      className="h-14 w-14 shrink-0 rounded-xl object-cover bg-bg-soft"
-                    />
+                    <div className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl ${productImageSurfaceClass}`}>
+                      <StoreImage
+                        src={img}
+                        alt={mapped.name}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-[15px] font-semibold text-primary line-clamp-1">
                         {mapped.name}

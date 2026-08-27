@@ -18,6 +18,7 @@ import {
   FALLBACK_PRICE_MAX,
 } from "@/lib/store/shop-filters";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import { resolveCategoryId } from "@/lib/store/category-utils";
 import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 import type { FilterState, SortOption, WishlistItem, Product } from "@/lib/types";
 import type { ApiProduct } from "@/types/product.types";
@@ -135,13 +136,17 @@ export default function ShopPage({
   }, [priceMax]);
 
   useEffect(() => {
-    if (initialCategory) {
-      const next = { ...createDefaultFilters(priceMax), categories: [initialCategory] };
-      setFilters(next);
-      setAppliedFilters(next);
-      setCurrentPage(1);
-    }
-  }, [initialCategory, priceMax]);
+    if (!initialCategory) return;
+    const categoryId =
+      resolveCategoryId(categories, initialCategory) ??
+      (/^[a-f\d]{24}$/i.test(initialCategory) ? initialCategory : undefined);
+    if (!categoryId) return;
+
+    const next = { ...createDefaultFilters(priceMax), categories: [categoryId] };
+    setFilters(next);
+    setAppliedFilters(next);
+    setCurrentPage(1);
+  }, [initialCategory, priceMax, categories]);
 
   useEffect(() => {
     setSearch(searchParams.get("search") ?? "");
