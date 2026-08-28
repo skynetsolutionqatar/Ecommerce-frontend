@@ -91,10 +91,12 @@ export default function DeliveryMapPicker({
         districtId && DISTRICT_MAP_CENTERS[districtId]
           ? DISTRICT_MAP_CENTERS[districtId]
           : { ...MAP_DEFAULT_CENTER, zoom: 11 };
-      const map = leaflet.map(containerRef.current, { preferCanvas: true }).setView(
-        [center.lat, center.lng],
-        center.zoom
-      );
+      const map = leaflet.map(containerRef.current, {
+        preferCanvas: true,
+        zoomControl: false,
+      }).setView([center.lat, center.lng], center.zoom);
+
+      leaflet.control.zoom({ position: "bottomright" }).addTo(map);
 
       leaflet
         .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -208,7 +210,7 @@ export default function DeliveryMapPicker({
             />
           </form>
           {openResults && query.trim().length >= 2 ? (
-            <div className="absolute z-[1000] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-border bg-white shadow-lg">
+            <div className="absolute z-[1100] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-border bg-white shadow-lg">
               {searching ? (
                 <p className="px-3 py-2.5 text-sm text-muted">Searching...</p>
               ) : results.length === 0 ? (
