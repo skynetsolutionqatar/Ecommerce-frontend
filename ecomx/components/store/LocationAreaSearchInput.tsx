@@ -109,9 +109,11 @@ export default function LocationAreaSearchInput({
         <div className="absolute z-[1000] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
           {searching ? (
             <p className="px-3 py-2.5 text-sm text-gray-500">Searching...</p>
-          ) : results.length === 0 ? (
-            <p className="px-3 py-2.5 text-sm text-gray-500">No areas found in Qatar</p>
-          ) : (
+          ) 
+          // : results.length === 0 ? (
+          //   <p className="px-3 py-2.5 text-sm text-gray-500">No areas found in Qatar</p>
+          // ) 
+          : (
             results.map((area) => (
               <button
                 key={area._id}

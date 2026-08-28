@@ -5,11 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-heading: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-display: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-label: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-mono: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-sans: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-label: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);

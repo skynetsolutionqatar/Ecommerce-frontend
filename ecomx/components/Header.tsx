@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as Icons from "./Icons";
 import type { CartItem, WishlistItem, StoreUser } from "@/lib/types";
 import Avatar from "./Avatar";
+import BrandLogo from "./BrandLogo";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
@@ -193,19 +194,16 @@ export default function Header({
             <motion.button
               type="button"
               onClick={() => goTo(ROUTES.home)}
-              className="flex shrink-0 cursor-pointer flex-col items-start border-0 bg-transparent p-0"
+              className="flex shrink-0 cursor-pointer items-center border-0 bg-transparent p-0"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
-              <span className="font-display text-[20px] font-extrabold leading-none tracking-tight text-gray-900 sm:text-[22px]">
-                {client.name.split(" ")[0]}
-                <span className="text-[11px] font-black text-gray-400">™</span>
-              </span>
-              <span
-                className={`hidden ${type.eyebrow} text-[7px] tracking-[0.22em] text-gray-400 sm:block`}
-              >
-                {client.tagline}
-              </span>
+              <BrandLogo
+                height={48}
+                priority
+                alt={client.name}
+                imgClassName="max-w-[180px] sm:max-w-[200px]"
+              />
             </motion.button>
 
             {/* All Categories Dropdown */}
@@ -498,15 +496,7 @@ export default function Header({
                   }}
                   className="border-0 bg-transparent p-0 text-left cursor-pointer"
                 >
-                  <div className="font-display text-lg font-extrabold text-white">
-                    {client.name.split(" ")[0]}
-                    <span className="text-slate-300 text-sm">™</span>
-                  </div>
-                  <div
-                    className={`${type.eyebrow} text-[7.5px] tracking-widest text-slate-400/70`}
-                  >
-                    {client.tagline}
-                  </div>
+                  <BrandLogo height={40} variant="light" alt={client.name} imgClassName="max-w-[160px]" />
                 </button>
                 <motion.button
                   type="button"

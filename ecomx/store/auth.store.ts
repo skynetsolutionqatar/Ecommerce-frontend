@@ -10,8 +10,11 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isHydrated: boolean;
+  authError: string | null;
   setAuth: (user: AuthUser, accessToken: string, refreshToken: string) => void;
   setUser: (user: AuthUser | null) => void;
+  setAuthError: (message: string | null) => void;
+  clearAuthError: () => void;
   clearAuth: () => void;
   setHydrated: (value: boolean) => void;
 }
@@ -23,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isHydrated: false,
+      authError: null,
 
       setAuth: (user, accessToken, refreshToken) => {
         if (typeof window !== "undefined") {
@@ -34,12 +38,16 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) => set({ user }),
 
+      setAuthError: (message) => set({ authError: message }),
+
+      clearAuthError: () => set({ authError: null }),
+
       clearAuth: () => {
         if (typeof window !== "undefined") {
           localStorage.removeItem(TOKEN_KEYS.access);
           localStorage.removeItem(TOKEN_KEYS.refresh);
         }
-        set({ user: null, accessToken: null, refreshToken: null });
+        set({ user: null, accessToken: null, refreshToken: null, authError: null });
       },
 
       setHydrated: (value) => set({ isHydrated: value }),

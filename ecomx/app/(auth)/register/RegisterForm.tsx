@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
+import AuthFormError from "@/components/auth/AuthFormError";
 import {
   AuthAltActions,
-  AuthError,
   AuthFormField,
   AuthGoToStoreLink,
   AuthPasswordField,
@@ -16,20 +16,19 @@ import {
   AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
-import { getErrorMessage, getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
+import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function RegisterForm() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
-  const { register, loading, error } = useAuth();
+  const { register, loading, clearError, setError } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
   });
-  const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const loginHref = redirectParam
@@ -38,12 +37,12 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError(null);
+    clearError();
     setSuccess(false);
 
     const validationError = getRegisterFieldError(form);
     if (validationError) {
-      setLocalError(validationError);
+      setError(validationError);
       return;
     }
 
@@ -58,8 +57,8 @@ export default function RegisterForm() {
         redirectParam ?? undefined
       );
       setSuccess(true);
-    } catch (err) {
-      setLocalError(getErrorMessage(err, "Registration failed"));
+    } catch {
+      // Shown via AuthFormError
     }
   };
 
@@ -80,6 +79,8 @@ export default function RegisterForm() {
   return (
     <AuthShell title="Create account" subtitle="Register with your email and Qatar mobile number.">
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
+        <AuthFormError />
+
         <AuthFormField label="Full Name" icon={<Icons.User />}>
           <input
             id="name"
@@ -119,10 +120,6 @@ export default function RegisterForm() {
           placeholder="Create a strong password"
           autoComplete="new-password"
         />
-
-        {(localError || error) && (
-          <AuthError message={localError ?? error ?? "Registration failed"} />
-        )}
 
         <AuthSubmitButton loading={loading} loadingLabel="Creating account…" label="Create Account" />
 

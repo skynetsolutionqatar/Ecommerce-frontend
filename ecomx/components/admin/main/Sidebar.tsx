@@ -571,6 +571,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { adminSections, type AdminMenuItem } from "../utils/SideSection";
+import BrandLogo from "@/components/BrandLogo";
 import { adminType } from "@/lib/admin/typography";
 import { colors } from "../utils/Colors";
 import { ADMIN_ROUTES } from "@/lib/config";
@@ -663,17 +664,23 @@ export default function Sidebar({
       {/* Header */}
       <div
         className={`${
-          mobile ? "w-full" : collapsed ? "w-16" : "w-48"
-        } flex items-center justify-between px-4 py-3 transition-all duration-500`}
+          mobile ? "w-full" : collapsed ? "w-16" : "w-56"
+        } flex items-center justify-between gap-2 px-3 py-4 transition-all duration-500 ${
+          collapsed && !mobile ? "flex-col gap-3 px-2" : ""
+        }`}
       >
         <Link
           href={ADMIN_ROUTES.dashboard}
           onClick={handleNavigate}
-          className={`flex items-center gap-2 border-0 bg-transparent p-0 no-underline ${adminType.sidebarBrand}`}
+          className={`flex min-w-0 flex-1 items-center border-0 bg-transparent p-0 no-underline ${adminType.sidebarBrand} ${
+            collapsed && !mobile ? "justify-center" : ""
+          }`}
         >
-          <span className="text-[#0a255dff] dark:text-[#0a255dff] font-bold text-lg">
-            {isExpanded ? "SKYNET™" : "S™"}
-          </span>
+          <BrandLogo
+            height={isExpanded ? 60 : 46}
+            alt="Skynet Solution"
+            imgClassName={isExpanded ? "max-w-[188px]" : "max-w-[46px] object-center"}
+          />
         </Link>
         {mobile ? (
           <button
@@ -697,7 +704,7 @@ export default function Sidebar({
       {/* Navigation */}
       <div
         className={`flex-1 transition-all duration-500 ${
-          mobile ? "w-full" : isExpanded ? "w-48" : "w-16"
+          mobile ? "w-full" : isExpanded ? "w-56" : "w-16"
         }`}
         onMouseEnter={() => !mobile && setHovered(true)}
         onMouseLeave={() => !mobile && setHovered(false)}

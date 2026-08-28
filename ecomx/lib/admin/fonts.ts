@@ -1,2 +1,1 @@
-/** @deprecated Import from `@/lib/fonts` instead. */
-export { adminFontClassName, TIMES_FONT_STACK } from "@/lib/fonts";
+export { adminFontClassName, fontCssVariables, FONT_STACK, urbanist } from "@/lib/fonts";

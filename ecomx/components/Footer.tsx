@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
+import { ROUTES } from "@/lib/routes";
+
 export default function Footer() {
   return (
     <footer className="text-white" style={{ background: "#0a1731ff" }}>
@@ -9,9 +13,18 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <div className="mb-0.5 font-display text-[22px] font-bold text-white">
-              Skynet<span className="text-sm text-slate-400">™</span>
-            </div>
+            <Link
+              href={ROUTES.home}
+              className="mb-4 inline-flex transition-opacity hover:opacity-90"
+              aria-label="Skynet Solution home"
+            >
+              <BrandLogo
+                height={54}
+                variant="footer"
+                alt="Skynet Solution"
+                imgClassName="max-w-[220px] sm:max-w-[240px]"
+              />
+            </Link>
             <p className="mb-4 max-w-[200px] text-[13px] md:text-[11.5px] leading-relaxed text-white/45">
               Qatar&apos;s leading POS hardware, ERP software, and IT solutions provider. Trusted by 1,000+ businesses across Qatar.
             </p>

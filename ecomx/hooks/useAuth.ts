@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth.api";
 import { ROLE } from "@/lib/Constant";
 import { AUTH_ROUTES, getPostAuthRedirect, isAdminRole } from "@/lib/config";
-import { getErrorMessage } from "@/lib/utils";
-import { showError } from "@/lib/toast";
+import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
 import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth.types";
 import { authUserToStoreUser } from "@/lib/auth-utils";
@@ -26,14 +25,14 @@ function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
 
 export function useAuth() {
   const router = useRouter();
-  const { user, isHydrated, setAuth, clearAuth, setUser } = useAuthStore();
+  const { user, isHydrated, setAuth, clearAuth, setUser, authError, setAuthError, clearAuthError } =
+    useAuthStore();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const login = useCallback(
     async (payload: LoginPayload, redirectTo?: string | null) => {
       setLoading(true);
-      setError(null);
+      clearAuthError();
       try {
         const res = await authApi.login(payload);
         const { customer, accessToken, refreshToken } = res.data;
@@ -47,21 +46,19 @@ export function useAuth() {
 
         return { user: normalized, storeUser: authUserToStoreUser(normalized) };
       } catch (err) {
-        const msg = getErrorMessage(err, "Login failed");
-        setError(msg);
-        showError(msg);
+        setAuthError(getAuthErrorMessage(err, "login"));
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [router, setAuth]
+    [router, setAuth, setAuthError, clearAuthError]
   );
 
   const register = useCallback(
     async (payload: RegisterPayload, redirectTo?: string | null) => {
       setLoading(true);
-      setError(null);
+      clearAuthError();
       try {
         const res = await authApi.register(payload);
         const { customer, accessToken, refreshToken } = res.data;
@@ -75,15 +72,13 @@ export function useAuth() {
 
         return { user: normalized, storeUser: authUserToStoreUser(normalized) };
       } catch (err) {
-        const msg = getErrorMessage(err, "Registration failed");
-        setError(msg);
-        showError(msg);
+        setAuthError(getAuthErrorMessage(err, "register"));
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [router, setAuth]
+    [router, setAuth, setAuthError, clearAuthError]
   );
 
   const logout = useCallback(async () => {
@@ -125,7 +120,9 @@ export function useAuth() {
     isAdmin: isAdminRole(user?.role),
     isHydrated,
     loading,
-    error,
+    error: authError,
+    setError: setAuthError,
+    clearError: clearAuthError,
     login,
     register,
     logout,

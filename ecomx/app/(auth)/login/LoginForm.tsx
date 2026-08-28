@@ -1,45 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
+import { getSessionExpiredMessage, isAuthSessionReason } from "@/lib/api/auth-errors";
+import AuthFormError from "@/components/auth/AuthFormError";
 import {
   AuthAltActions,
-  AuthError,
   AuthFormField,
   AuthPasswordField,
   AuthShell,
   AuthSubmitButton,
   authInputClass,
 } from "@/components/auth/AuthShell";
-import { getErrorMessage } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
-  const { login, loading, error } = useAuth();
+  const { login, loading, setError, clearError } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [localError, setLocalError] = useState<string | null>(null);
 
   const registerHref = redirectParam
     ? `${AUTH_ROUTES.register}?redirect=${encodeURIComponent(redirectParam)}`
     : AUTH_ROUTES.register;
 
+  useEffect(() => {
+    if (isAuthSessionReason(searchParams.get("reason"))) {
+      setError(getSessionExpiredMessage());
+    }
+  }, [searchParams, setError]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError(null);
+    clearError();
     try {
       await login(form, redirectParam ?? undefined);
-    } catch (err) {
-      setLocalError(getErrorMessage(err, "Login failed"));
+    } catch {
+      // Shown via AuthFormError
     }
   };
 
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to access your admin dashboard and manage your store.">
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
+        <AuthFormError />
+
         <AuthFormField label="Email Address" icon={<Icons.Mail />}>
           <input
             id="email"
@@ -61,8 +68,6 @@ export default function LoginForm() {
           placeholder="Enter your password"
           autoComplete="current-password"
         />
-
-        {(localError || error) && <AuthError message={localError ?? error ?? "Login failed"} />}
 
         <AuthSubmitButton loading={loading} loadingLabel="Signing in…" label="Sign In" />
 

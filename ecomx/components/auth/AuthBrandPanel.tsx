@@ -1,4 +1,5 @@
-import { BarChart3, Layers, ShieldCheck, ShoppingBag } from "lucide-react";
+import { BarChart3, ShieldCheck, ShoppingBag } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 const features = [
   {
@@ -28,16 +29,11 @@ export function AuthBrandPanel() {
         <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:40px_40px]" />
 
         <div className="relative">
-          <div className="mb-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm">
-              <Layers className="h-5 w-5 text-white" strokeWidth={2.25} />
-            </div>
-            <div className="leading-tight">
-              <p className="font-display text-lg font-bold tracking-wide text-white">SKYNET™</p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
-                Management Suite
-              </p>
-            </div>
+          <div className="mb-10">
+            <BrandLogo height={64} variant="light" alt="Skynet Solution" imgClassName="max-w-[240px]" />
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+              Management Suite
+            </p>
           </div>
 
           <h2 className="max-w-[320px] font-display text-[32px] font-bold leading-[1.15] text-white xl:text-[36px]">
@@ -68,11 +64,8 @@ export function AuthBrandPanel() {
       {/* Mobile brand strip */}
       <div className="relative overflow-hidden bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#0f3460] px-6 py-8 text-center lg:hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_60%)]" />
-        <div className="relative mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/10">
-          <Layers className="h-6 w-6 text-white" strokeWidth={2.25} />
-        </div>
-        <p className="relative font-display text-xl font-bold text-white">SKYNET™</p>
-        <p className="relative mt-1 text-xs uppercase tracking-[0.16em] text-white/50">Management Suite</p>
+        <BrandLogo height={56} variant="light" alt="Skynet Solution" className="mx-auto" imgClassName="max-w-[220px]" />
+        <p className="relative mt-3 text-xs uppercase tracking-[0.16em] text-white/50">Management Suite</p>
       </div>
     </>
   );

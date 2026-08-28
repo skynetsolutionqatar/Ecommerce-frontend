@@ -111,13 +111,11 @@ export function getHeroSurfaceStyle(accent: HeroAccent) {
   };
 }
 
-/** Floating orb configs for the new-gen mesh background. */
+/** Floating orb configs — kept to two large orbs for smoother GPU compositing. */
 export function getHeroMeshOrbs(accent: HeroAccent) {
   return [
-    { color: accent.mesh1, size: "min(55vw, 420px)", x: "-8%", y: "-12%", duration: 14, depth: 1 },
-    { color: accent.mesh2, size: "min(48vw, 360px)", x: "72%", y: "58%", duration: 18, depth: -0.6 },
-    { color: accent.mesh3, size: "min(40vw, 300px)", x: "38%", y: "-18%", duration: 16, depth: 0.75 },
-    { color: `${accent.neon}28`, size: "min(32vw, 240px)", x: "8%", y: "68%", duration: 20, depth: -0.45 },
+    { color: accent.mesh1, size: "min(55vw, 420px)", x: "-8%", y: "-12%", duration: 16, depth: 1 },
+    { color: accent.mesh2, size: "min(48vw, 360px)", x: "72%", y: "58%", duration: 20, depth: -0.6 },
   ] as const;
 }
 
@@ -197,13 +195,13 @@ export const HERO_IMAGE_INNER =
   "relative flex h-full w-full items-center justify-center";
 
 export const HERO_SLIDE_MIN_H =
-  "min-h-[400px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[380px]";
+  "min-h-[440px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[380px]";
 
 import { productImageClass } from "./product-image-utils";
 
-/** @deprecated Use productImageClass from product-image-utils */
+/** Hero image sizing — explicit mobile height; desktop fills the right column frame. */
 export function getHeroImageClass(): string {
-  return "h-full w-full max-h-[58%] max-w-[78%] object-contain object-center sm:max-h-[62%] sm:max-w-[82%] md:max-h-[68%] md:max-w-[86%] lg:max-h-[72%] lg:max-w-[88%]";
+  return "h-full w-auto max-h-full max-w-full object-contain object-center";
 }
 
 /** Hero image frame — no multiply here (transform + nested multiply breaks backdrop blending). */

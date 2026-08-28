@@ -151,8 +151,8 @@ export default function OrdersPage({
           <Icons.ChevronLeft /> Back
         </button>
 
-        <div className="mb-8 rounded-3xl bg-footer px-6 py-8 text-white shadow-[0_12px_40px_rgba(0,0,0,0.15)] sm:px-8 sm:py-10">
-          <div className={`mb-2 ${type.eyebrow} text-[13px] md:text-[11px] text-accent`}>
+        <div className="mb-8 rounded-3xl bg-[#0a255dff] px-6 py-8 text-white shadow-[0_12px_40px_rgba(0,0,0,0.15)] sm:px-8 sm:py-10">
+          <div className={`mb-2 ${type.eyebrow} text-[13px] md:text-[11px] text-white/75`}>
             Order History
           </div>
           <h1 className="font-display text-[28px] font-bold sm:text-[32px]">My Orders</h1>
@@ -210,7 +210,7 @@ export default function OrdersPage({
                   onClick={() => handleFilterChange(item.key)}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                     filter === item.key
-                      ? "bg-primary text-white"
+                      ? "bg-[#0a255dff] text-white"
                       : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                   }`}
                 >

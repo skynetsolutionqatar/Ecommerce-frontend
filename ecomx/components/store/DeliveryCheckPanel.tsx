@@ -136,6 +136,7 @@ export default function DeliveryCheckPanel() {
     setChecking(true);
     setMessage(null);
     setIsDeliverable(null);
+    setShowMap(false);
 
     try {
       if (mapLat != null && mapLng != null) {

@@ -18,11 +18,11 @@
   --color-footer: #111827;
   --color-sale: #E53935;
 
-  --font-sans: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-display: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-label: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-heading: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
-  --font-mono: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  --font-sans: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-label: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
   --animate-fade-in: fade-in 0.25s ease;
@@ -112,6 +112,49 @@
   }
 }
 
+@keyframes hero-orb-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes hero-aurora-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes hero-shimmer-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  40% {
+    transform: translateX(220%);
+  }
+
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes hero-beam-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.hero-bg-paused .hero-bg-animate {
+  animation-play-state: paused !important;
+}
+
 @keyframes mega-fade-in {
   from {
     opacity: 0;
@@ -126,7 +169,7 @@
 
 html {
   scroll-behavior: smooth;
-  font-family: "Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif;
+  font-family: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   /* JS overrides --header-height dynamically via Header.tsx */
   --header-height: 136px;
   --header-gap: 12px;

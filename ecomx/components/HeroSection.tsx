@@ -14,7 +14,6 @@ import {
   getHeroMeshOrbs,
   getHeroAuroraGradient,
   getHeroBeamGradient,
-  HERO_NOISE_URL,
   buildHeroSlides,
   HERO_TRUST_BADGES,
   HERO_SLIDE_LABELS,
@@ -44,7 +43,8 @@ const SPRING_SNAPPY = { type: "spring" as const, stiffness: 380, damping: 32 };
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 260, damping: 28 };
 const SPRING_MAGNET = { stiffness: 300, damping: 18, mass: 0.4 };
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
-const SLIDE_TRANSITION: Transition = { duration: 0.6, ease: [0.32, 0.72, 0, 1] };
+const SLIDE_SPRING: Transition = { type: "spring", stiffness: 210, damping: 28, mass: 0.85 };
+const DRAG_SNAP: Transition = { type: "spring", stiffness: 320, damping: 32, mass: 0.75 };
 const INSTANT_TRANSITION: Transition = { duration: 0 };
 
 const contentStagger: Variants = {
@@ -58,7 +58,7 @@ const contentUp: Variants = {
 };
 
 const productEnter: Variants = {
-  hidden: { opacity: 0, x: 56, scale: 1.05 },
+  hidden: { opacity: 1, x: 16, scale: 1.02 },
   show: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] } },
 };
 
@@ -138,28 +138,35 @@ function HeroAtmosphere({
   parallaxX,
   parallaxY,
   spotlight,
+  paused = false,
 }: {
   accent: HeroAccent;
   parallaxX: MotionValue<number>;
   parallaxY: MotionValue<number>;
   spotlight: MotionValue<string>;
+  paused?: boolean;
 }) {
   const orbs = getHeroMeshOrbs(accent);
-  const orbX = useTransform(parallaxX, [-1, 1], [-22, 22]);
-  const orbY = useTransform(parallaxY, [-1, 1], [-14, 14]);
+  const orbX = useTransform(parallaxX, [-1, 1], [-18, 18]);
+  const orbY = useTransform(parallaxY, [-1, 1], [-12, 12]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${paused ? "hero-bg-paused" : ""}`}
+      aria-hidden
+    >
       {orbs.map((orb, i) => (
         <MeshOrb key={`orb-${i}`} orb={orb} orbX={orbX} orbY={orbY} />
       ))}
 
-      {/* Aurora sweep */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 aspect-square w-[130%] opacity-50 blur-2xl"
-        style={{ background: getHeroAuroraGradient(accent), x: "-50%", y: "-50%" }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 44, repeat: Infinity, ease: "linear" }}
+      {/* Aurora sweep — CSS spin keeps this on the compositor thread */}
+      <div
+        className="hero-bg-animate absolute left-1/2 top-1/2 aspect-square w-[130%] opacity-45 blur-xl will-change-transform"
+        style={{
+          background: getHeroAuroraGradient(accent),
+          transform: "translate(-50%, -50%)",
+          animation: "hero-aurora-spin 48s linear infinite",
+        }}
       />
 
       {/* Cursor spotlight */}
@@ -167,7 +174,7 @@ function HeroAtmosphere({
 
       {/* Grid */}
       <div
-        className="absolute inset-0 opacity-[0.45]"
+        className="absolute inset-0 opacity-[0.4]"
         style={{
           backgroundImage: `linear-gradient(${accent.color}0a 1px, transparent 1px), linear-gradient(90deg, ${accent.color}0a 1px, transparent 1px)`,
           backgroundSize: "52px 52px",
@@ -177,21 +184,13 @@ function HeroAtmosphere({
       />
 
       {/* Glass shimmer sweep */}
-      <motion.div
-        className="absolute inset-0 opacity-[0.18]"
+      <div
+        className="hero-bg-animate absolute inset-0 opacity-[0.16] will-change-transform"
         style={{
           background:
-            "linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.6) 50%, transparent 58%)",
-          x: "-120%",
+            "linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.55) 50%, transparent 58%)",
+          animation: "hero-shimmer-sweep 9s ease-in-out infinite",
         }}
-        animate={{ x: ["-120%", "220%"] }}
-        transition={{ duration: 5.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
-      />
-
-      {/* Film grain */}
-      <div
-        className="absolute inset-0 opacity-[0.035] mix-blend-overlay"
-        style={{ backgroundImage: HERO_NOISE_URL, backgroundSize: "180px 180px" }}
       />
 
       {/* Edge vignette */}
@@ -219,19 +218,19 @@ function MeshOrb({
 
   return (
     <motion.div
-      className="absolute rounded-full blur-3xl"
-      style={{
-        width: orb.size,
-        height: orb.size,
-        left: orb.x,
-        top: orb.y,
-        background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
-        x,
-        y,
-      }}
-      animate={{ scale: [1, 1.14, 1.05, 1], opacity: [0.5, 0.78, 0.62, 0.5] }}
-      transition={{ duration: orb.duration, repeat: Infinity, ease: "easeInOut" }}
-    />
+      className="absolute will-change-transform"
+      style={{ left: orb.x, top: orb.y, x, y }}
+    >
+      <div
+        className="hero-bg-animate rounded-full blur-2xl will-change-transform"
+        style={{
+          width: orb.size,
+          height: orb.size,
+          background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+          animation: `hero-orb-breathe ${orb.duration}s ease-in-out infinite`,
+        }}
+      />
+    </motion.div>
   );
 }
 
@@ -361,72 +360,26 @@ function HeroSlidePanel({
   slide,
   index,
   isActive,
-  direction,
-  parallaxX,
-  parallaxY,
-  spotX,
-  spotY,
   onPrimaryAction,
   onViewAll,
 }: {
   slide: HeroSlide;
   index: number;
   isActive: boolean;
-  direction: number;
-  parallaxX: MotionValue<number>;
-  parallaxY: MotionValue<number>;
-  spotX: MotionValue<number>;
-  spotY: MotionValue<number>;
   onPrimaryAction: (slide: HeroSlide) => void;
   onViewAll?: () => void;
 }) {
   const ac = getSlideAccent(index, slide.slideKind);
-  const slideSurface = getHeroSurfaceStyle(ac);
   const badge = getEyebrowBadgeStyle(slide.eyebrow, ac);
   const animateIn = isActive;
-  const slideSpotlight = useMotionTemplate`radial-gradient(340px circle at ${spotX}px ${spotY}px, ${ac.neon}1f, transparent 72%)`;
 
   return (
     <div
-      className={`${HERO_SLIDE_MIN_H} relative grid h-full w-full shrink-0 basis-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:block`}
+      className={`${HERO_SLIDE_MIN_H} relative flex h-full w-full min-w-0 shrink-0 basis-full flex-col overflow-hidden sm:block`}
     >
-      {/* Single unified mesh — full slide, no left/right split */}
-      <div className="pointer-events-none absolute inset-0 z-0" style={slideSurface} aria-hidden />
-      <div className="pointer-events-none absolute inset-0 z-[1]">
-        <HeroAtmosphere
-          accent={ac}
-          parallaxX={parallaxX}
-          parallaxY={parallaxY}
-          spotlight={slideSpotlight}
-        />
-      </div>
-
-      {/* Product floats on the same background — no separate panel */}
-      <motion.div
-        className="pointer-events-none relative order-2 z-[2] flex min-h-[200px] items-center justify-center px-4 pb-2 sm:absolute sm:inset-0 sm:order-none sm:min-h-0 sm:justify-end sm:px-8 sm:pb-0 sm:pl-[42%] md:pl-[40%] lg:pr-12"
-        variants={productEnter}
-        initial="hidden"
-        animate={isActive ? "show" : "hidden"}
-      >
-        <div
-          className={`${HERO_IMAGE_INNER} h-[120px] w-full max-w-[220px] sm:h-[72%] sm:max-w-[240px] md:max-w-[280px] lg:max-w-[320px] xl:max-w-[340px]`}
-        >
-          <StoreImage
-            src={slide.img}
-            alt={formatHeroTitle(slide.title).replace("\n", " ")}
-            priority
-            blend={false}
-            className={getHeroImageClass()}
-            style={{ background: "transparent" }}
-          />
-        </div>
-      </motion.div>
-
-      <HeroTrustBadges isActive={isActive} accent={ac} />
-
-      <div className="relative z-10 order-1 flex items-start px-3 pt-3 sm:absolute sm:inset-0 sm:order-none sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
+      <div className="relative z-10 min-w-0 shrink-0 px-3 pb-1 pt-3 sm:absolute sm:inset-0 sm:flex sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
         <motion.div
-          className="w-full max-w-[380px]"
+          className="w-full min-w-0 max-w-[380px]"
           variants={contentStagger}
           initial="hidden"
           animate={isActive ? "show" : "hidden"}
@@ -539,6 +492,26 @@ function HeroSlidePanel({
           ) : null}
         </motion.div>
       </div>
+
+      <motion.div
+        className="pointer-events-none relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 pt-0 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%]"
+        variants={productEnter}
+        initial={false}
+        animate={isActive ? "show" : "hidden"}
+      >
+        <div className={`${HERO_IMAGE_INNER} flex h-[140px] w-full max-w-[220px] items-center justify-center sm:h-[72%] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[340px] xl:max-w-[360px]`}>
+          <StoreImage
+            src={slide.img}
+            alt={formatHeroTitle(slide.title).replace("\n", " ")}
+            priority
+            blend={false}
+            className={getHeroImageClass()}
+            style={{ background: "transparent", maxHeight: "100%", width: "auto", height: "100%" }}
+          />
+        </div>
+      </motion.div>
+
+      <HeroTrustBadges isActive={isActive} accent={ac} />
     </div>
   );
 }
@@ -546,28 +519,22 @@ function HeroSlidePanel({
 function HeroSkeleton() {
   return (
     <div
-      className={`${HERO_SLIDE_MIN_H} relative grid w-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-2xl bg-[#f8fafc] sm:block md:rounded-3xl`}
+      className={`${HERO_SLIDE_MIN_H} relative flex w-full flex-col overflow-hidden rounded-2xl bg-[#f8fafc] sm:block md:rounded-3xl`}
       style={{ boxShadow: "0 2px 24px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05)" }}
     >
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-40"
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40 animate-shimmer-bar"
         style={{
           background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%)",
         }}
-        animate={{ x: ["-120%", "220%"] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
       />
-      <div className="relative z-10 flex flex-col gap-2 px-4 pt-4 sm:absolute sm:inset-0 sm:max-w-[48%] sm:justify-center sm:px-5 md:max-w-[46%] md:px-8">
+      <div className="relative z-10 shrink-0 px-4 pb-2 pt-4 sm:absolute sm:inset-0 sm:flex sm:max-w-[48%] sm:flex-col sm:justify-center sm:px-5 md:max-w-[46%] md:px-8">
         <div className="h-3 w-24 rounded-full bg-slate-200/80" />
-        <div className="h-8 w-full max-w-sm rounded-lg bg-slate-200/80" />
-        <div className="h-9 w-32 rounded-full bg-slate-200/80" />
+        <div className="mt-2 h-8 w-full max-w-sm rounded-lg bg-slate-200/80" />
+        <div className="mt-2 h-9 w-32 rounded-full bg-slate-200/80" />
       </div>
-      <div className="relative flex min-h-0 items-center justify-center px-4 pb-4 sm:absolute sm:inset-0 sm:pb-0 sm:pl-[44%] md:pl-[42%]">
-        <motion.div
-          className="h-full w-full max-w-[240px] sm:h-[230px] sm:w-[270px] sm:max-w-none md:h-[280px] md:w-[340px]"
-          animate={{ opacity: [0.5, 0.85, 0.5] }}
-          transition={{ duration: 1.6, repeat: Infinity }}
-        />
+      <div className="relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:pb-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%]">
+        <div className="h-[140px] w-full max-w-[220px] animate-pulse rounded-2xl bg-slate-200/60 sm:h-[230px] sm:max-w-[270px] md:h-[280px] md:max-w-[340px]" />
       </div>
     </div>
   );
@@ -590,7 +557,6 @@ export default function HeroSection({
   const trackSlides = useMemo(() => [...slides, slides[0]], [slides]);
 
   const [trackIndex, setTrackIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [instant, setInstant] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -603,31 +569,31 @@ export default function HeroSection({
 
   const displayIndex = trackIndex % SLIDE_COUNT;
   const accent = getSlideAccent(displayIndex, slides[displayIndex]?.slideKind);
+  const heroSurface = getHeroSurfaceStyle(accent);
+  const bgPaused = isDragging || instant;
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const spotX = useMotionValue(-500);
   const spotY = useMotionValue(-500);
   const progress = useMotionValue(0);
-  const parallaxX = useSpring(mx, { stiffness: 140, damping: 22 });
-  const parallaxY = useSpring(my, { stiffness: 140, damping: 22 });
+  const parallaxX = useSpring(mx, { stiffness: 200, damping: 26 });
+  const parallaxY = useSpring(my, { stiffness: 200, damping: 26 });
   const smoothSpotX = useSpring(spotX, { stiffness: 220, damping: 30 });
   const smoothSpotY = useSpring(spotY, { stiffness: 220, damping: 30 });
+  const heroSpotlight = useMotionTemplate`radial-gradient(340px circle at ${smoothSpotX}px ${smoothSpotY}px, ${accent.neon}1f, transparent 72%)`;
 
   const goTo = useCallback((index: number) => {
-    setDirection(index >= trackIndexRef.current ? 1 : -1);
     setInstant(false);
     setTrackIndex(index);
   }, []);
 
   const next = useCallback(() => {
-    setDirection(1);
     setInstant(false);
     setTrackIndex((i) => (i >= SLIDE_COUNT ? SLIDE_COUNT : i + 1));
   }, []);
 
   const prev = useCallback(() => {
-    setDirection(-1);
     setInstant(false);
     setTrackIndex((i) => (i <= 0 ? SLIDE_COUNT - 1 : i - 1));
   }, []);
@@ -641,15 +607,18 @@ export default function HeroSection({
 
   const handleDragEnd = useCallback(
     (_: unknown, info: PanInfo) => {
-      setIsDragging(false);
       const { offset, velocity } = info;
       if (offset.x < -SWIPE_THRESHOLD || velocity.x < -400) {
+        setIsDragging(false);
         next();
         return;
       }
       if (offset.x > SWIPE_THRESHOLD || velocity.x > 400) {
+        setIsDragging(false);
         prev();
+        return;
       }
+      setIsDragging(false);
     },
     [next, prev]
   );
@@ -658,7 +627,7 @@ export default function HeroSection({
 
   useEffect(() => {
     if (trackIndex !== SLIDE_COUNT) return;
-    const id = window.setTimeout(handleTrackComplete, 650);
+    const id = window.setTimeout(handleTrackComplete, 850);
     return () => window.clearTimeout(id);
   }, [trackIndex, handleTrackComplete]);
 
@@ -724,12 +693,14 @@ export default function HeroSection({
         transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
       >
         {/* Animated gradient border */}
-        <div className="relative overflow-hidden rounded-[18px] p-[1.5px] md:rounded-[26px]">
-          <motion.div
-            className="absolute left-1/2 top-1/2 aspect-square w-[160%]"
-            style={{ background: getHeroBeamGradient(accent), opacity: 0.55, x: "-50%", y: "-50%" }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+        <div className={`relative overflow-hidden rounded-[18px] p-[1.5px] md:rounded-[26px] ${bgPaused ? "hero-bg-paused" : ""}`}>
+          <div
+            className="hero-bg-animate absolute left-1/2 top-1/2 aspect-square w-[160%] opacity-55 will-change-transform"
+            style={{
+              background: getHeroBeamGradient(accent),
+              transform: "translate(-50%, -50%)",
+              animation: "hero-beam-spin 10s linear infinite",
+            }}
           />
 
           <motion.div
@@ -779,28 +750,41 @@ export default function HeroSection({
             </AnimatePresence> */}
 
             <div className={`relative min-h-0 flex-1 overflow-hidden ${HERO_SLIDE_MIN_H}`}>
+              {/* One shared background — avoids 5× duplicated blur animations while sliding */}
+              <div
+                className={`pointer-events-none absolute inset-0 z-0 ${bgPaused ? "hero-bg-paused" : ""}`}
+                style={heroSurface}
+                aria-hidden
+              />
+              <div className="pointer-events-none absolute inset-0 z-[1]">
+                <HeroAtmosphere
+                  accent={accent}
+                  parallaxX={parallaxX}
+                  parallaxY={parallaxY}
+                  spotlight={heroSpotlight}
+                  paused={bgPaused}
+                />
+              </div>
+
               <motion.div
-                className="flex h-full min-h-[inherit] w-full cursor-grab active:cursor-grabbing"
+                className="relative z-10 flex h-full min-h-[inherit] w-full min-w-0 cursor-grab touch-pan-y active:cursor-grabbing will-change-transform"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.14}
+                dragElastic={0.22}
+                dragMomentum={false}
+                dragTransition={DRAG_SNAP}
                 onDragStart={() => setIsDragging(true)}
                 onDragEnd={handleDragEnd}
                 animate={{ x: `-${trackIndex * 100}%` }}
-                transition={instant || isDragging ? INSTANT_TRANSITION : SLIDE_TRANSITION}
+                transition={instant ? INSTANT_TRANSITION : SLIDE_SPRING}
                 onAnimationComplete={handleTrackComplete}
               >
                 {trackSlides.map((s, i) => (
-                  <div key={`track-${i}`} className="flex h-full min-h-[inherit] w-full shrink-0 basis-full">
+                  <div key={`track-${i}`} className="flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full">
                     <HeroSlidePanel
                       slide={s}
                       index={i < SLIDE_COUNT ? i : 0}
                       isActive={trackIndex === i}
-                      direction={direction}
-                      parallaxX={parallaxX}
-                      parallaxY={parallaxY}
-                      spotX={smoothSpotX}
-                      spotY={smoothSpotY}
                       onPrimaryAction={handlePrimaryAction}
                       onViewAll={onViewAll}
                     />

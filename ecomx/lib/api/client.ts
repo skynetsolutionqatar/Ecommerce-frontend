@@ -1,7 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { API_CONFIG, TOKEN_KEYS } from "@/lib/config";
-import { HTTP_STATUS } from "@/lib/Constant";
-import { showError } from "@/lib/toast";
+import { API_CONFIG, AUTH_ROUTES, TOKEN_KEYS } from "@/lib/config";
+import { AUTH_PATH, HTTP_STATUS } from "@/lib/Constant";
+import {
+  AUTH_SESSION_REASON,
+  shouldSkipAuthRefresh,
+} from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
 import type { ApiResponse } from "@/types/api.types";
 import type { AuthTokens } from "@/types/auth.types";
@@ -73,6 +76,10 @@ apiClient.interceptors.response.use(
     const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === HTTP_STATUS.UNAUTHORIZED && original && !original._retry) {
+      if (shouldSkipAuthRefresh(original.url)) {
+        return Promise.reject(error);
+      }
+
       original._retry = true;
 
       refreshPromise ??= refreshAccessToken().finally(() => {
@@ -86,7 +93,14 @@ apiClient.interceptors.response.use(
       }
 
       if (typeof window !== "undefined") {
-        showError("Session expired. Please sign in again.");
+        const path = window.location.pathname;
+        const onAuthPage = path === AUTH_PATH.LOGIN || path === AUTH_PATH.REGISTER;
+        if (!onAuthPage) {
+          const redirect = encodeURIComponent(`${path}${window.location.search}`);
+          window.location.replace(
+            `${AUTH_ROUTES.login}?reason=${AUTH_SESSION_REASON}&redirect=${redirect}`
+          );
+        }
       }
     }
 

@@ -1,14 +1,23 @@
-/** App-wide Times New Roman stack — storefront + admin. */
-export const TIMES_FONT_STACK =
-  '"Times New Roman", Times, "Liberation Serif", "Nimbus Roman No9 L", serif';
+import { Urbanist } from "next/font/google";
 
-export const timesFontVariables = {
-  sans: TIMES_FONT_STACK,
-  display: TIMES_FONT_STACK,
-  label: TIMES_FONT_STACK,
-  heading: TIMES_FONT_STACK,
-  mono: TIMES_FONT_STACK,
+/** Matches skynet.com — used across storefront, auth, and admin. */
+export const urbanist = Urbanist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-urbanist",
+  display: "swap",
+});
+
+export const FONT_STACK =
+  'var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+export const fontCssVariables = {
+  sans: FONT_STACK,
+  display: FONT_STACK,
+  label: FONT_STACK,
+  heading: FONT_STACK,
+  mono: FONT_STACK,
 } as const;
 
-/** Legacy admin import — no next/font class names needed for system Times. */
-export const adminFontClassName = "";
+/** @deprecated Use urbanist.className */
+export const adminFontClassName = urbanist.className;

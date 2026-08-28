@@ -3,6 +3,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import QueryProvider from "@/components/QueryProvider";
 import AuthInitializer from "@/components/AuthInitializer";
 import { getClientConfig } from "@/config/clients";
+import { urbanist } from "@/lib/fonts";
 import { themeToCssProperties } from "@/lib/theme-css";
 import "./globals.css";
 
@@ -27,11 +28,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full"
+      className={`h-full ${urbanist.variable}`}
       data-client={client.id}
       style={themeToCssProperties(client.theme)}
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden font-sans antialiased" style={{ background: "#f1f3f6" }}>
+      <body
+        className={`${urbanist.className} flex min-h-full flex-col overflow-x-hidden font-sans antialiased`}
+        style={{ background: "#f1f3f6" }}
+      >
         <QueryProvider>
           <AuthInitializer>
             <ThemeProvider clientId={client.id}>{children}</ThemeProvider>

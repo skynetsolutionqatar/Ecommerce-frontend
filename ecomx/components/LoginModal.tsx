@@ -6,7 +6,9 @@ import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 import { isAdminRole } from "@/lib/config";
-import { getErrorMessage, getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
+import { getAuthErrorMessage } from "@/lib/api/auth-errors";
+import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
+import AuthFormError from "@/components/auth/AuthFormError";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
@@ -38,7 +40,7 @@ export default function LoginModal({
   user,
 }: LoginModalProps) {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, loading, clearError, setError } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = isAdminRole(authUser?.role);
@@ -46,10 +48,13 @@ export default function LoginModal({
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
+
+  const switchMode = (next: AuthMode) => {
+    clearError();
+    setMode(next);
+  };
 
   if (!open) return null;
 
@@ -57,8 +62,7 @@ export default function LoginModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    clearError();
 
     try {
       let storeUser: StoreUser;
@@ -67,7 +71,6 @@ export default function LoginModal({
         const validationError = getRegisterFieldError(form);
         if (validationError) {
           setError(validationError);
-          setLoading(false);
           return;
         }
 
@@ -85,7 +88,6 @@ export default function LoginModal({
         const result = await login({ email: form.email, password: form.password }, null);
         storeUser = { ...result.storeUser, avatarUrl: avatarPreview ?? result.storeUser.avatarUrl };
       } else {
-        setLoading(false);
         return;
       }
 
@@ -96,12 +98,10 @@ export default function LoginModal({
         onClose();
         setForm({ name: "", email: "", phone: "", password: "" });
         setAvatarPreview(undefined);
-        setMode("login");
+        switchMode("login");
       }, 1400);
     } catch (err) {
-      setError(getErrorMessage(err, "Authentication failed"));
-    } finally {
-      setLoading(false);
+      setError(getAuthErrorMessage(err, mode === "register" ? "register" : "login"));
     }
   };
 
@@ -163,7 +163,7 @@ export default function LoginModal({
           {mode === "forgot" && (
             <button
               type="button"
-              onClick={() => setMode("login")}
+              onClick={() => switchMode("login")}
               className="absolute left-4 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-lg text-white backdrop-blur-sm transition-colors hover:bg-white/20"
               title="Back to Sign In"
             >
@@ -215,7 +215,7 @@ export default function LoginModal({
                     key={tab}
                     type="button"
                     onClick={() => {
-                      setMode(tab);
+                      switchMode(tab);
                       setError(null);
                     }}
                     className={`flex-1 rounded-lg py-2 text-xs font-bold uppercase tracking-wide transition-all ${
@@ -288,6 +288,8 @@ export default function LoginModal({
           ) : (
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-4">
+                <AuthFormError />
+
                 {mode === "register" && (
                   <FormField label="Full Name" icon={<Icons.User />}>
                     <input
@@ -364,20 +366,11 @@ export default function LoginModal({
                   <div className="-mt-1 text-right">
                     <button
                       type="button"
-                      onClick={() => setMode("forgot")}
+                      onClick={() => switchMode("forgot")}
                       className="cursor-pointer border-0 bg-transparent text-sm md:text-xs font-bold text-[#0a255d] hover:underline"
                     >
                       Forgot password?
                     </button>
-                  </div>
-                )}
-
-                {error && (
-                  <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm md:text-xs font-semibold text-red-700">
-                    <span className="mt-0.5 flex h-5 w-5 md:h-4 md:w-4 shrink-0 items-center justify-center rounded-full bg-red-100 text-[12px] md:text-[10px]">
-                      !
-                    </span>
-                    {error}
                   </div>
                 )}
 
@@ -433,7 +426,7 @@ export default function LoginModal({
                     Remember your password?{" "}
                     <button
                       type="button"
-                      onClick={() => setMode("login")}
+                      onClick={() => switchMode("login")}
                       className="cursor-pointer border-0 bg-transparent font-bold text-[#0a255d] hover:underline"
                     >
                       Sign In
