@@ -110,6 +110,8 @@ export interface DashboardData {
   recentTransactions: DashboardTableSection<DashboardTransaction>;
   recentOrders: DashboardTableSection<DashboardOrder>;
   lowStock: DashboardTableSection<DashboardLowStockItem>;
+  utmSourceReport: { title: string; description: string; items: CategoryChartItem[] };
+  utmCampaignReport: { title: string; description: string; points: ChartPoint[] };
 }
 
 export interface DashboardQueryParams {

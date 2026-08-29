@@ -12,6 +12,7 @@ import { tw, type } from "@/lib/theme";
 import { showError, showSuccess } from "@/lib/toast";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
+import { getStoredAttribution } from "@/lib/utm";
 import {
   clearDeliverySelection,
   hasVerifiedDeliverySelection,
@@ -475,6 +476,7 @@ export default function CheckoutPage({
 
     setPlacing(true);
     try {
+      const attribution = getStoredAttribution();
       const orderNumber = await onPlaceOrder({
         deliveryAddress: {
           fullName: form.fullName.trim(),
@@ -486,6 +488,10 @@ export default function CheckoutPage({
           country: selectedCountry?.name ?? "Qatar",
         },
         paymentMethod: "cash_on_delivery",
+        attribution,
+        utm_source: attribution.utm_source,
+        utm_medium: attribution.utm_medium,
+        utm_campaign: attribution.utm_campaign,
       });
       saveCheckoutAddress(form);
       router.push(`${ROUTES.orders}?placed=${encodeURIComponent(orderNumber)}`);

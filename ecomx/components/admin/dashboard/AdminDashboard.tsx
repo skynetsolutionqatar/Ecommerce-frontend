@@ -145,6 +145,25 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
+        <section className="grid gap-4 lg:grid-cols-2">
+          <Suspense fallback={<ChartFallback />}>
+            <LabeledPieChart
+              title={data.utmSourceReport.title}
+              description={data.utmSourceReport.description}
+              items={data.utmSourceReport.items}
+            />
+          </Suspense>
+          <Suspense fallback={<ChartFallback />}>
+            <CategoryBarChart
+              title={data.utmCampaignReport.title}
+              description={data.utmCampaignReport.description}
+              points={data.utmCampaignReport.points}
+              valueLabel="Orders"
+              formatValue={(value) => value.toLocaleString()}
+            />
+          </Suspense>
+        </section>
+
         <RecentOrdersTable
           title={data.recentOrders.title}
           viewAllLabel={data.recentOrders.viewAllLabel}

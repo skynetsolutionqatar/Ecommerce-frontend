@@ -679,7 +679,7 @@ export default function Sidebar({
           <BrandLogo
             height={isExpanded ? 60 : 46}
             alt="Skynet Solution"
-            imgClassName={isExpanded ? "max-w-[188px]" : "max-w-[46px] object-center"}
+            imgClassName={isExpanded ? "max-w-[200px]" : "max-w-[46px] object-center"}
           />
         </Link>
         {mobile ? (

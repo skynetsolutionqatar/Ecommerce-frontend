@@ -1,7 +1,17 @@
 import type { OrderStatus } from "@/lib/Constant";
 import type { PaginationParams } from "@/types/api.types";
+import type { UTMAttribution } from "@/lib/utm";
 
-export type { OrderStatus };
+export type { OrderStatus, UTMAttribution };
+
+export interface OrderAttribution {
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_term?: string;
+  utm_content?: string;
+  capturedAt?: string;
+}
 
 export interface OrderItem {
   productId: string;
@@ -58,6 +68,7 @@ export interface ApiOrder {
   adminNote?: string;
   statusHistory?: OrderStatusHistoryEntry[];
   notes?: string;
+  attribution?: OrderAttribution;
   createdAt: string;
   updatedAt?: string;
   deliveredAt?: string;
@@ -101,6 +112,10 @@ export interface PlaceOrderPayload {
   customerNote?: string;
   couponCode?: string;
   notes?: string;
+  attribution?: UTMAttribution;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export function orderTotal(order: ApiOrder): number {

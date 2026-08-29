@@ -26,15 +26,25 @@ interface CategoryBarChartProps {
   title: string;
   description?: string;
   points: ChartPoint[];
+  valueLabel?: string;
+  formatValue?: (value: number) => string;
 }
 
 interface CategoryBarBodyProps {
   chartData: { category: string; revenue: number }[];
   height: number;
   maxBarSize?: number;
+  valueLabel: string;
+  formatValue: (value: number) => string;
 }
 
-function CategoryBarBody({ chartData, height, maxBarSize = 40 }: CategoryBarBodyProps) {
+function CategoryBarBody({
+  chartData,
+  height,
+  maxBarSize = 40,
+  valueLabel,
+  formatValue,
+}: CategoryBarBodyProps) {
   return (
     <ChartContainer height={height}>
       <BarChart data={chartData} margin={{ ...chartMargin, left: 4, bottom: 4 }}>
@@ -56,7 +66,10 @@ function CategoryBarBody({ chartData, height, maxBarSize = 40 }: CategoryBarBody
           tickFormatter={formatChartAxis}
           width={44}
         />
-        <Tooltip formatter={(value) => [formatPrice(Number(value)), "Revenue"]} {...tooltipStyle} />
+        <Tooltip
+          formatter={(value) => [formatValue(Number(value)), valueLabel]}
+          {...tooltipStyle}
+        />
         <Bar
           dataKey="revenue"
           fill={CHART_COLORS.tertiary}
@@ -68,13 +81,21 @@ function CategoryBarBody({ chartData, height, maxBarSize = 40 }: CategoryBarBody
   );
 }
 
-function CategoryBarChart({ title, description, points }: CategoryBarChartProps) {
+function CategoryBarChart({
+  title,
+  description,
+  points,
+  valueLabel = "Revenue",
+  formatValue = formatPrice,
+}: CategoryBarChartProps) {
   const [expanded, setExpanded] = useState(false);
 
   const chartData = useMemo(
     () => points.map((p) => ({ category: p.label, revenue: p.value })),
     [points]
   );
+
+  const bodyProps = { chartData, valueLabel, formatValue };
 
   return (
     <>
@@ -84,7 +105,7 @@ function CategoryBarChart({ title, description, points }: CategoryBarChartProps)
         onExpand={() => setExpanded(true)}
         className="h-full"
       >
-        <CategoryBarBody chartData={chartData} height={240} />
+        <CategoryBarBody {...bodyProps} height={240} />
       </DashboardCard>
 
       <ChartExpandDialog
@@ -93,7 +114,7 @@ function CategoryBarChart({ title, description, points }: CategoryBarChartProps)
         title={title}
         description={description}
       >
-        <CategoryBarBody chartData={chartData} height={420} maxBarSize={56} />
+        <CategoryBarBody {...bodyProps} height={420} maxBarSize={56} />
       </ChartExpandDialog>
     </>
   );

@@ -21,6 +21,7 @@ const TABS = [
   { key: "summary", label: "Summary" },
   { key: "items", label: "Items" },
   { key: "shipping", label: "Shipping" },
+  { key: "attribution", label: "Attribution" },
 ];
 
 export default function AdminOrderDetailPage({
@@ -216,6 +217,39 @@ export default function AdminOrderDetailPage({
             <ViewField label="Address" value={address.line1} />
             <ViewField label="City" value={address.city} />
             <ViewField label="Country" value={address.country} />
+          </div>
+        </ViewSection>
+
+        <ViewSection id="attribution" title="Marketing Attribution">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <ViewField
+              label="UTM Source"
+              value={order.attribution?.utm_source ?? "direct"}
+            />
+            <ViewField
+              label="UTM Medium"
+              value={order.attribution?.utm_medium || "—"}
+            />
+            <ViewField
+              label="UTM Campaign"
+              value={order.attribution?.utm_campaign || "—"}
+            />
+            <ViewField
+              label="UTM Term"
+              value={order.attribution?.utm_term || "—"}
+            />
+            <ViewField
+              label="UTM Content"
+              value={order.attribution?.utm_content || "—"}
+            />
+            <ViewField
+              label="Captured At"
+              value={
+                order.attribution?.capturedAt
+                  ? formatDateTime(order.attribution.capturedAt)
+                  : "—"
+              }
+            />
           </div>
         </ViewSection>
       </div>
