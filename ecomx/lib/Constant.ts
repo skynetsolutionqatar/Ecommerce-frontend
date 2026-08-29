@@ -158,6 +158,11 @@ export const ROUTE_PREFIX = {
   ADMIN: "/admin",
 } as const;
 
+/** Paths that belong to the admin app (session expiry redirects here only). */
+export function isAdminAppPath(pathname: string): boolean {
+  return pathname.startsWith(ROUTE_PREFIX.ADMIN);
+}
+
 /** Auth page paths */
 export const AUTH_PATH = {
   LOGIN: "/login",

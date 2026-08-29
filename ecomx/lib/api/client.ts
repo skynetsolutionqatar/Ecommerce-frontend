@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_CONFIG, AUTH_ROUTES, TOKEN_KEYS } from "@/lib/config";
-import { AUTH_PATH, HTTP_STATUS } from "@/lib/Constant";
+import { AUTH_PATH, HTTP_STATUS, isAdminAppPath } from "@/lib/Constant";
 import {
   AUTH_SESSION_REASON,
   shouldSkipAuthRefresh,
@@ -95,7 +95,9 @@ apiClient.interceptors.response.use(
       if (typeof window !== "undefined") {
         const path = window.location.pathname;
         const onAuthPage = path === AUTH_PATH.LOGIN || path === AUTH_PATH.REGISTER;
-        if (!onAuthPage) {
+
+        // Store shoppers: clear session silently — login is only prompted at checkout.
+        if (!onAuthPage && isAdminAppPath(path)) {
           const redirect = encodeURIComponent(`${path}${window.location.search}`);
           window.location.replace(
             `${AUTH_ROUTES.login}?reason=${AUTH_SESSION_REASON}&redirect=${redirect}`

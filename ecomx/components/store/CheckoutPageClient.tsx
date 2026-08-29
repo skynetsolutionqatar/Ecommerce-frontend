@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import CheckoutPage from "@/components/CheckoutPage";
 import { useStore } from "@/components/StoreProvider";
 import { useRouter } from "next/navigation";
@@ -14,17 +14,12 @@ export default function CheckoutPageClient() {
   const router = useRouter();
   const { cart, setLoginOpen, refreshCart } = useStore();
   const { place } = useMyOrderMutations();
-  const isHydrated = useAuthStore((s) => s.isHydrated);
   const isLoggedIn = useAuthStore(selectIsAuthenticated);
   const user = useAuthStore((s) => s.user);
 
   const initialContact = user
     ? { fullName: user.name, email: user.email, phone: user.phone ?? "" }
     : undefined;
-
-  useEffect(() => {
-    if (isHydrated && !isLoggedIn) setLoginOpen(true);
-  }, [isHydrated, isLoggedIn, setLoginOpen]);
 
   const handlePlaceOrder = useCallback(
     async (payload: PlaceOrderPayload) => {

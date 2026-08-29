@@ -82,13 +82,18 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
+    const wasAdmin = isAdminRole(useAuthStore.getState().user?.role);
     try {
       await authApi.logout();
     } catch {
       // ignore — clear local state regardless
     } finally {
       clearAuth();
-      router.push(AUTH_ROUTES.login);
+      if (wasAdmin) {
+        router.push(AUTH_ROUTES.login);
+      } else {
+        router.replace("/");
+      }
     }
   }, [clearAuth, router]);
 

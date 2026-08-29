@@ -43,8 +43,19 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isAuthRoute && isAuthenticated && isAdmin) {
-    return NextResponse.redirect(new URL(`${ROUTE_PREFIX.ADMIN}/dashboard`, request.url));
+  if (isAuthRoute && !isAuthenticated) {
+    const redirect = request.nextUrl.searchParams.get("redirect");
+    if (redirect && !redirect.startsWith(ROUTE_PREFIX.ADMIN)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (isAuthRoute && isAuthenticated) {
+    if (isAdmin) {
+      return NextResponse.redirect(new URL(`${ROUTE_PREFIX.ADMIN}/dashboard`, request.url));
+    }
+    // Store customers must not see admin login/register pages
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

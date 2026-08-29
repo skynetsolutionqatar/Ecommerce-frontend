@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import OrdersPage from "@/components/Orders";
 import { useStore } from "@/components/StoreProvider";
 import { useRouter } from "next/navigation";
@@ -12,10 +11,6 @@ export default function OrdersPageClient() {
   const { setLoginOpen } = useStore();
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const isLoggedIn = useAuthStore(selectIsAuthenticated);
-
-  useEffect(() => {
-    if (isHydrated && !isLoggedIn) setLoginOpen(true);
-  }, [isHydrated, isLoggedIn, setLoginOpen]);
 
   return (
     <OrdersPage
