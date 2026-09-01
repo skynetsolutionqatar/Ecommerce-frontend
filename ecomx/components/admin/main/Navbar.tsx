@@ -6,6 +6,7 @@ import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
 import LiveClock from "@/components/admin/main/LiveClock";
 import { adminSections } from "@/components/admin/utils/SideSection";
+import { colors } from "@/components/admin/utils/Colors";
 import { adminType } from "@/lib/admin/typography";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
@@ -33,19 +34,19 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   }, []);
 
   return (
-    <header className="relative z-[100] flex w-full min-w-0 items-center justify-between gap-2 border-b border-border bg-card px-3 py-2 sm:px-4 md:px-6">
+    <header className={`admin-navbar-primary relative z-[100] flex h-16 w-full min-w-0 items-center justify-between gap-2 px-3 sm:px-4 md:px-6 ${colors.mainColor} text-white`}>
       <div className="flex min-w-0 flex-1 items-center gap-2 md:max-w-2xl lg:w-2/5">
         {onMenuClick ? (
           <button
             type="button"
             onClick={onMenuClick}
             aria-label="Open menu"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:bg-muted/60 md:hidden"
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition md:hidden ${colors.navSurface}`}
           >
             <Menu size={20} />
           </button>
         ) : null}
-        <CommandSearch sections={adminSections} />
+        <CommandSearch sections={adminSections} tone="primary" />
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
@@ -53,16 +54,16 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           <LiveClock />
         </div>
 
-        <AdminThemeToggle />
+        <AdminThemeToggle tone="primary" />
 
-        <NotificationBell />
+        <NotificationBell tone="primary" />
 
         <div
           ref={dropdownRef}
           className="relative flex cursor-pointer items-center"
           onClick={() => setOpen(!open)}
         >
-          <User className="mb-1 h-6 w-6 rounded-full border-2 border-muted-foreground text-muted-foreground" />
+          <User className={`mb-1 h-6 w-6 rounded-full border-2 ${colors.navIcon} ${colors.navIconBorder}`} />
 
           {open && (
             <div className="absolute right-0 top-12 z-[110] w-56 rounded-xl border border-border bg-card shadow-lg">

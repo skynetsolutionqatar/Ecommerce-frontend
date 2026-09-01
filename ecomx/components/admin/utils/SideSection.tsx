@@ -82,7 +82,7 @@ export const adminSections: AdminMenuSection[] = [
     items: [
       {
         name: "General Settings",
-        icon: <Boxes size={18} />,
+        icon: <Settings size={18} />,
         subMenu: [
           // { name: "Tenants", path: ADMIN_ROUTES.tenants, icon: <Settings size={16} /> },
         ],

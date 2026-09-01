@@ -39,37 +39,47 @@ const AUTO_MS = 5500;
 const SLIDE_COUNT = 4;
 const SWIPE_THRESHOLD = 48;
 
+const SLIDE_EASE = [0.32, 0.72, 0, 1] as const;
+const SLIDE_DURATION = 2.5;
+
 const SPRING_SNAPPY = { type: "spring" as const, stiffness: 380, damping: 32 };
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 260, damping: 28 };
 const SPRING_MAGNET = { stiffness: 300, damping: 18, mass: 0.4 };
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
-const SLIDE_SPRING: Transition = { type: "spring", stiffness: 210, damping: 28, mass: 0.85 };
-const DRAG_SNAP: Transition = { type: "spring", stiffness: 320, damping: 32, mass: 0.75 };
+const SLIDE_TRANSITION: Transition = { duration: SLIDE_DURATION, ease: SLIDE_EASE };
+const HERO_THEME_TRANSITION: Transition = { duration: SLIDE_DURATION, ease: SLIDE_EASE };
+const DRAG_SNAP: Transition = { type: "spring", stiffness: 180, damping: 32, mass: 0.95 };
 const INSTANT_TRANSITION: Transition = { duration: 0 };
+const HERO_BG_CSS_TRANSITION = `background-color ${SLIDE_DURATION}s cubic-bezier(0.32, 0.72, 0, 1), background-image ${SLIDE_DURATION}s cubic-bezier(0.32, 0.72, 0, 1)`;
 
 const contentStagger: Variants = {
   hidden: { opacity: 0 },
+  idle: { opacity: 1 },
   show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.06 } },
 };
 
 const contentUp: Variants = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT_EXPO } },
+  hidden: { opacity: 0, y: 18 },
+  idle: { opacity: 1, y: 0 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_OUT_EXPO } },
 };
 
 const productEnter: Variants = {
-  hidden: { opacity: 1, x: 16, scale: 1.02 },
-  show: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] } },
+  hidden: { opacity: 0, x: 10, scale: 0.98 },
+  idle: { opacity: 1, x: 0, scale: 1 },
+  show: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.7, ease: EASE_OUT_EXPO } },
 };
 
 const trustStagger: Variants = {
   hidden: { opacity: 0 },
+  idle: { opacity: 1 },
   show: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
 };
 
 const trustUp: Variants = {
-  hidden: { opacity: 0, y: 16, filter: "blur(4px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: SPRING_SMOOTH },
+  hidden: { opacity: 0, y: 12 },
+  idle: { opacity: 1, y: 0 },
+  show: { opacity: 1, y: 0, transition: SPRING_SMOOTH },
 };
 
 /** Counts up to the target price whenever the slide becomes active. */
@@ -166,6 +176,7 @@ function HeroAtmosphere({
           background: getHeroAuroraGradient(accent),
           transform: "translate(-50%, -50%)",
           animation: "hero-aurora-spin 48s linear infinite",
+          transition: HERO_BG_CSS_TRANSITION,
         }}
       />
 
@@ -228,6 +239,7 @@ function MeshOrb({
           height: orb.size,
           background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
           animation: `hero-orb-breathe ${orb.duration}s ease-in-out infinite`,
+          transition: HERO_BG_CSS_TRANSITION,
         }}
       />
     </motion.div>
@@ -238,8 +250,8 @@ function HeroTrustBadges({ isActive, accent }: { isActive: boolean; accent: Hero
   return (
     <motion.div
       className="absolute bottom-2 right-2 z-30 hidden flex-col gap-1.5 md:bottom-4 md:right-4 md:flex"
-      initial="hidden"
-      animate={isActive ? "show" : "hidden"}
+      initial={isActive ? "hidden" : false}
+      animate={isActive ? "show" : "idle"}
       variants={trustStagger}
     >
       {HERO_TRUST_BADGES.map((b) => (
@@ -381,8 +393,8 @@ function HeroSlidePanel({
         <motion.div
           className="w-full min-w-0 max-w-[380px]"
           variants={contentStagger}
-          initial="hidden"
-          animate={isActive ? "show" : "hidden"}
+          initial={isActive ? "hidden" : false}
+          animate={isActive ? "show" : "idle"}
         >
           <motion.div className="mb-2 flex items-center gap-1.5" variants={contentUp}>
             <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
@@ -496,8 +508,8 @@ function HeroSlidePanel({
       <motion.div
         className="pointer-events-none relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 pt-0 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%]"
         variants={productEnter}
-        initial={false}
-        animate={isActive ? "show" : "hidden"}
+        initial={isActive ? "hidden" : false}
+        animate={isActive ? "show" : "idle"}
       >
         <div className={`${HERO_IMAGE_INNER} flex h-[140px] w-full max-w-[220px] items-center justify-center sm:h-[72%] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[340px] xl:max-w-[360px]`}>
           <StoreImage
@@ -627,7 +639,7 @@ export default function HeroSection({
 
   useEffect(() => {
     if (trackIndex !== SLIDE_COUNT) return;
-    const id = window.setTimeout(handleTrackComplete, 850);
+    const id = window.setTimeout(handleTrackComplete, SLIDE_DURATION * 1000 + 40);
     return () => window.clearTimeout(id);
   }, [trackIndex, handleTrackComplete]);
 
@@ -700,14 +712,16 @@ export default function HeroSection({
               background: getHeroBeamGradient(accent),
               transform: "translate(-50%, -50%)",
               animation: "hero-beam-spin 10s linear infinite",
+              transition: HERO_BG_CSS_TRANSITION,
             }}
           />
 
           <motion.div
             className="group relative flex w-full flex-col overflow-hidden rounded-[17px] md:rounded-[25px]"
-            style={{
+            animate={{
               boxShadow: `0 18px 50px -12px ${accent.glow}, 0 2px 8px rgba(15,23,42,0.06)`,
             }}
+            transition={{ boxShadow: HERO_THEME_TRANSITION }}
             onMouseMove={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               mx.set((e.clientX - r.left - r.width / 2) / (r.width / 2));
@@ -753,7 +767,7 @@ export default function HeroSection({
               {/* One shared background — avoids 5× duplicated blur animations while sliding */}
               <div
                 className={`pointer-events-none absolute inset-0 z-0 ${bgPaused ? "hero-bg-paused" : ""}`}
-                style={heroSurface}
+                style={{ ...heroSurface, transition: HERO_BG_CSS_TRANSITION }}
                 aria-hidden
               />
               <div className="pointer-events-none absolute inset-0 z-[1]">
@@ -770,13 +784,13 @@ export default function HeroSection({
                 className="relative z-10 flex h-full min-h-[inherit] w-full min-w-0 cursor-grab touch-pan-y active:cursor-grabbing will-change-transform"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.22}
+                dragElastic={0.1}
                 dragMomentum={false}
                 dragTransition={DRAG_SNAP}
                 onDragStart={() => setIsDragging(true)}
                 onDragEnd={handleDragEnd}
                 animate={{ x: `-${trackIndex * 100}%` }}
-                transition={instant ? INSTANT_TRANSITION : SLIDE_SPRING}
+                transition={instant ? INSTANT_TRANSITION : SLIDE_TRANSITION}
                 onAnimationComplete={handleTrackComplete}
               >
                 {trackSlides.map((s, i) => (

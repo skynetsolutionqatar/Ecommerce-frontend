@@ -571,7 +571,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { adminSections, type AdminMenuItem } from "../utils/SideSection";
-import BrandLogo from "@/components/BrandLogo";
 import { adminType } from "@/lib/admin/typography";
 import { colors } from "../utils/Colors";
 import { ADMIN_ROUTES } from "@/lib/config";
@@ -657,44 +656,49 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-500 ${
+      className={`flex h-screen flex-col border-r ${colors.sidebarBorder} ${colors.mainColor} text-white transition-all duration-500 ${
         mobile ? "w-[min(280px,85vw)]" : ""
       }`}
     >
       {/* Header */}
       <div
         className={`${
-          mobile ? "w-full" : collapsed ? "w-16" : "w-56"
-        } flex items-center justify-between gap-2 px-3 py-4 transition-all duration-500 ${
-          collapsed && !mobile ? "flex-col gap-3 px-2" : ""
+          mobile ? "w-full" : collapsed ? "w-[4.5rem]" : "w-56"
+        } flex shrink-0 items-center justify-between gap-2 px-3 transition-all duration-500 ${
+          collapsed && !mobile ? "flex-col gap-2 py-2" : "h-16 py-0"
         }`}
       >
         <Link
           href={ADMIN_ROUTES.dashboard}
           onClick={handleNavigate}
-          className={`flex min-w-0 flex-1 items-center border-0 bg-transparent p-0 no-underline ${adminType.sidebarBrand} ${
+          className={`flex min-w-0 flex-1 items-center border-0 bg-transparent p-0 no-underline ${
             collapsed && !mobile ? "justify-center" : ""
           }`}
         >
-          <BrandLogo
-            height={isExpanded ? 60 : 46}
-            alt="Skynet Solution"
-            imgClassName={isExpanded ? "max-w-[200px]" : "max-w-[46px] object-center"}
-          />
+          {isExpanded ? (
+            <div className="min-w-0 leading-tight">
+              <p className={`text-sm font-bold tracking-wide ${colors.sidebarBrand}`}>Skynet™</p>
+              <p className={`text-[10px] font-medium uppercase tracking-wider ${colors.sidebarBrandSub}`}>
+                Management Suite
+              </p>
+            </div>
+          ) : (
+            <span className={`text-xs font-bold tracking-wide ${colors.sidebarBrand}`}>S™</span>
+          )}
         </Link>
         {mobile ? (
           <button
             type="button"
             onClick={handleNavigate}
             aria-label="Close menu"
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-white/80 hover:text-white dark:text-white/75 dark:hover:text-white cursor-pointer"
           >
             <X size={20} />
           </button>
         ) : (
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-white/80 hover:text-white dark:text-white/75 dark:hover:text-white cursor-pointer"
           >
             {collapsed ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -704,7 +708,7 @@ export default function Sidebar({
       {/* Navigation */}
       <div
         className={`flex-1 transition-all duration-500 ${
-          mobile ? "w-full" : isExpanded ? "w-56" : "w-16"
+          mobile ? "w-full" : isExpanded ? "w-56" : "w-[4.5rem]"
         }`}
         onMouseEnter={() => !mobile && setHovered(true)}
         onMouseLeave={() => !mobile && setHovered(false)}
@@ -715,12 +719,12 @@ export default function Sidebar({
               {/* Section heading */}
               <div className="px-2 mb-1">
                 {isExpanded ? (
-                  <span className={adminType.sidebarSection}>
+                  <span className={`${adminType.sidebarSection} ${colors.sidebarSection}`}>
                     {section.title}
                   </span>
                 ) : (
                   <span className="flex justify-center mr-3">
-                    <span className="w-1.5 h-1.5 bg-[#7987a1] rounded-full"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 dark:bg-white/35"></span>
                   </span>
                 )}
               </div>
@@ -739,8 +743,8 @@ export default function Sidebar({
                             onClick={() => toggleMenu(item.name)}
                             className={`w-full flex items-center justify-between px-2 py-2 rounded-md transition ${
                               isParentActive && isExpanded
-                                ? `${colors.mainColor} text-white`
-                                : "text-sidebar-foreground hover:bg-sidebar-accent"
+                                ? colors.sidebarActive
+                                : colors.sidebarInactive
                             }`}
                           >
                             <span className="flex items-center gap-2">
@@ -773,8 +777,8 @@ export default function Sidebar({
                                       onClick={handleNavigate}
                                       className={`flex items-center gap-2 px-2 py-1 rounded-md transition ${adminType.sidebarSubNav} ${
                                         isActive
-                                          ? `text-white ${colors.mainColor}`
-                                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                                          ? colors.sidebarSubActive
+                                          : colors.sidebarSubInactive
                                       }`}
                                     >
                                       {sub.icon}
@@ -792,8 +796,8 @@ export default function Sidebar({
                           onClick={handleNavigate}
                           className={`flex items-center gap-2 px-2 py-2 rounded-md transition ${
                             isPathActive(item.path || "")
-                              ? `${colors.mainColor} text-white`
-                              : "text-sidebar-foreground hover:bg-sidebar-accent"
+                              ? colors.sidebarActive
+                              : colors.sidebarInactive
                           }`}
                         >
                           {item.icon}

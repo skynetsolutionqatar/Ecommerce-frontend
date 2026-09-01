@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AdminAuthGuard from "@/components/admin/AdminAuthGuard";
 import AdminThemeProvider from "@/components/admin/AdminThemeProvider";
 import Navbar from "@/components/admin/main/Navbar";
 import Sidebar from "@/components/admin/main/Sidebar";
+import { colors } from "@/components/admin/utils/Colors";
 import { useAdminTheme } from "@/hooks/useAdminTheme";
+import { cn } from "@/lib/utils";
 import "../../admin-globals.css";
 import { Toaster } from "react-hot-toast";
 
@@ -31,12 +33,37 @@ function AdminToaster() {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  const checkScrollBottom = useCallback(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 4;
+    setIsAtBottom(atBottom);
+  }, []);
+
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+
+    checkScrollBottom();
+    el.addEventListener("scroll", checkScrollBottom, { passive: true });
+
+    const resizeObserver = new ResizeObserver(checkScrollBottom);
+    resizeObserver.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", checkScrollBottom);
+      resizeObserver.disconnect();
+    };
+  }, [checkScrollBottom]);
 
   return (
     <AdminAuthGuard>
       <AdminThemeProvider>
         <div className="flex h-screen w-full overflow-hidden">
-          <div className="hidden h-full shrink-0 border-r border-border bg-card shadow-sm md:block">
+          <div className="hidden h-full shrink-0 md:block">
             <Sidebar />
           </div>
 
@@ -54,13 +81,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </>
           ) : null}
 
-          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-            <div className="relative z-[100] h-16 shrink-0 border-b border-border bg-card shadow-sm">
+          <div className={`flex min-w-0 flex-1 flex-col overflow-hidden ${colors.mainColor}`}>
+            <div className="relative z-[100] h-16 shrink-0">
               <Navbar onMenuClick={() => setMobileNavOpen(true)} />
             </div>
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-2 sm:p-3 md:p-4">
-              {children}
-            </main>
+            <div className="flex-1 overflow-hidden p-2 pt-0 md:p-3 md:pt-0">
+              <main
+                ref={mainRef}
+                className={cn(
+                  "h-full overflow-y-auto overflow-x-hidden rounded-t-xl bg-background p-2 shadow-sm ring-1 ring-border/50 transition-[border-radius] duration-200 sm:p-3 md:p-4 dark:ring-border/30",
+                  isAtBottom && "rounded-bl-xl rounded-br-xl",
+                )}
+              >
+                {children}
+              </main>
+            </div>
           </div>
         </div>
         <AdminToaster />

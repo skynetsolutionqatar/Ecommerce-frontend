@@ -30,7 +30,13 @@ export function AuthBrandPanel() {
 
         <div className="relative">
           <div className="mb-10">
-            <BrandLogo height={64} variant="light" alt="Skynet Solution" imgClassName="max-w-[240px]" />
+            <BrandLogo
+              height={56}
+              variant="footer"
+              priority
+              alt="Skynet Solution"
+              imgClassName="max-w-[260px] object-left"
+            />
             <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
               Management Suite
             </p>
@@ -64,7 +70,14 @@ export function AuthBrandPanel() {
       {/* Mobile brand strip */}
       <div className="relative overflow-hidden bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#0f3460] px-6 py-8 text-center lg:hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_60%)]" />
-        <BrandLogo height={56} variant="light" alt="Skynet Solution" className="mx-auto" imgClassName="max-w-[220px]" />
+        <BrandLogo
+          height={52}
+          variant="footer"
+          priority
+          alt="Skynet Solution"
+          className="mx-auto"
+          imgClassName="max-w-[240px] object-left"
+        />
         <p className="relative mt-3 text-xs uppercase tracking-[0.16em] text-white/50">Management Suite</p>
       </div>
     </>

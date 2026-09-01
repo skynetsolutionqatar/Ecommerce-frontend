@@ -21,7 +21,7 @@ const TYPE_BG = {
 
 type Tab = "unread" | "read";
 
-export default function NotificationBell() {
+export default function NotificationBell({ tone = "default" }: { tone?: "default" | "primary" }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("unread");
   const ref = useRef<HTMLDivElement>(null);
@@ -46,10 +46,22 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Notifications"
-        className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-muted/60"
+        className={
+          tone === "primary"
+            ? "relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10 dark:hover:bg-white/10"
+            : "relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-muted/60"
+        }
       >
         <Bell
-          className={`h-5 w-5 ${isConnected ? "text-muted-foreground" : "text-muted-foreground/50"}`}
+          className={`h-5 w-5 ${
+            tone === "primary"
+              ? isConnected
+                ? "text-white/90 dark:text-white/85"
+                : "text-white/50 dark:text-white/45"
+              : isConnected
+                ? "text-muted-foreground"
+                : "text-muted-foreground/50"
+          }`}
         />
 
         {unreadCount > 0 ? (

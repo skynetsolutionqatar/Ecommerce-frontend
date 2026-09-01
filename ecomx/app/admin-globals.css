@@ -166,6 +166,34 @@ html.admin-theme-transition [data-slot="chart"] *,
   transition: none !important;
 }
 
+/* Keep sidebar brand logo sharp when switching light / dark theme */
+.admin-sidebar-brand img {
+  view-transition-name: admin-brand-logo;
+  transition: none !important;
+}
+
+html.admin-theme-transition .admin-sidebar-brand img,
+.admin-shell.admin-theme-transition .admin-sidebar-brand img {
+  transition: none !important;
+}
+
+@supports (view-transition-name: admin-brand-logo) {
+  ::view-transition-group(admin-brand-logo) {
+    animation-duration: 0ms;
+  }
+
+  ::view-transition-old(admin-brand-logo),
+  ::view-transition-new(admin-brand-logo) {
+    animation: none;
+    mix-blend-mode: normal;
+    opacity: 1;
+  }
+
+  ::view-transition-image-pair(admin-brand-logo) {
+    isolation: isolate;
+  }
+}
+
 @supports (view-transition-name: root) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -253,8 +281,24 @@ html.admin-theme-transition [data-slot="chart"] *,
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
+.admin-shell .admin-navbar-primary .admin-nav-clock {
+  border-color: rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: none;
+}
+
+.dark.admin-shell .admin-navbar-primary .admin-nav-clock,
+.admin-shell.dark .admin-navbar-primary .admin-nav-clock {
+  border-color: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.08);
+}
+
 .admin-shell .admin-nav-clock-icon {
   color: #059669;
+}
+
+.admin-shell .admin-navbar-primary .admin-nav-clock-icon {
+  color: rgb(255 255 255 / 0.9);
 }
 
 .admin-shell .admin-nav-clock-text {
@@ -270,6 +314,10 @@ html.admin-theme-transition [data-slot="chart"] *,
   color: var(--foreground);
 }
 
+.admin-shell .admin-navbar-primary .admin-nav-clock-time {
+  color: #fff;
+}
+
 .admin-shell .admin-nav-clock-date {
   font-size: 0.6875rem;
   color: var(--muted-foreground);
@@ -279,11 +327,19 @@ html.admin-theme-transition [data-slot="chart"] *,
   line-height: 1.2;
 }
 
+.admin-shell .admin-navbar-primary .admin-nav-clock-date {
+  color: rgb(255 255 255 / 0.72);
+}
+
 .admin-shell .admin-nav-clock-location {
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #059669;
+}
+
+.admin-shell .admin-navbar-primary .admin-nav-clock-location {
+  color: rgb(255 255 255 / 0.85);
 }
 
 /* ─── Command search dialog (Billing App-F exact style) ─── */
@@ -296,9 +352,10 @@ html.admin-theme-transition [data-slot="chart"] *,
 
 [data-slot="dialog-content"].admin-command-search-dialog {
   z-index: 51 !important;
-  top: 50% !important;
+  top: 4.5rem !important;
   left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  display: block !important;
+  transform: translateX(-50%) !important;
   width: min(calc(100vw - 2rem), 30rem) !important;
   max-width: 30rem !important;
   overflow: visible !important;
@@ -312,9 +369,21 @@ html.admin-theme-transition [data-slot="chart"] *,
   --tw-ring-shadow: 0 0 #0000 !important;
 }
 
+@media (min-width: 768px) {
+  [data-slot="dialog-content"].admin-command-search-dialog {
+    top: 4.5rem !important;
+    left: calc(7rem + 50vw) !important;
+    transform: translateX(-50%) !important;
+    width: min(calc(100vw - 14rem - 2rem), 30rem) !important;
+    max-width: min(calc(100vw - 14rem - 2rem), 30rem) !important;
+  }
+}
+
 .admin-command-search-panel {
   display: flex !important;
   flex-direction: column !important;
+  width: 100% !important;
+  text-align: left !important;
   max-height: 500px !important;
   overflow: hidden !important;
   border-radius: 1rem !important;

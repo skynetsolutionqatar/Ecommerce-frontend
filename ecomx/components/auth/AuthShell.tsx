@@ -15,6 +15,7 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
+        <p className="mb-2 font-label text-sm font-bold tracking-wide text-[#0a255d]">Skynet™</p>
         <h1 className="font-display text-[28px] font-bold tracking-tight text-primary sm:text-[32px]">
           {title}
         </h1>
