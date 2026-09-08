@@ -15,6 +15,7 @@ import { LIST_PAGE_SIZE } from "@/lib/admin/client-pagination";
 import { resolveParentName } from "@/lib/admin/category-form";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
+import { productImageSurfaceClass, withProductImageBlend } from "@/lib/store/product-image-utils";
 import type { ApiCategory } from "@/types/category.types";
 
 const ACTIVE_OPTIONS = [
@@ -126,8 +127,27 @@ export default function AdminCategoriesPage() {
                     {(page - 1) * LIST_PAGE_SIZE + index + 1}
                   </td>
                   <td className="px-5 py-4">
-                    <p className="font-medium text-gray-800">{cat.name}</p>
-                    <p className="text-xs text-gray-500">{cat.slug}</p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border ${productImageSurfaceClass}`}
+                      >
+                        {cat.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={cat.image}
+                            alt=""
+                            className={withProductImageBlend("h-full w-full object-contain p-1")}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xs text-gray-400">—</div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-800">{cat.name}</p>
+                        <p className="text-xs text-gray-500">{cat.slug}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-4 text-gray-500">{resolveParentName(cat)}</td>
                   <td className="px-5 py-4">{cat.displayOrder ?? 0}</td>

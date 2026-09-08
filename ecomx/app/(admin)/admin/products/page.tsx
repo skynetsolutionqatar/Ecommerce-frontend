@@ -14,6 +14,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { formatPrice } from "@/lib/utils";
+import { productImageSurfaceClass, withProductImageBlend } from "@/lib/store/product-image-utils";
 import type { ApiProduct, ProductStatus } from "@/types/product.types";
 
 const PAGE_SIZE = 10;
@@ -131,8 +132,27 @@ export default function AdminProductsPage() {
                 >
                   <td className="px-5 py-4 text-gray-400">{(page - 1) * PAGE_SIZE + index + 1}</td>
                   <td className="px-5 py-4">
-                    <p className="font-medium text-gray-800">{product.name}</p>
-                    <p className="text-xs text-gray-500">{product.sku ?? product.slug}</p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border ${productImageSurfaceClass}`}
+                      >
+                        {product.thumbnail ?? product.images?.[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={product.thumbnail ?? product.images?.[0]}
+                            alt=""
+                            className={withProductImageBlend("h-full w-full object-contain p-1")}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xs text-gray-400">—</div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-800">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.sku ?? product.slug}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-4 text-gray-500">{product.brand ?? "—"}</td>
                   <td className="px-5 py-4 font-medium">{formatPrice(product.price)}</td>
