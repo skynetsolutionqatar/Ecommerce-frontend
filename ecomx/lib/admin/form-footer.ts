@@ -5,6 +5,8 @@ export const PRODUCT_FORM_ID = "product-form";
 export const CATEGORY_FORM_ID = "category-form";
 export const COUPON_FORM_ID = "coupon-form";
 export const TENANT_FORM_ID = "tenant-form";
+export const COMPANY_FORM_ID = "company-form";
+export const CHANGE_PASSWORD_FORM_ID = "change-password-form";
 
 const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:bg-green-700`;
 const cancelBtn = "rounded-lg px-6 py-2";
@@ -51,3 +53,6 @@ export const couponFormFooterButtons = (opts: Omit<Parameters<typeof createFormF
 
 export const tenantFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
   createFormFooterButtons({ ...opts, formId: TENANT_FORM_ID, entityLabel: "Store" });
+
+export const companyFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
+  createFormFooterButtons({ ...opts, formId: COMPANY_FORM_ID, entityLabel: "Company" });

@@ -40,7 +40,7 @@ export default function LoginModal({
   user,
 }: LoginModalProps) {
   const router = useRouter();
-  const { login, register, loading, clearError, setError } = useAuth();
+  const { login, register, forgotPassword, loading, clearError, setError } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = isAdminRole(authUser?.role);
@@ -88,6 +88,12 @@ export default function LoginModal({
         const result = await login({ email: form.email, password: form.password }, null);
         storeUser = { ...result.storeUser, avatarUrl: avatarPreview ?? result.storeUser.avatarUrl };
       } else {
+        if (!form.email.trim()) {
+          setError("Email is required");
+          return;
+        }
+        await forgotPassword({ email: form.email.trim() });
+        setSuccess(true);
         return;
       }
 
@@ -101,7 +107,9 @@ export default function LoginModal({
         switchMode("login");
       }, 1400);
     } catch (err) {
-      setError(getAuthErrorMessage(err, mode === "register" ? "register" : "login"));
+      const action =
+        mode === "register" ? "register" : mode === "forgot" ? "forgotPassword" : "login";
+      setError(getAuthErrorMessage(err, action));
     }
   };
 

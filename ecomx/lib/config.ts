@@ -33,11 +33,14 @@ export const ADMIN_ROUTES = {
   tenants: `${ROUTE_PREFIX.ADMIN}/tenants`,
   tenant: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/${slug}`,
   tenantEdit: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/edit/${slug}`,
+  company: `${ROUTE_PREFIX.ADMIN}/company`,
 } as const;
 
 export const AUTH_ROUTES = {
   login: AUTH_PATH.LOGIN,
   register: AUTH_PATH.REGISTER,
+  forgotPassword: AUTH_PATH.FORGOT_PASSWORD,
+  resetPassword: AUTH_PATH.RESET_PASSWORD,
 } as const;
 
 export const TOKEN_KEYS = {

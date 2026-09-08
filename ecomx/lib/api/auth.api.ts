@@ -1,5 +1,13 @@
 import { apiGet, apiPost } from "./client";
-import type { AuthResponse, AuthUser, LoginPayload, RegisterPayload } from "@/types/auth.types";
+import type {
+  AuthResponse,
+  AuthUser,
+  ChangePasswordPayload,
+  ForgotPasswordPayload,
+  LoginPayload,
+  RegisterPayload,
+  ResetPasswordPayload,
+} from "@/types/auth.types";
 
 export const authApi = {
   login: (payload: LoginPayload) =>
@@ -16,4 +24,13 @@ export const authApi = {
     apiPost<{ accessToken: string; refreshToken: string }>("/auth/refresh", {
       refreshToken,
     }),
+
+  changePassword: (payload: ChangePasswordPayload) =>
+    apiPost<Record<string, never>>("/auth/change-password", payload),
+
+  forgotPassword: (payload: ForgotPasswordPayload) =>
+    apiPost<{ message: string }>("/auth/forgot-password", payload),
+
+  resetPassword: (payload: ResetPasswordPayload) =>
+    apiPost<{ message: string }>("/auth/reset-password", payload),
 };

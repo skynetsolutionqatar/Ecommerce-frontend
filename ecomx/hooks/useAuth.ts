@@ -7,7 +7,7 @@ import { ROLE } from "@/lib/Constant";
 import { AUTH_ROUTES, getPostAuthRedirect, isAdminRole } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
-import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth.types";
+import type { AuthUser, ChangePasswordPayload, ForgotPasswordPayload, LoginPayload, RegisterPayload, ResetPasswordPayload } from "@/types/auth.types";
 import { authUserToStoreUser } from "@/lib/auth-utils";
 
 function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
@@ -111,6 +111,47 @@ export function useAuth() {
     }
   }, [clearAuth, setUser]);
 
+  const changePassword = useCallback(async (payload: ChangePasswordPayload) => {
+    setLoading(true);
+    clearAuthError();
+    try {
+      await authApi.changePassword(payload);
+    } catch (err) {
+      setAuthError(getAuthErrorMessage(err, "changePassword"));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [clearAuthError, setAuthError]);
+
+  const forgotPassword = useCallback(async (payload: ForgotPasswordPayload) => {
+    setLoading(true);
+    clearAuthError();
+    try {
+      const res = await authApi.forgotPassword(payload);
+      return res.message;
+    } catch (err) {
+      setAuthError(getAuthErrorMessage(err, "forgotPassword"));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [clearAuthError, setAuthError]);
+
+  const resetPassword = useCallback(async (payload: ResetPasswordPayload) => {
+    setLoading(true);
+    clearAuthError();
+    try {
+      const res = await authApi.resetPassword(payload);
+      return res.message;
+    } catch (err) {
+      setAuthError(getAuthErrorMessage(err, "resetPassword"));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [clearAuthError, setAuthError]);
+
   useEffect(() => {
     if (!isHydrated) return;
     const { accessToken, user: storedUser } = useAuthStore.getState();
@@ -131,6 +172,9 @@ export function useAuth() {
     login,
     register,
     logout,
+    changePassword,
+    forgotPassword,
+    resetPassword,
     refreshMe,
     toStoreUser: authUserToStoreUser,
   };

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
 import { getSessionExpiredMessage, isAuthSessionReason } from "@/lib/api/auth-errors";
@@ -68,6 +69,15 @@ export default function LoginForm() {
           placeholder="Enter your password"
           autoComplete="current-password"
         />
+
+        <div className="-mt-2 text-right">
+          <Link
+            href={AUTH_ROUTES.forgotPassword}
+            className="text-sm font-semibold text-[#0a255d] hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <AuthSubmitButton loading={loading} loadingLabel="Signing in…" label="Sign In" />
 

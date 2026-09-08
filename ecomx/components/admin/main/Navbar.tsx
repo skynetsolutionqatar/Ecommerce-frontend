@@ -4,6 +4,7 @@ import { Edit3, LogOut, Menu, RefreshCcw, Store, User } from "lucide-react";
 import NotificationBell from "@/components/admin/main/Notification";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
+import ChangePasswordDialog from "@/components/admin/main/ChangePasswordDialog";
 import LiveClock from "@/components/admin/main/LiveClock";
 import { adminSections } from "@/components/admin/utils/SideSection";
 import { colors } from "@/components/admin/utils/Colors";
@@ -14,6 +15,7 @@ import Link from "next/link";
 
 export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const [open, setOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { user, logout } = useAuth();
 
@@ -85,7 +87,12 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
                 </button>
                 <button
                   type="button"
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setOpen(false);
+                    setChangePasswordOpen(true);
+                  }}
+                  className={`flex w-full items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/60 ${adminType.navMenuItem}`}
                 >
                   <Edit3 size={16} /> Change Password
                 </button>
@@ -115,6 +122,11 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           )}
         </div>
       </div>
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+      />
     </header>
   );
 }

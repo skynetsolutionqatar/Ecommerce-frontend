@@ -11,6 +11,7 @@ import {
   Star,
   Boxes,
   Settings,
+  Building2,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 
@@ -84,6 +85,7 @@ export const adminSections: AdminMenuSection[] = [
         name: "General Settings",
         icon: <Settings size={18} />,
         subMenu: [
+          { name: "Company", path: ADMIN_ROUTES.company, icon: <Building2 size={16} /> },
           // { name: "Tenants", path: ADMIN_ROUTES.tenants, icon: <Settings size={16} /> },
         ],
       },

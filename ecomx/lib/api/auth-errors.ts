@@ -11,6 +11,10 @@ export const AUTH_ERROR = {
   signInFailed:
     "Unable to sign in. Your session may have expired, or your email or password is incorrect. Please try again.",
   registerFailed: "Unable to create account. Please check your details and try again.",
+  changePasswordFailed:
+    "Unable to change password. Check your current password and try again.",
+  forgotPasswordFailed: "Unable to send reset link. Please try again.",
+  resetPasswordFailed: "Unable to reset password. The link may be invalid or expired.",
   network: "Network error. Check your connection and try again.",
   timeout: "Request timed out. Please try again.",
 } as const;
@@ -36,7 +40,7 @@ export function getSessionExpiredMessage(): string {
 /** Single resolver — login, register, session expiry, and validation strings. */
 export function getAuthErrorMessage(
   error: unknown,
-  action: "login" | "register" = "login"
+  action: "login" | "register" | "changePassword" | "forgotPassword" | "resetPassword" = "login"
 ): string {
   if (typeof error === "string" && error.trim()) {
     return error.trim();
@@ -56,7 +60,9 @@ export function getAuthErrorMessage(
     const apiMessage = data?.message?.trim() || data?.error?.trim();
 
     if (status === HTTP_STATUS.UNAUTHORIZED) {
-      return AUTH_ERROR.signInFailed;
+      return action === "changePassword"
+        ? AUTH_ERROR.changePasswordFailed
+        : AUTH_ERROR.signInFailed;
     }
 
     if (status === HTTP_STATUS.CONFLICT) {
@@ -70,5 +76,9 @@ export function getAuthErrorMessage(
     if (apiMessage) return apiMessage;
   }
 
-  return action === "login" ? AUTH_ERROR.signInFailed : AUTH_ERROR.registerFailed;
+  if (action === "register") return AUTH_ERROR.registerFailed;
+  if (action === "changePassword") return AUTH_ERROR.changePasswordFailed;
+  if (action === "forgotPassword") return AUTH_ERROR.forgotPasswordFailed;
+  if (action === "resetPassword") return AUTH_ERROR.resetPasswordFailed;
+  return AUTH_ERROR.signInFailed;
 }
