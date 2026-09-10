@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ExternalLink, ImageOff } from "lucide-react";
 import { adminType } from "@/lib/admin/typography";
+import { colors } from "@/components/admin/utils/Colors";
 import { productImageSurfaceClass, withProductImageBlend } from "@/lib/store/product-image-utils";
 import { productMediaUrls, sameImageUrl } from "@/lib/admin/product-form";
 
@@ -54,7 +55,7 @@ export default function ProductMediaView({ thumbnail, images }: ProductMediaView
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group overflow-hidden rounded-xl border border-border bg-card transition hover:border-emerald-500/50 hover:shadow-md"
+            className={`group overflow-hidden rounded-xl border border-border bg-card transition hover:shadow-md ${colors.hoverPrimaryBorder}`}
           >
             <div className={`relative min-h-[200px] overflow-hidden ${productImageSurfaceClass}`}>
               <MediaImage src={url} alt={isThumbnail ? "Product thumbnail" : `Product image ${index + 1}`} />
@@ -65,7 +66,7 @@ export default function ProductMediaView({ thumbnail, images }: ProductMediaView
 
             <div className="space-y-1 border-t border-border bg-card p-3">
               {isThumbnail && (
-                <span className={`inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 ${adminType.badge} font-medium text-emerald-700 dark:text-emerald-400`}>
+                <span className={`inline-flex rounded-full px-2 py-0.5 ${adminType.badge} font-medium ${colors.badgePrimary}`}>
                   Thumbnail
                 </span>
               )}

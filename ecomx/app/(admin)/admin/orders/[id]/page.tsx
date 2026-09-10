@@ -15,6 +15,7 @@ import { useOrder, useOrderMutations } from "@/hooks/useOrders";
 import { formatDateTime, formatPrice } from "@/lib/utils";
 import { orderAddress, orderTotal } from "@/types/order.types";
 import DownloadInvoiceButton from "@/components/store/DownloadInvoiceButton";
+import { colors } from "@/components/admin/utils/Colors";
 import { ORDER_STATUS } from "@/lib/Constant";
 
 const TABS = [
@@ -185,7 +186,7 @@ export default function AdminOrderDetailPage({
               type="button"
               onClick={() => void handleUpdate()}
               disabled={!newStatus || updateStatus.isPending}
-              className="mt-3 rounded-md bg-emerald-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className={`mt-3 rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-50 ${colors.primaryButton}`}
             >
               {updateStatus.isPending ? "Updating…" : "Update Status"}
             </button>

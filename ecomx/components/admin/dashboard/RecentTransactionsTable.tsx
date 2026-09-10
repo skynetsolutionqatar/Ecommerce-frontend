@@ -4,6 +4,7 @@ import type { DashboardTransaction } from "@/types/dashboard.types";
 import type { PaginationMeta } from "@/types/api.types";
 import { TRANSACTION_STATUS, TRANSACTION_STATUS_LABEL, type TransactionStatus } from "@/lib/Constant";
 import { adminType } from "@/lib/admin/typography";
+import { colors } from "@/components/admin/utils/Colors";
 import ListPagination from "@/components/admin/shared/ListPagination";
 import DashboardCard from "./DashboardCard";
 
@@ -55,7 +56,7 @@ function RecentTransactionsTable({
       headerRight={
         <Link
           href={viewAllHref}
-          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline dark:text-emerald-400`}
+          className={`${adminType.badge} font-semibold ${colors.link}`}
         >
           {viewAllLabel}
         </Link>

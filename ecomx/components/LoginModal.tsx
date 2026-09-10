@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 import { isAdminRole } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
+import { getApiFieldErrors } from "@/lib/api/errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import AuthFormError from "@/components/auth/AuthFormError";
 import * as Icons from "./Icons";
@@ -22,6 +23,7 @@ interface LoginModalProps {
 }
 
 type AuthMode = "login" | "register" | "forgot";
+type RegisterField = "name" | "email" | "phone" | "password";
 
 const inputClass =
   "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-all placeholder:text-gray-400 focus:border-[#0a255d] focus:shadow-[0_0_0_4px_rgba(10,37,93,0.12)]";
@@ -50,9 +52,20 @@ export default function LoginModal({
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [success, setSuccess] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegisterField, string>>>({});
+
+  const clearFieldError = (field: RegisterField) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const switchMode = (next: AuthMode) => {
     clearError();
+    setFieldErrors({});
     setMode(next);
   };
 
@@ -63,6 +76,7 @@ export default function LoginModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setFieldErrors({});
 
     try {
       let storeUser: StoreUser;
@@ -107,6 +121,13 @@ export default function LoginModal({
         switchMode("login");
       }, 1400);
     } catch (err) {
+      const apiFieldErrors = mode === "register" ? getApiFieldErrors(err) : {};
+      if (Object.keys(apiFieldErrors).length > 0) {
+        setFieldErrors(apiFieldErrors);
+        clearError();
+        return;
+      }
+
       const action =
         mode === "register" ? "register" : mode === "forgot" ? "forgotPassword" : "login";
       setError(getAuthErrorMessage(err, action));
@@ -299,31 +320,45 @@ export default function LoginModal({
                 <AuthFormError />
 
                 {mode === "register" && (
-                  <FormField label="Full Name" icon={<Icons.User />}>
+                  <FormField label="Full Name" icon={<Icons.User />} error={fieldErrors.name}>
                     <input
                       value={form.name}
-                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                      onChange={(e) => {
+                        clearFieldError("name");
+                        setForm((f) => ({ ...f, name: e.target.value }));
+                      }}
                       placeholder="Mohammed Al-Thani"
                       required
-                      className={inputClass}
+                      className={`${inputClass} ${fieldErrors.name ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
                     />
                   </FormField>
                 )}
 
-                <FormField label="Email Address" icon={<Icons.Mail />}>
+                <FormField
+                  label="Email Address"
+                  icon={<Icons.Mail />}
+                  error={mode === "register" ? fieldErrors.email : undefined}
+                >
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                    onChange={(e) => {
+                      if (mode === "register") clearFieldError("email");
+                      setForm((f) => ({ ...f, email: e.target.value }));
+                    }}
                     placeholder="you@company.com"
                     required
-                    className={inputClass}
+                    className={`${inputClass} ${mode === "register" && fieldErrors.email ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
                   />
                 </FormField>
 
                 {mode === "register" && (
-                  <FormField label="Phone (Qatar)" icon={<Icons.Phone />}>
-                    <div className="flex overflow-hidden rounded-xl border border-gray-200 bg-white focus-within:border-blue-500">
+                  <FormField label="Phone (Qatar)" icon={<Icons.Phone />} error={fieldErrors.phone}>
+                    <div
+                      className={`flex overflow-hidden rounded-xl border bg-white ${
+                        fieldErrors.phone ? "border-red-400 focus-within:border-red-400" : "border-gray-200 focus-within:border-blue-500"
+                      }`}
+                    >
                       <span className="flex items-center border-r border-gray-200 bg-gray-50 px-3 text-sm font-semibold text-gray-700">
                         +974
                       </span>
@@ -333,12 +368,13 @@ export default function LoginModal({
                         required
                         maxLength={8}
                         value={form.phone}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          clearFieldError("phone");
                           setForm((f) => ({
                             ...f,
                             phone: e.target.value.replace(/\D/g, "").slice(0, 8),
-                          }))
-                        }
+                          }));
+                        }}
                         placeholder="51882350"
                         autoComplete="tel-national"
                         className={`${inputClass} rounded-none border-0 shadow-none focus:shadow-none`}
@@ -348,15 +384,22 @@ export default function LoginModal({
                 )}
 
                 {mode !== "forgot" && (
-                  <FormField label="Password" icon={<Icons.Lock />}>
+                  <FormField
+                    label="Password"
+                    icon={<Icons.Lock />}
+                    error={mode === "register" ? fieldErrors.password : undefined}
+                  >
                     <div className="relative">
                       <input
                         type={showPass ? "text" : "password"}
                         value={form.password}
-                        onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                        onChange={(e) => {
+                          if (mode === "register") clearFieldError("password");
+                          setForm((f) => ({ ...f, password: e.target.value }));
+                        }}
                         placeholder="Enter your password"
                         required
-                        className={`${inputClass} pr-12`}
+                        className={`${inputClass} pr-12 ${mode === "register" && fieldErrors.password ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
                       />
                       <button
                         type="button"
@@ -453,10 +496,12 @@ export default function LoginModal({
 function FormField({
   label,
   icon,
+  error,
   children,
 }: {
   label: string;
   icon: React.ReactNode;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -466,6 +511,7 @@ function FormField({
         {label}
       </label>
       {children}
+      {error ? <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p> : null}
     </div>
   );
 }

@@ -5,6 +5,13 @@ export const colors = {
   mainColor: "bg-[#0a255d] dark:bg-[#061a3d]",
   mainColorText: "text-[#0a255d] dark:text-white",
   mainColorBorder: "border-[#0a255d] dark:border-white/10",
+  activePage: "bg-[#0a255d] text-white dark:bg-[#061a3d]",
+  primaryButton: "bg-[#0a255d] text-white dark:bg-[#061a3d]",
+  link: "text-[#0a255d] hover:underline dark:text-blue-400",
+  focusInput: "focus:border-[#0a255d] focus:ring-[#0a255d]/20 dark:focus:border-white/40",
+  accent: "accent-[#0a255d]",
+  badgePrimary: "bg-[#0a255d]/15 text-[#0a255d] dark:text-blue-400",
+  hoverPrimaryBorder: "hover:border-[#0a255d]/50",
   sidebarBorder: "border-white/10 dark:border-white/10",
   sidebarActive:
     "bg-white text-[#0a255d] font-medium shadow-sm dark:bg-white/15 dark:text-white dark:shadow-none",

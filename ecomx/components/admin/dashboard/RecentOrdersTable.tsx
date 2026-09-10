@@ -6,6 +6,7 @@ import type { DashboardOrder } from "@/types/dashboard.types";
 import type { PaginationMeta } from "@/types/api.types";
 import { ORDER_STATUS, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/Constant";
 import { adminType } from "@/lib/admin/typography";
+import { colors } from "@/components/admin/utils/Colors";
 import ListPagination from "@/components/admin/shared/ListPagination";
 import DashboardCard from "./DashboardCard";
 
@@ -61,7 +62,7 @@ function RecentOrdersTable({
       headerRight={
         <Link
           href={viewAllHref}
-          className={`${adminType.badge} font-semibold text-emerald-800 hover:underline dark:text-emerald-400`}
+          className={`${adminType.badge} font-semibold ${colors.link}`}
         >
           {viewAllLabel}
         </Link>

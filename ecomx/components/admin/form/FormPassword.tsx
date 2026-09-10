@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import React from "react";
 import { cn } from "@/lib/utils";
+import { colors } from "@/components/admin/utils/Colors";
 
 interface FormPasswordInputProps {
   label: string;
@@ -50,7 +51,7 @@ function FormPasswordInput({
             "w-full rounded-lg border bg-transparent px-4 py-2 pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2",
             hasError
               ? "border-destructive focus:ring-destructive/30"
-              : "border-border focus:border-emerald-600 focus:ring-emerald-600/20"
+              : `border-border ${colors.focusInput}`
           )}
         />
         <button

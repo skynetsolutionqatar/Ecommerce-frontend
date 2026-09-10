@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { colors } from "@/components/admin/utils/Colors";
 
 interface ListPaginationProps {
   page: number;
@@ -38,6 +39,9 @@ export default function ListPagination({
 }: ListPaginationProps) {
   const pages = Math.max(totalPages, 1);
   const visiblePages = getVisiblePages(page, pages);
+  const pageBtnBase = "rounded-md border border-border px-3 py-1";
+  const pageBtnActive = `${pageBtnBase} ${colors.activePage}`;
+  const pageBtnInactive = `${pageBtnBase} bg-card text-foreground hover:bg-muted/60`;
 
   return (
     <div className="flex flex-col gap-3 border-t border-border p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
@@ -56,7 +60,7 @@ export default function ListPagination({
           <>
             <Button
               onClick={() => onPageChange(1)}
-              className={`rounded-md border border-border px-3 py-1 ${page === 1 ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
+              className={page === 1 ? pageBtnActive : pageBtnInactive}
             >
               1
             </Button>
@@ -67,7 +71,7 @@ export default function ListPagination({
           <Button
             key={pageNumber}
             onClick={() => onPageChange(pageNumber)}
-            className={`rounded-md border border-border px-3 py-1 ${page === pageNumber ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
+            className={page === pageNumber ? pageBtnActive : pageBtnInactive}
           >
             {pageNumber}
           </Button>
@@ -79,7 +83,7 @@ export default function ListPagination({
             )}
             <Button
               onClick={() => onPageChange(pages)}
-              className={`rounded-md border border-border px-3 py-1 ${page === pages ? "bg-emerald-800 text-white dark:bg-emerald-700" : "bg-card text-foreground hover:bg-muted/60"}`}
+              className={page === pages ? pageBtnActive : pageBtnInactive}
             >
               {pages}
             </Button>

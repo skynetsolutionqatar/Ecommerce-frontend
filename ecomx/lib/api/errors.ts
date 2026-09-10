@@ -2,15 +2,27 @@ import type { AxiosError } from "axios";
 import { HTTP_STATUS } from "@/lib/Constant";
 import type { ApiResponse } from "@/types/api.types";
 
+export type ValidationErrors =
+  | Record<string, string[] | string>
+  | Array<{ field?: string; message?: string; msg?: string }>;
+
 type ApiErrorBody = ApiResponse<unknown> & {
   error?: string;
 };
 
-type ValidationErrors =
-  | Record<string, string[] | string>
-  | Array<{ field?: string; message?: string; msg?: string }>;
+function getErrorBody(error: unknown): ApiErrorBody | null {
+  if (typeof error === "string") return null;
 
-function formatValidationErrors(errors: ValidationErrors): string | null {
+  const axiosError = error as AxiosError<ApiErrorBody>;
+  if (axiosError?.isAxiosError && axiosError.response?.data) {
+    return axiosError.response.data;
+  }
+
+  const generic = error as { response?: { data?: ApiErrorBody } };
+  return generic.response?.data ?? null;
+}
+
+export function formatValidationErrors(errors: ValidationErrors): string | null {
   const messages: string[] = [];
 
   if (Array.isArray(errors)) {
@@ -29,6 +41,43 @@ function formatValidationErrors(errors: ValidationErrors): string | null {
 
   if (messages.length === 0) return null;
   return messages.slice(0, 3).join(" · ");
+}
+
+export function getValidationErrorMessage(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const errors = (data as ApiErrorBody).errors;
+  if (!errors || typeof errors !== "object") return null;
+  return formatValidationErrors(errors);
+}
+
+export function getApiFieldErrors(error: unknown): Record<string, string> {
+  const data = getErrorBody(error);
+  if (!data?.errors || typeof data.errors !== "object") return {};
+
+  const fieldErrors: Record<string, string> = {};
+
+  if (Array.isArray(data.errors)) {
+    for (const item of data.errors) {
+      const field = item.field?.trim();
+      const message = (item.message ?? item.msg)?.trim();
+      if (field && message && !fieldErrors[field]) {
+        fieldErrors[field] = message;
+      }
+    }
+    return fieldErrors;
+  }
+
+  for (const [field, value] of Object.entries(data.errors)) {
+    const list = Array.isArray(value) ? value : [value];
+    const message = list.find((msg) => typeof msg === "string" && msg.trim()) as
+      | string
+      | undefined;
+    if (message?.trim()) {
+      fieldErrors[field] = message.trim();
+    }
+  }
+
+  return fieldErrors;
 }
 
 function messageFromStatus(status?: number): string | null {
@@ -74,11 +123,7 @@ export function getApiErrorMessage(error: unknown, fallback = "Something went wr
     }
 
     const data = axiosError.response.data;
-    const validationMsg =
-      data?.errors && typeof data.errors === "object"
-        ? formatValidationErrors(data.errors)
-        : null;
-
+    const validationMsg = getValidationErrorMessage(data);
     if (validationMsg) return validationMsg;
 
     const apiMessage = data?.message?.trim() || data?.error?.trim();
@@ -95,10 +140,7 @@ export function getApiErrorMessage(error: unknown, fallback = "Something went wr
     };
 
     const data = generic.response?.data;
-    const validationMsg =
-      data?.errors && typeof data.errors === "object"
-        ? formatValidationErrors(data.errors)
-        : null;
+    const validationMsg = getValidationErrorMessage(data);
     if (validationMsg) return validationMsg;
 
     const apiMessage = data?.message?.trim() || data?.error?.trim();

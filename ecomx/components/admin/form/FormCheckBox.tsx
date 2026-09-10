@@ -2,6 +2,7 @@
 
 import React from "react";
 import { adminFormLabelCompact } from "@/lib/admin/form-classes";
+import { colors } from "@/components/admin/utils/Colors";
 
 interface FormCheckboxProps {
   label: string;
@@ -38,7 +39,7 @@ function FormCheckbox({
             disabled={disabled}
             onChange={onChange}
             onBlur={onBlur}
-            className={`h-4 w-4 rounded border-border accent-emerald-700 ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+            className={`h-4 w-4 rounded border-border ${colors.accent} ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
           />
         </div>
         {hasError && <p className="mt-1 text-xs text-red-500">{error}</p>}

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { adminFormLabel } from "@/lib/admin/form-classes";
+import { colors } from "@/components/admin/utils/Colors";
 
 interface RadioOption {
   label: string;
@@ -29,7 +30,7 @@ function FormRadio({ label, name, value, options, onChange }: FormRadioProps) {
               value={option.value}
               checked={value === option.value}
               onChange={onChange}
-              className="accent-emerald-700"
+              className={colors.accent}
             />
             {option.label}
           </label>

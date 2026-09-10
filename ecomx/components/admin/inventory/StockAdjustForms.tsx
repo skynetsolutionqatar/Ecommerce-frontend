@@ -4,6 +4,7 @@ import React from "react";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
 import { FormInput, FormNumberInput, FormSection, FormSelect } from "@/components/admin/form";
+import { colors } from "@/components/admin/utils/Colors";
 import { INVENTORY_MOVEMENT_TYPE } from "@/lib/Constant";
 import {
   addStockValidationSchema,
@@ -78,7 +79,7 @@ function StockAdjustForms({ isPending = false, onAdd, onReduce }: StockAdjustFor
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${colors.primaryButton}`}
           >
             {isPending ? "Adding..." : "Add Stock"}
           </button>

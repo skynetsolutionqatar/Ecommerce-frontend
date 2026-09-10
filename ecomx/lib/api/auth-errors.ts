@@ -1,5 +1,6 @@
 import type { AxiosError } from "axios";
 import { HTTP_STATUS } from "@/lib/Constant";
+import { getValidationErrorMessage } from "@/lib/api/errors";
 import type { ApiResponse } from "@/types/api.types";
 
 type ApiErrorBody = ApiResponse<unknown> & { error?: string };
@@ -57,7 +58,10 @@ export function getAuthErrorMessage(
     }
 
     const { status, data } = axiosError.response;
+    const validationMsg = getValidationErrorMessage(data);
     const apiMessage = data?.message?.trim() || data?.error?.trim();
+
+    if (validationMsg) return validationMsg;
 
     if (status === HTTP_STATUS.UNAUTHORIZED) {
       return action === "changePassword"

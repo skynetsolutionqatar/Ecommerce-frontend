@@ -19,7 +19,7 @@ export function adminFormInputClass({
     "admin-form-input w-full border-b-2 bg-transparent py-2 text-sm text-foreground outline-none transition placeholder:text-muted-foreground",
     hasError
       ? "border-destructive focus:border-destructive"
-      : "border-border focus:border-emerald-600",
+      : "border-border focus:border-[#0a255d] dark:focus:border-white/40",
     readOnly && "admin-form-readonly cursor-not-allowed border-border/70 bg-muted text-muted-foreground",
     disabled && "cursor-not-allowed opacity-60"
   );
@@ -36,7 +36,7 @@ export function adminFormSelectClass({
     "admin-form-input w-full border-b-2 bg-transparent py-2 text-sm text-foreground outline-none",
     hasError
       ? "border-destructive focus:border-destructive"
-      : "border-border focus:border-emerald-600",
+      : "border-border focus:border-[#0a255d] dark:focus:border-white/40",
     disabled && "cursor-not-allowed opacity-60"
   );
 }

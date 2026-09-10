@@ -29,13 +29,20 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
 export const authInputClass =
   "w-full rounded-xl border border-border/80 bg-white px-4 py-3.5 text-sm text-primary shadow-[0_1px_2px_rgba(17,24,39,0.04)] outline-none transition-all placeholder:text-muted/50 focus:border-[#0a255d] focus:shadow-[0_0_0_3px_rgba(10,37,93,0.1)]";
 
+export function AuthFieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1.5 text-xs font-medium text-red-600">{message}</p>;
+}
+
 export function AuthFormField({
   label,
   icon,
+  error,
   children,
 }: {
   label: string;
   icon: React.ReactNode;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -45,6 +52,7 @@ export function AuthFormField({
         {label}
       </label>
       {children}
+      <AuthFieldError message={error} />
     </div>
   );
 }
@@ -55,16 +63,22 @@ export function AuthPhoneField({
   value,
   onChange,
   required = true,
+  error,
 }: {
   id?: string;
   label?: string;
   value: string;
   onChange: (digits: string) => void;
   required?: boolean;
+  error?: string;
 }) {
   return (
-    <AuthFormField label={label} icon={<Icons.Phone />}>
-      <div className="flex overflow-hidden rounded-xl border border-border/80 bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04)] focus-within:border-[#0a255d] focus-within:shadow-[0_0_0_3px_rgba(10,37,93,0.1)]">
+    <AuthFormField label={label} icon={<Icons.Phone />} error={error}>
+      <div
+        className={`flex overflow-hidden rounded-xl border bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04)] focus-within:shadow-[0_0_0_3px_rgba(10,37,93,0.1)] ${
+          error ? "border-red-400 focus-within:border-red-400" : "border-border/80 focus-within:border-[#0a255d]"
+        }`}
+      >
         <span className="flex items-center border-r border-border/80 bg-bg-soft px-3 text-sm font-semibold text-primary">
           +974
         </span>
@@ -103,6 +117,7 @@ export function AuthPasswordField({
   onChange,
   placeholder,
   autoComplete,
+  error,
 }: {
   label: string;
   id: string;
@@ -110,11 +125,12 @@ export function AuthPasswordField({
   onChange: (value: string) => void;
   placeholder?: string;
   autoComplete?: string;
+  error?: string;
 }) {
   const [visible, setVisible] = useState(false);
 
   return (
-    <AuthFormField label={label} icon={<Icons.Lock />}>
+    <AuthFormField label={label} icon={<Icons.Lock />} error={error}>
       <div className="relative">
         <input
           id={id}
@@ -122,7 +138,7 @@ export function AuthPasswordField({
           required
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`${authInputClass} pr-12`}
+          className={`${authInputClass} pr-12 ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]" : ""}`}
           placeholder={placeholder}
           autoComplete={autoComplete}
         />

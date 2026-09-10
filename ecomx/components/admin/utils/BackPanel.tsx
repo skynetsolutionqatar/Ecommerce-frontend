@@ -81,7 +81,7 @@ export default function BackPanel({
       icon: <SquarePen size={16} strokeWidth={2.25} />,
       onClick: () => router.push(editPath),
       className: cn(
-        "rounded-lg px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-900",
+        "rounded-lg px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90",
         colors.mainColor
       ),
     });
