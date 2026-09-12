@@ -31,6 +31,7 @@ export default function ForgotPasswordForm() {
 
     try {
       await forgotPassword({ email: email.trim() });
+      setEmail("");
       setSuccess(true);
     } catch (err) {
       setError(getAuthErrorMessage(err, "forgotPassword"));

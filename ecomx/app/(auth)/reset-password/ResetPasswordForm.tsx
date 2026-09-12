@@ -41,6 +41,7 @@ export default function ResetPasswordForm() {
         newPassword: form.newPassword,
         confirmPassword: form.confirmPassword,
       });
+      setForm({ newPassword: "", confirmPassword: "" });
       setSuccess(true);
       setTimeout(() => {
         router.replace(AUTH_ROUTES.login);

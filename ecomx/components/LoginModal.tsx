@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -66,8 +66,21 @@ export default function LoginModal({
   const switchMode = (next: AuthMode) => {
     clearError();
     setFieldErrors({});
+    setSuccess(false);
     setMode(next);
   };
+
+  useEffect(() => {
+    if (!open) {
+      setMode("login");
+      setShowPass(false);
+      setForm({ name: "", email: "", phone: "", password: "" });
+      setSuccess(false);
+      setAvatarPreview(undefined);
+      setFieldErrors({});
+      clearError();
+    }
+  }, [open, clearError]);
 
   if (!open) return null;
 
@@ -107,6 +120,7 @@ export default function LoginModal({
           return;
         }
         await forgotPassword({ email: form.email.trim() });
+        setForm((f) => ({ ...f, email: "" }));
         setSuccess(true);
         return;
       }
