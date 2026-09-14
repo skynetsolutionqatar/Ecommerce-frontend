@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
-import { FormPasswordInput } from "@/components/admin/form";
-import { colors } from "@/components/admin/utils/Colors";
+import { AuthPasswordField } from "@/components/auth/AuthShell";
+import AuthFormError from "@/components/auth/AuthFormError";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
+import { getApiFieldErrors } from "@/lib/api/errors";
 import {
   changePasswordValidationSchema,
   defaultChangePasswordFormValues,
@@ -26,17 +26,15 @@ interface ChangePasswordDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const cancelBtnClass = "h-9 rounded-lg px-6";
-const primaryBtnClass = `h-9 rounded-lg px-6 ${colors.mainColor} text-white hover:opacity-90`;
+const cancelBtnClass = "h-10 rounded-xl px-6";
+const primaryBtnClass =
+  "h-10 rounded-xl bg-gradient-to-r from-[#0a255d] to-[#1e40af] px-6 text-sm font-bold text-white shadow-[0_4px_16px_rgba(10,37,93,0.35)] hover:opacity-90 disabled:opacity-60";
 
 export default function ChangePasswordDialog({
   open,
   onOpenChange,
 }: ChangePasswordDialogProps) {
-  const { changePassword, loading } = useAuth();
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const { changePassword, loading, clearError, setError } = useAuth();
 
   const formik = useFormik({
     initialValues: defaultChangePasswordFormValues,
@@ -44,6 +42,7 @@ export default function ChangePasswordDialog({
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values, helpers) => {
+      clearError();
       try {
         await changePassword({
           currentPassword: values.currentPassword,
@@ -52,27 +51,33 @@ export default function ChangePasswordDialog({
         });
         toast.success("Password updated successfully");
         helpers.resetForm();
-        setShowCurrent(false);
-        setShowNew(false);
-        setShowConfirm(false);
         onOpenChange(false);
       } catch (err) {
-        toast.error(getAuthErrorMessage(err, "changePassword"));
+        const apiFieldErrors = getApiFieldErrors(err);
+        if (Object.keys(apiFieldErrors).length > 0) {
+          const mapped: Partial<typeof defaultChangePasswordFormValues> = {};
+          if (apiFieldErrors.currentPassword) mapped.currentPassword = apiFieldErrors.currentPassword;
+          if (apiFieldErrors.newPassword) mapped.newPassword = apiFieldErrors.newPassword;
+          if (apiFieldErrors.confirmPassword) mapped.confirmPassword = apiFieldErrors.confirmPassword;
+          if (apiFieldErrors.password) mapped.newPassword = apiFieldErrors.password;
+          helpers.setErrors(mapped);
+          clearError();
+          return;
+        }
+        setError(getAuthErrorMessage(err, "changePassword"));
       }
     },
   });
 
   const handleOpenChange = (nextOpen: boolean) => {
+    clearError();
     if (!nextOpen) {
       formik.resetForm();
-      setShowCurrent(false);
-      setShowNew(false);
-      setShowConfirm(false);
     }
     onOpenChange(nextOpen);
   };
 
-  const { handleChange, handleBlur, values, errors, touched, handleSubmit, isSubmitting } =
+  const { setFieldValue, setFieldTouched, values, errors, touched, handleSubmit, isSubmitting } =
     formik;
 
   const pending = loading || isSubmitting;
@@ -80,10 +85,10 @@ export default function ChangePasswordDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="z-[200] gap-0 overflow-hidden p-0 sm:max-w-md">
-        <div className="space-y-4 p-4">
-          <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
+        <div className="space-y-4 p-5 sm:p-6">
+          <DialogHeader className="text-left">
+            <DialogTitle className="font-display text-xl text-primary">Change Password</DialogTitle>
+            <DialogDescription className="text-sm text-muted">
               Enter your current password and choose a new one.
             </DialogDescription>
           </DialogHeader>
@@ -91,51 +96,46 @@ export default function ChangePasswordDialog({
           <form
             id={CHANGE_PASSWORD_FORM_ID}
             onSubmit={handleSubmit}
-            className="space-y-4"
+            className="space-y-5"
           >
-            <FormPasswordInput
+            <AuthFormError />
+
+            <AuthPasswordField
+              id="currentPassword"
               label="Current Password"
-              name="currentPassword"
               value={values.currentPassword}
+              error={touched.currentPassword ? errors.currentPassword : undefined}
+              onChange={(value) => void setFieldValue("currentPassword", value)}
+              onBlur={() => void setFieldTouched("currentPassword", true)}
               placeholder="Enter current password"
-              required
-              showPassword={showCurrent}
-              setShowPassword={setShowCurrent}
-              error={errors.currentPassword}
-              touched={touched.currentPassword}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              autoComplete="current-password"
             />
-            <FormPasswordInput
+
+            <AuthPasswordField
+              id="newPassword"
               label="New Password"
-              name="newPassword"
               value={values.newPassword}
+              error={touched.newPassword ? errors.newPassword : undefined}
+              onChange={(value) => void setFieldValue("newPassword", value)}
+              onBlur={() => void setFieldTouched("newPassword", true)}
               placeholder="Enter new password"
-              required
-              showPassword={showNew}
-              setShowPassword={setShowNew}
-              error={errors.newPassword}
-              touched={touched.newPassword}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              autoComplete="new-password"
             />
-            <FormPasswordInput
+
+            <AuthPasswordField
+              id="confirmPassword"
               label="Confirm New Password"
-              name="confirmPassword"
               value={values.confirmPassword}
+              error={touched.confirmPassword ? errors.confirmPassword : undefined}
+              onChange={(value) => void setFieldValue("confirmPassword", value)}
+              onBlur={() => void setFieldTouched("confirmPassword", true)}
               placeholder="Re-enter new password"
-              required
-              showPassword={showConfirm}
-              setShowPassword={setShowConfirm}
-              error={errors.confirmPassword}
-              touched={touched.confirmPassword}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              autoComplete="new-password"
             />
           </form>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-muted/50 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-muted/50 px-5 py-4 sm:px-6">
           <Button
             type="button"
             variant="outline"

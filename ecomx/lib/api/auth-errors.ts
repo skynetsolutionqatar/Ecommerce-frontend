@@ -22,7 +22,7 @@ export const AUTH_ERROR = {
 
 function isAuthEndpoint(url?: string): boolean {
   if (!url) return false;
-  return /\/auth\/(login|register|refresh)(\/|$|\?)/.test(url);
+  return /\/auth\/(login|register|refresh|google-login)(\/|$|\?)/.test(url);
 }
 
 /** Skip token refresh for login/register failures — avoids false session-expired redirects. */
@@ -41,7 +41,13 @@ export function getSessionExpiredMessage(): string {
 /** Single resolver — login, register, session expiry, and validation strings. */
 export function getAuthErrorMessage(
   error: unknown,
-  action: "login" | "register" | "changePassword" | "forgotPassword" | "resetPassword" = "login"
+  action:
+    | "login"
+    | "register"
+    | "googleLogin"
+    | "changePassword"
+    | "forgotPassword"
+    | "resetPassword" = "login"
 ): string {
   if (typeof error === "string" && error.trim()) {
     return error.trim();

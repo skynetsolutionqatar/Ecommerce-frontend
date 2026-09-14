@@ -115,17 +115,21 @@ export function AuthPasswordField({
   id,
   value,
   onChange,
+  onBlur,
   placeholder,
   autoComplete,
   error,
+  required = true,
 }: {
   label: string;
   id: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   autoComplete?: string;
   error?: string;
+  required?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
 
@@ -134,10 +138,12 @@ export function AuthPasswordField({
       <div className="relative">
         <input
           id={id}
+          name={id}
           type={visible ? "text" : "password"}
-          required
+          required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           className={`${authInputClass} pr-12 ${error ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]" : ""}`}
           placeholder={placeholder}
           autoComplete={autoComplete}

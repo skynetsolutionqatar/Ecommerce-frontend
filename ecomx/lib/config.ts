@@ -12,6 +12,7 @@ export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5050/api/v1",
   tenantId: process.env.NEXT_PUBLIC_TENANT_ID ?? "6a363c2f05587300d65b2720",
   tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG ?? "skynet",
+  googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
 } as const;
 
 export const ADMIN_ROUTES = {

@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
+import { getApiFieldErrors } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
+  AuthAltActions,
   AuthPasswordField,
   AuthShell,
   AuthSubmitButton,
+  AuthSuccessState,
 } from "@/components/auth/AuthShell";
+
+type ResetField = "newPassword" | "confirmPassword";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -19,11 +23,22 @@ export default function ResetPasswordForm() {
   const token = searchParams.get("token") ?? "";
   const { resetPassword, loading, clearError, setError } = useAuth();
   const [form, setForm] = useState({ newPassword: "", confirmPassword: "" });
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<ResetField, string>>>({});
   const [success, setSuccess] = useState(false);
+
+  const clearFieldError = (field: ResetField) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setFieldErrors({});
 
     if (!token) {
       setError("Invalid or missing reset link. Request a new one.");
@@ -31,7 +46,7 @@ export default function ResetPasswordForm() {
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setError("Passwords do not match");
+      setFieldErrors({ confirmPassword: "Passwords do not match" });
       return;
     }
 
@@ -47,6 +62,18 @@ export default function ResetPasswordForm() {
         router.replace(AUTH_ROUTES.login);
       }, 1800);
     } catch (err) {
+      const apiFieldErrors = getApiFieldErrors(err);
+      const mappedErrors: Partial<Record<ResetField, string>> = {};
+      if (apiFieldErrors.newPassword) mappedErrors.newPassword = apiFieldErrors.newPassword;
+      if (apiFieldErrors.confirmPassword) mappedErrors.confirmPassword = apiFieldErrors.confirmPassword;
+      if (apiFieldErrors.password) mappedErrors.newPassword = apiFieldErrors.password;
+
+      if (Object.keys(mappedErrors).length > 0) {
+        setFieldErrors(mappedErrors);
+        clearError();
+        return;
+      }
+
       setError(getAuthErrorMessage(err, "resetPassword"));
     }
   };
@@ -57,14 +84,10 @@ export default function ResetPasswordForm() {
         title="Invalid reset link"
         subtitle="This password reset link is missing or invalid."
       >
-        <p className="text-center text-sm text-muted-foreground">
-          <Link
-            href={AUTH_ROUTES.forgotPassword}
-            className="font-semibold text-[#0a255d] hover:underline"
-          >
-            Request a new reset link
-          </Link>
-        </p>
+        <AuthAltActions
+          primary={{ href: AUTH_ROUTES.forgotPassword, label: "Request New Link" }}
+          secondary={{ href: AUTH_ROUTES.login, label: "Sign In" }}
+        />
       </AuthShell>
     );
   }
@@ -72,9 +95,14 @@ export default function ResetPasswordForm() {
   if (success) {
     return (
       <AuthShell title="Password updated" subtitle="You can now sign in with your new password.">
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Redirecting you to sign in…
-        </div>
+        <AuthSuccessState
+          title="Password updated"
+          message="Redirecting you to sign in…"
+        />
+        <AuthAltActions
+          primary={{ href: AUTH_ROUTES.login, label: "Sign In" }}
+          secondary={{ href: "/", label: "Go to Store" }}
+        />
       </AuthShell>
     );
   }
@@ -88,7 +116,11 @@ export default function ResetPasswordForm() {
           id="newPassword"
           label="New Password"
           value={form.newPassword}
-          onChange={(newPassword) => setForm((f) => ({ ...f, newPassword }))}
+          error={fieldErrors.newPassword}
+          onChange={(newPassword) => {
+            clearFieldError("newPassword");
+            setForm((f) => ({ ...f, newPassword }));
+          }}
           placeholder="Enter new password"
           autoComplete="new-password"
         />
@@ -97,7 +129,11 @@ export default function ResetPasswordForm() {
           id="confirmPassword"
           label="Confirm New Password"
           value={form.confirmPassword}
-          onChange={(confirmPassword) => setForm((f) => ({ ...f, confirmPassword }))}
+          error={fieldErrors.confirmPassword}
+          onChange={(confirmPassword) => {
+            clearFieldError("confirmPassword");
+            setForm((f) => ({ ...f, confirmPassword }));
+          }}
           placeholder="Re-enter new password"
           autoComplete="new-password"
         />
@@ -108,11 +144,10 @@ export default function ResetPasswordForm() {
           label="Update Password"
         />
 
-        <p className="text-center text-sm text-muted-foreground">
-          <Link href={AUTH_ROUTES.login} className="font-semibold text-[#0a255d] hover:underline">
-            Back to Sign In
-          </Link>
-        </p>
+        <AuthAltActions
+          primary={{ href: AUTH_ROUTES.login, label: "Sign In" }}
+          secondary={{ href: AUTH_ROUTES.forgotPassword, label: "Request New Link" }}
+        />
       </form>
     </AuthShell>
   );

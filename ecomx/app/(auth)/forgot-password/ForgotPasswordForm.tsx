@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
+import { getApiFieldErrors } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
+  AuthAltActions,
   AuthFormField,
   AuthShell,
   AuthSubmitButton,
+  AuthSuccessState,
   authInputClass,
 } from "@/components/auth/AuthShell";
 import * as Icons from "@/components/Icons";
@@ -17,11 +19,13 @@ import * as Icons from "@/components/Icons";
 export default function ForgotPasswordForm() {
   const { forgotPassword, loading, clearError, setError } = useAuth();
   const [email, setEmail] = useState("");
+  const [fieldError, setFieldError] = useState<string | undefined>();
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+    setFieldError(undefined);
     setSuccess(false);
 
     if (!email.trim()) {
@@ -34,6 +38,12 @@ export default function ForgotPasswordForm() {
       setEmail("");
       setSuccess(true);
     } catch (err) {
+      const apiFieldErrors = getApiFieldErrors(err);
+      if (apiFieldErrors.email) {
+        setFieldError(apiFieldErrors.email);
+        clearError();
+        return;
+      }
       setError(getAuthErrorMessage(err, "forgotPassword"));
     }
   };
@@ -44,14 +54,14 @@ export default function ForgotPasswordForm() {
         title="Check your email"
         subtitle="If an account exists for that address, we sent a password reset link."
       >
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Check your inbox for the reset link. It expires in 1 hour.
-        </div>
-        <p className="mt-5 text-center text-sm text-muted-foreground">
-          <Link href={AUTH_ROUTES.login} className="font-semibold text-[#0a255d] hover:underline">
-            Back to Sign In
-          </Link>
-        </p>
+        <AuthSuccessState
+          title="Reset link sent"
+          message="Check your inbox for the reset link. It expires in 1 hour."
+        />
+        <AuthAltActions
+          primary={{ href: AUTH_ROUTES.login, label: "Sign In" }}
+          secondary={{ href: "/", label: "Go to Store" }}
+        />
       </AuthShell>
     );
   }
@@ -64,15 +74,18 @@ export default function ForgotPasswordForm() {
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
         <AuthFormError />
 
-        <AuthFormField label="Email Address" icon={<Icons.Mail />}>
+        <AuthFormField label="Email Address" icon={<Icons.Mail />} error={fieldError}>
           <input
             id="email"
             type="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={authInputClass}
-            placeholder="admin@skynetqatar.com"
+            onChange={(e) => {
+              setFieldError(undefined);
+              setEmail(e.target.value);
+            }}
+            className={`${authInputClass} ${fieldError ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]" : ""}`}
+            placeholder="you@company.com"
             autoComplete="email"
           />
         </AuthFormField>
@@ -83,12 +96,10 @@ export default function ForgotPasswordForm() {
           label="Send Reset Link"
         />
 
-        <p className="text-center text-sm text-muted-foreground">
-          Remember your password?{" "}
-          <Link href={AUTH_ROUTES.login} className="font-semibold text-[#0a255d] hover:underline">
-            Sign In
-          </Link>
-        </p>
+        <AuthAltActions
+          primary={{ href: AUTH_ROUTES.login, label: "Sign In" }}
+          secondary={{ href: "/", label: "Go to Store" }}
+        />
       </form>
     </AuthShell>
   );

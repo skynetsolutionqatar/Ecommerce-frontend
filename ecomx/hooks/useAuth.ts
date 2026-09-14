@@ -7,7 +7,14 @@ import { ROLE } from "@/lib/Constant";
 import { AUTH_ROUTES, getPostAuthRedirect, isAdminRole } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
-import type { AuthUser, ChangePasswordPayload, ForgotPasswordPayload, LoginPayload, RegisterPayload, ResetPasswordPayload } from "@/types/auth.types";
+import type {
+  AuthUser,
+  ChangePasswordPayload,
+  ForgotPasswordPayload,
+  LoginPayload,
+  RegisterPayload,
+  ResetPasswordPayload,
+} from "@/types/auth.types";
 import { authUserToStoreUser } from "@/lib/auth-utils";
 
 function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {

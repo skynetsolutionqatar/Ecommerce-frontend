@@ -10,6 +10,7 @@ import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import AuthFormError from "@/components/auth/AuthFormError";
+import { getGoogleOAuthStartUrl, isGoogleOAuthConfigured } from "@/lib/google-oauth";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
@@ -146,6 +147,15 @@ export default function LoginModal({
         mode === "register" ? "register" : mode === "forgot" ? "forgotPassword" : "login";
       setError(getAuthErrorMessage(err, action));
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    clearError();
+    if (!isGoogleOAuthConfigured()) {
+      setError("Google sign-in is not configured. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env.local.");
+      return;
+    }
+    window.location.href = getGoogleOAuthStartUrl("/");
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -463,16 +473,19 @@ export default function LoginModal({
                       </span>
                       <div className="h-px flex-1 bg-gray-200" />
                     </div>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 gap-2.5">
                       <button
                         type="button"
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
+                        disabled={loading}
+                        onClick={handleGoogleSignIn}
+                        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-[#4285F4] text-[12px] md:text-[10px] font-black text-white">
                           G
                         </span>
                         Google
                       </button>
+                      {/* Microsoft sign-in — hidden until OAuth is implemented
                       <button
                         type="button"
                         className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
@@ -482,6 +495,7 @@ export default function LoginModal({
                         </span>
                         Microsoft
                       </button>
+                      */}
                     </div>
                   </>
                 )}
