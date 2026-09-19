@@ -1,9 +1,12 @@
 "use client";
 
 import { Suspense, memo, useState } from "react";
+import Link from "next/link";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { useDashboard } from "@/hooks/useDashboard";
+import { ADMIN_ROUTES } from "@/lib/config";
 import { adminType } from "@/lib/admin/typography";
+import { colors } from "@/components/admin/utils/Colors";
 import { lazyClient } from "@/lib/lazy";
 import StatCard from "./StatCard";
 import RecentTransactionsTable from "./RecentTransactionsTable";
@@ -145,23 +148,39 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-2">
-          <Suspense fallback={<ChartFallback />}>
-            <LabeledPieChart
-              title={data.utmSourceReport.title}
-              description={data.utmSourceReport.description}
-              items={data.utmSourceReport.items}
-            />
-          </Suspense>
-          <Suspense fallback={<ChartFallback />}>
-            <CategoryBarChart
-              title={data.utmCampaignReport.title}
-              description={data.utmCampaignReport.description}
-              points={data.utmCampaignReport.points}
-              valueLabel="Orders"
-              formatValue={(value) => value.toLocaleString()}
-            />
-          </Suspense>
+        <section className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className={adminType.sectionTitle}>Analytics & Reports</h2>
+              <p className={adminType.pageDescription}>
+                Traffic sources and campaign performance preview.
+              </p>
+            </div>
+            <Link
+              href={ADMIN_ROUTES.report("revenue")}
+              className={`${adminType.badge} inline-flex w-fit items-center font-semibold ${colors.link}`}
+            >
+              Open reports →
+            </Link>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Suspense fallback={<ChartFallback />}>
+              <LabeledPieChart
+                title={data.utmSourceReport.title}
+                description={data.utmSourceReport.description}
+                items={data.utmSourceReport.items}
+              />
+            </Suspense>
+            <Suspense fallback={<ChartFallback />}>
+              <CategoryBarChart
+                title={data.utmCampaignReport.title}
+                description={data.utmCampaignReport.description}
+                points={data.utmCampaignReport.points}
+                valueLabel="Orders"
+                formatValue={(value) => value.toLocaleString()}
+              />
+            </Suspense>
+          </div>
         </section>
 
         <RecentOrdersTable

@@ -1,6 +1,10 @@
 import * as Yup from "yup";
 import { INVENTORY_MOVEMENT_TYPE } from "@/lib/Constant";
-import type { AddStockPayload, ReduceStockPayload } from "@/types/inventory.types";
+import type {
+  AddStockPayload,
+  ReduceStockPayload,
+  SetStockPayload,
+} from "@/types/inventory.types";
 
 export type AddStockFormValues = {
   quantity: number | "";
@@ -13,6 +17,11 @@ export type ReduceStockFormValues = {
   note: string;
 };
 
+export type SetStockFormValues = {
+  stock: number | "";
+  note: string;
+};
+
 export const defaultAddStockValues: AddStockFormValues = {
   quantity: "",
   note: "",
@@ -21,6 +30,11 @@ export const defaultAddStockValues: AddStockFormValues = {
 export const defaultReduceStockValues: ReduceStockFormValues = {
   quantity: "",
   type: INVENTORY_MOVEMENT_TYPE.ADJUSTMENT,
+  note: "",
+};
+
+export const defaultSetStockValues: SetStockFormValues = {
+  stock: "",
   note: "",
 };
 
@@ -54,6 +68,21 @@ export function toReduceStockPayload(values: ReduceStockFormValues): ReduceStock
   return {
     quantity: Number(values.quantity),
     type: values.type as ReduceStockPayload["type"],
+    note: values.note.trim() || undefined,
+  };
+}
+
+export const setStockValidationSchema = Yup.object({
+  stock: Yup.number()
+    .required("Stock quantity is required")
+    .min(0, "Stock cannot be negative")
+    .integer("Stock must be a whole number"),
+  note: Yup.string().max(300, "Note cannot exceed 300 characters"),
+});
+
+export function toSetStockPayload(values: SetStockFormValues): SetStockPayload {
+  return {
+    stock: Number(values.stock),
     note: values.note.trim() || undefined,
   };
 }

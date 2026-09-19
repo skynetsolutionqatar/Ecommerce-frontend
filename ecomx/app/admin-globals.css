@@ -622,6 +622,18 @@ html.admin-theme-transition .admin-sidebar-brand img,
   background-color: var(--muted);
 }
 
+/* ─── Report list (Billing App-F style) ─── */
+.admin-shell .admin-filter-select {
+  height: 2rem;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.8125rem;
+}
+
+.admin-shell .admin-report-card .admin-filter-wrap {
+  width: 100%;
+}
+
 /* ─── Admin tables ─── */
 .admin-shell .admin-table {
   color: var(--foreground);

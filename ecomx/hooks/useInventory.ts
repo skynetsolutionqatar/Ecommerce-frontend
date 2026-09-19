@@ -4,13 +4,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchLowStockProducts,
   fetchStockHistory,
+  fetchStockProducts,
   inventoryApi,
 } from "@/lib/api/inventory.api";
 import type {
   AddStockPayload,
   LowStockQuery,
   ReduceStockPayload,
+  SetStockPayload,
   StockHistoryQuery,
+  StockProductsQuery,
 } from "@/types/inventory.types";
 
 export const INVENTORY_KEY = "inventory";
@@ -28,6 +31,15 @@ export function useLowStockWithMeta(params?: LowStockQuery) {
   return useQuery({
     queryKey: [INVENTORY_KEY, "low-stock", params],
     queryFn: () => fetchLowStockProducts(params),
+    staleTime: 60_000,
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useStockProductsWithMeta(params?: StockProductsQuery) {
+  return useQuery({
+    queryKey: [INVENTORY_KEY, "stock", params],
+    queryFn: () => fetchStockProducts(params),
     staleTime: 60_000,
     placeholderData: (prev) => prev,
   });
@@ -55,8 +67,11 @@ export function useStockHistory(productId: string, params?: StockHistoryQuery) {
 export function useInventoryMutations() {
   const queryClient = useQueryClient();
 
-  const invalidate = () =>
+  const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: [INVENTORY_KEY] });
+    void queryClient.invalidateQueries({ queryKey: ["products"] });
+    void queryClient.invalidateQueries({ queryKey: ["product"] });
+  };
 
   const addStock = useMutation({
     mutationFn: ({ productId, payload }: { productId: string; payload: AddStockPayload }) =>
@@ -70,5 +85,11 @@ export function useInventoryMutations() {
     onSuccess: invalidate,
   });
 
-  return { addStock, reduceStock };
+  const setStock = useMutation({
+    mutationFn: ({ productId, payload }: { productId: string; payload: SetStockPayload }) =>
+      inventoryApi.setStock(productId, payload),
+    onSuccess: invalidate,
+  });
+
+  return { addStock, reduceStock, setStock };
 }

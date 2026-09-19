@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import type { DashboardLowStockItem } from "@/types/dashboard.types";
 import type { PaginationMeta } from "@/types/api.types";
+import { ADMIN_ROUTES } from "@/lib/config";
 import { adminType } from "@/lib/admin/typography";
 import { colors } from "@/components/admin/utils/Colors";
 import ListPagination from "@/components/admin/shared/ListPagination";
@@ -75,7 +76,13 @@ function LowStockTable({
               <p className={`mb-1 line-clamp-2 font-semibold leading-snug text-foreground ${adminType.badge}`}>
                 {row.product}
               </p>
-              <p className={`font-mono ${adminType.badge} text-muted-foreground`}>{row.sku}</p>
+              <p className={`mb-3 font-mono ${adminType.badge} text-muted-foreground`}>{row.sku}</p>
+              <Link
+                href={ADMIN_ROUTES.inventoryUpdate(row.id)}
+                className={`inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 ${adminType.badge} font-semibold ${colors.link} transition hover:bg-muted/60`}
+              >
+                Update
+              </Link>
             </div>
           );
         })}

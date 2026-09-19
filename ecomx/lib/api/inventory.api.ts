@@ -6,11 +6,20 @@ import type {
   LowStockQuery,
   ProductStock,
   ReduceStockPayload,
+  SetStockPayload,
   StockHistoryEntry,
   StockHistoryQuery,
+  StockProduct,
+  StockProductsQuery,
 } from "@/types/inventory.types";
 
 export const inventoryApi = {
+  getStockProducts: (params?: StockProductsQuery) =>
+    apiGet<{ products: StockProduct[] }>(
+      "/inventory/stock",
+      params as Record<string, unknown>
+    ),
+
   getLowStock: (params?: LowStockQuery) =>
     apiGet<{ products: LowStockProduct[]; count: number }>(
       "/inventory/alerts/low-stock",
@@ -36,6 +45,12 @@ export const inventoryApi = {
       `/inventory/${productId}/reduce`,
       payload
     ),
+
+  setStock: (productId: string, payload: SetStockPayload) =>
+    apiPatch<{ product: { stock: number }; log: StockHistoryEntry | null }>(
+      `/inventory/${productId}/set`,
+      payload
+    ),
 };
 
 export type LowStockResult = {
@@ -49,6 +64,21 @@ export async function fetchLowStockProducts(params?: LowStockQuery): Promise<Low
   return {
     products: res.data.products,
     count: res.data.count,
+    pagination: res.pagination,
+  };
+}
+
+export type StockProductsResult = {
+  products: StockProduct[];
+  pagination?: PaginationMeta;
+};
+
+export async function fetchStockProducts(
+  params?: StockProductsQuery
+): Promise<StockProductsResult> {
+  const res = await inventoryApi.getStockProducts(params);
+  return {
+    products: res.data.products,
     pagination: res.pagination,
   };
 }

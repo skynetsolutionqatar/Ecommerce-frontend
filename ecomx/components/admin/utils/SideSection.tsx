@@ -12,8 +12,10 @@ import {
   Boxes,
   Settings,
   Building2,
+  FileBarChart,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
+import { REPORT_MENU } from "@/lib/admin/reports.config";
 
 export interface AdminMenuItem {
   name: string;
@@ -45,8 +47,16 @@ export const adminSections: AdminMenuSection[] = [
         name: "Catalog",
         icon: <Layers size={18} />,
         subMenu: [
-          { name: "Products", path: ADMIN_ROUTES.products, icon: <Package size={16} /> },
-          { name: "Categories", path: ADMIN_ROUTES.categories, icon: <Tag size={16} /> },
+          {
+            name: "Products",
+            path: ADMIN_ROUTES.products,
+            icon: <Package size={16} />,
+          },
+          {
+            name: "Categories",
+            path: ADMIN_ROUTES.categories,
+            icon: <Tag size={16} />,
+          },
         ],
       },
     ],
@@ -58,8 +68,16 @@ export const adminSections: AdminMenuSection[] = [
         name: "Sales",
         icon: <ShoppingCart size={18} />,
         subMenu: [
-          { name: "Orders", path: ADMIN_ROUTES.orders, icon: <ClipboardList size={16} /> },
-          { name: "Customers", path: ADMIN_ROUTES.customers, icon: <Users size={16} /> },
+          {
+            name: "Orders",
+            path: ADMIN_ROUTES.orders,
+            icon: <ClipboardList size={16} />,
+          },
+          {
+            name: "Customers",
+            path: ADMIN_ROUTES.customers,
+            icon: <Users size={16} />,
+          },
         ],
       },
     ],
@@ -71,10 +89,39 @@ export const adminSections: AdminMenuSection[] = [
         name: "Operations",
         icon: <Boxes size={18} />,
         subMenu: [
-          { name: "Inventory", path: ADMIN_ROUTES.inventory, icon: <BarChart3 size={16} /> },
-          { name: "Coupons", path: ADMIN_ROUTES.coupons, icon: <Ticket size={16} /> },
-          { name: "Reviews", path: ADMIN_ROUTES.reviews, icon: <Star size={16} /> },
+          {
+            name: "Inventory",
+            path: ADMIN_ROUTES.inventory,
+            icon: <BarChart3 size={16} />,
+          },
+          {
+            name: "Coupons",
+            path: ADMIN_ROUTES.coupons,
+            icon: <Ticket size={16} />,
+          },
+          {
+            name: "Reviews",
+            path: ADMIN_ROUTES.reviews,
+            icon: <Star size={16} />,
+          },
         ],
+      },
+    ],
+  },
+  {
+    title: "REPORTS",
+    items: [
+      {
+        name: "Reports",
+        icon: <FileBarChart size={18} />,
+        subMenu: REPORT_MENU.map((report) => ({
+          name: report.name,
+          path: report.path,
+          icon: (() => {
+            const Icon = report.icon;
+            return <Icon size={16} />;
+          })(),
+        })),
       },
     ],
   },
@@ -85,7 +132,11 @@ export const adminSections: AdminMenuSection[] = [
         name: "General Settings",
         icon: <Settings size={18} />,
         subMenu: [
-          { name: "Company", path: ADMIN_ROUTES.company, icon: <Building2 size={16} /> },
+          {
+            name: "Company",
+            path: ADMIN_ROUTES.company,
+            icon: <Building2 size={16} />,
+          },
           // { name: "Tenants", path: ADMIN_ROUTES.tenants, icon: <Settings size={16} /> },
         ],
       },

@@ -104,3 +104,6 @@ Confirm/revert based on response
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40skynet-store-fd14e.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 } -->
+
+
+<!-- use https://resend.com for mailing F & B -->

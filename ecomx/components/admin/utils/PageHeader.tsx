@@ -11,6 +11,7 @@ type PageHeaderProps = {
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
+  actions?: React.ReactNode;
   showBackButton?: boolean;
   className?: string;
   btnClassName?: string;
@@ -21,6 +22,7 @@ function PageHeader({
   description,
   actionLabel,
   onAction,
+  actions,
   showBackButton = false,
   className = "",
   btnClassName = "",
@@ -41,16 +43,17 @@ function PageHeader({
         </div>
       </div>
 
-      {actionLabel && (
-        <Button
-          size="sm"
-          onClick={onAction}
-          className={`gap-2 ${btnClassName} ${colors.mainColor} text-white transition-all hover:bg-opacity-90 cursor-pointer`}
-        >
-          <Plus className="h-4 w-4 font-bold" />
-          {actionLabel}
-        </Button>
-      )}
+      {actions ??
+        (actionLabel ? (
+          <Button
+            size="sm"
+            onClick={onAction}
+            className={`gap-2 ${btnClassName} ${colors.mainColor} text-white transition-all hover:bg-opacity-90 cursor-pointer`}
+          >
+            <Plus className="h-4 w-4 font-bold" />
+            {actionLabel}
+          </Button>
+        ) : null)}
     </div>
   );
 }

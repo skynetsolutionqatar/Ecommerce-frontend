@@ -11,7 +11,10 @@ export interface LowStockProduct {
   stock: number;
   lowStockAlert?: number;
   thumbnail?: string;
+  categoryId?: { _id: string; name: string; slug?: string } | string;
 }
+
+export interface StockProduct extends LowStockProduct {}
 
 export interface ProductStock {
   productId: string;
@@ -45,9 +48,20 @@ export interface ReduceStockPayload {
   note?: string;
 }
 
+export interface SetStockPayload {
+  stock: number;
+  note?: string;
+}
+
 /** GET /inventory/alerts/low-stock */
 export interface LowStockQuery extends PaginationParams {
   categoryId?: string;
+}
+
+/** GET /inventory/stock */
+export interface StockProductsQuery extends PaginationParams {
+  categoryId?: string;
+  stockStatus?: "low" | "ok" | "";
 }
 
 /** GET /inventory/:productId/history */

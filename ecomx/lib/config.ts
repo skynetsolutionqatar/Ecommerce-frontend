@@ -17,6 +17,8 @@ export const API_CONFIG = {
 
 export const ADMIN_ROUTES = {
   dashboard: `${ROUTE_PREFIX.ADMIN}/dashboard`,
+  reports: `${ROUTE_PREFIX.ADMIN}/reports`,
+  report: (type: string) => `${ROUTE_PREFIX.ADMIN}/reports/${type}`,
   products: `${ROUTE_PREFIX.ADMIN}/products`,
   product: (id: string) => `${ROUTE_PREFIX.ADMIN}/products/${id}`,
   orders: `${ROUTE_PREFIX.ADMIN}/orders`,
@@ -25,6 +27,8 @@ export const ADMIN_ROUTES = {
   categories: `${ROUTE_PREFIX.ADMIN}/categories`,
   category: (id: string) => `${ROUTE_PREFIX.ADMIN}/categories/${id}`,
   inventory: `${ROUTE_PREFIX.ADMIN}/inventory`,
+  inventoryUpdate: (productId: string) =>
+    `${ROUTE_PREFIX.ADMIN}/inventory?update=${encodeURIComponent(productId)}`,
   inventoryProduct: (productId: string) => `${ROUTE_PREFIX.ADMIN}/inventory/${productId}`,
   coupons: `${ROUTE_PREFIX.ADMIN}/coupons`,
   coupon: (id: string) => `${ROUTE_PREFIX.ADMIN}/coupons/${id}`,

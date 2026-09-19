@@ -21,10 +21,13 @@ interface LoginModalProps {
   onSuccess?: (user: StoreUser) => void;
   onLogout?: () => void;
   user?: StoreUser | null;
+  initialMode?: AuthMode;
+  resetToken?: string;
 }
 
-type AuthMode = "login" | "register" | "forgot";
+type AuthMode = "login" | "register" | "forgot" | "reset";
 type RegisterField = "name" | "email" | "phone" | "password";
+type ResetField = "newPassword" | "confirmPassword";
 
 const inputClass =
   "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-all placeholder:text-gray-400 focus:border-[#0a255d] focus:shadow-[0_0_0_4px_rgba(10,37,93,0.12)]";
@@ -44,9 +47,11 @@ export default function LoginModal({
   onSuccess,
   onLogout,
   user,
+  initialMode,
+  resetToken = "",
 }: LoginModalProps) {
   const router = useRouter();
-  const { login, register, forgotPassword, loading, clearError, setError } = useAuth();
+  const { login, register, forgotPassword, resetPassword, loading, clearError, setError } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = isAdminRole(authUser?.role);
@@ -57,6 +62,8 @@ export default function LoginModal({
   const [success, setSuccess] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegisterField, string>>>({});
+  const [resetForm, setResetForm] = useState({ newPassword: "", confirmPassword: "" });
+  const [resetFieldErrors, setResetFieldErrors] = useState<Partial<Record<ResetField, string>>>({});
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const clearFieldError = (field: RegisterField) => {
@@ -76,17 +83,25 @@ export default function LoginModal({
   };
 
   useEffect(() => {
+    if (open && initialMode) {
+      setMode(initialMode);
+    }
+  }, [open, initialMode]);
+
+  useEffect(() => {
     if (!open) {
-      setMode("login");
+      setMode(initialMode ?? "login");
       setShowPass(false);
       setForm({ name: "", email: "", phone: "", password: "" });
+      setResetForm({ newPassword: "", confirmPassword: "" });
       setSuccess(false);
       setAvatarPreview(undefined);
       setFieldErrors({});
+      setResetFieldErrors({});
       setGoogleLoading(false);
       clearError();
     }
-  }, [open, clearError]);
+  }, [open, clearError, initialMode]);
 
   if (!open) return null;
 
@@ -120,7 +135,7 @@ export default function LoginModal({
       } else if (mode === "login") {
         const result = await login({ email: form.email, password: form.password }, null);
         storeUser = { ...result.storeUser, avatarUrl: avatarPreview ?? result.storeUser.avatarUrl };
-      } else {
+      } else if (mode === "forgot") {
         if (!form.email.trim()) {
           setError("Email is required");
           return;
@@ -128,6 +143,29 @@ export default function LoginModal({
         await forgotPassword({ email: form.email.trim() });
         setForm((f) => ({ ...f, email: "" }));
         setSuccess(true);
+        return;
+      } else if (mode === "reset") {
+        if (!resetToken) {
+          setError("Invalid or missing reset link. Request a new one.");
+          return;
+        }
+        if (resetForm.newPassword !== resetForm.confirmPassword) {
+          setResetFieldErrors({ confirmPassword: "Passwords do not match" });
+          return;
+        }
+        await resetPassword({
+          token: resetToken,
+          newPassword: resetForm.newPassword,
+          confirmPassword: resetForm.confirmPassword,
+        });
+        setResetForm({ newPassword: "", confirmPassword: "" });
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          onClose();
+        }, 1800);
+        return;
+      } else {
         return;
       }
 
@@ -141,15 +179,32 @@ export default function LoginModal({
         switchMode("login");
       }, 1400);
     } catch (err) {
-      const apiFieldErrors = mode === "register" ? getApiFieldErrors(err) : {};
-      if (Object.keys(apiFieldErrors).length > 0) {
+      const apiFieldErrors = getApiFieldErrors(err);
+      if (mode === "register" && Object.keys(apiFieldErrors).length > 0) {
         setFieldErrors(apiFieldErrors);
         clearError();
         return;
       }
+      if (mode === "reset" && Object.keys(apiFieldErrors).length > 0) {
+        const mappedErrors: Partial<Record<ResetField, string>> = {};
+        if (apiFieldErrors.newPassword) mappedErrors.newPassword = apiFieldErrors.newPassword;
+        if (apiFieldErrors.confirmPassword) mappedErrors.confirmPassword = apiFieldErrors.confirmPassword;
+        if (apiFieldErrors.password) mappedErrors.newPassword = apiFieldErrors.password;
+        if (Object.keys(mappedErrors).length > 0) {
+          setResetFieldErrors(mappedErrors);
+          clearError();
+          return;
+        }
+      }
 
       const action =
-        mode === "register" ? "register" : mode === "forgot" ? "forgotPassword" : "login";
+        mode === "register"
+          ? "register"
+          : mode === "forgot"
+            ? "forgotPassword"
+            : mode === "reset"
+              ? "resetPassword"
+              : "login";
       setError(getAuthErrorMessage(err, action));
     }
   };
@@ -184,7 +239,9 @@ export default function LoginModal({
         ? "Welcome Back"
         : mode === "register"
           ? "Join Skynet"
-          : "Reset Password";
+          : mode === "reset"
+            ? "New Password"
+            : "Reset Password";
 
   const headerSubtitle =
     user && !success
@@ -193,7 +250,9 @@ export default function LoginModal({
         ? "Sign in to shop smarter"
         : mode === "register"
           ? "Create your account in seconds"
-          : "We'll email you a reset link";
+          : mode === "reset"
+            ? "Choose a new password for your account"
+            : "We'll email you a reset link";
 
   return (
     <div
@@ -219,10 +278,10 @@ export default function LoginModal({
             <X className="h-4 w-4" />
           </button>
 
-          {mode === "forgot" && (
+          {(mode === "forgot" || mode === "reset") && (
             <button
               type="button"
-              onClick={() => switchMode("login")}
+              onClick={() => (initialMode === "reset" ? onClose() : switchMode("login"))}
               className="absolute left-4 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-lg text-white backdrop-blur-sm transition-colors hover:bg-white/20"
               title="Back to Sign In"
             >
@@ -260,14 +319,14 @@ export default function LoginModal({
             <div>
               <div className="mb-1 flex items-center justify-center gap-2 font-display text-[26px] font-bold tracking-tight">
                 {headerTitle}
-                {!user && mode !== "forgot" && (
+                {!user && mode !== "forgot" && mode !== "reset" && (
                   <Sparkles className="h-5 w-5 text-amber-300" strokeWidth={2.25} />
                 )}
               </div>
               <p className="text-[13px] font-medium text-blue-100/80">{headerSubtitle}</p>
             </div>
 
-            {!user && !success && mode !== "forgot" && (
+            {!user && !success && mode !== "forgot" && mode !== "reset" && (
               <div className="flex w-full max-w-[280px] rounded-xl border border-white/20 bg-black/20 p-1 backdrop-blur-sm">
                 {(["login", "register"] as const).map((tab) => (
                   <button
@@ -336,13 +395,31 @@ export default function LoginModal({
                   ? "Signed in!"
                   : mode === "register"
                     ? "Account created!"
-                    : "Email sent!"}
+                    : mode === "reset"
+                      ? "Password updated!"
+                      : "Email sent!"}
               </div>
               <p className="text-sm font-medium text-gray-500">
                 {mode === "forgot"
                   ? "Check your inbox for the reset link."
-                  : "Welcome to Skynet Solution Qatar."}
+                  : mode === "reset"
+                    ? "You can now sign in with your new password."
+                    : "Welcome to Skynet Solution Qatar."}
               </p>
+            </div>
+          ) : mode === "reset" && !resetToken ? (
+            <div className="py-4 text-center">
+              <p className="mb-4 text-sm font-medium text-gray-600">
+                This password reset link is missing or invalid.
+              </p>
+              <button
+                type="button"
+                onClick={() => switchMode("forgot")}
+                className={primaryBtnClass}
+              >
+                Request New Link
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
@@ -364,23 +441,25 @@ export default function LoginModal({
                   </FormField>
                 )}
 
-                <FormField
-                  label="Email Address"
-                  icon={<Icons.Mail />}
-                  error={mode === "register" ? fieldErrors.email : undefined}
-                >
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => {
-                      if (mode === "register") clearFieldError("email");
-                      setForm((f) => ({ ...f, email: e.target.value }));
-                    }}
-                    placeholder="you@company.com"
-                    required
-                    className={`${inputClass} ${mode === "register" && fieldErrors.email ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
-                  />
-                </FormField>
+                {mode !== "reset" && (
+                  <FormField
+                    label="Email Address"
+                    icon={<Icons.Mail />}
+                    error={mode === "register" ? fieldErrors.email : undefined}
+                  >
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => {
+                        if (mode === "register") clearFieldError("email");
+                        setForm((f) => ({ ...f, email: e.target.value }));
+                      }}
+                      placeholder="you@company.com"
+                      required
+                      className={`${inputClass} ${mode === "register" && fieldErrors.email ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
+                    />
+                  </FormField>
+                )}
 
                 {mode === "register" && (
                   <FormField label="Phone (Qatar)" icon={<Icons.Phone />} error={fieldErrors.phone}>
@@ -413,7 +492,7 @@ export default function LoginModal({
                   </FormField>
                 )}
 
-                {mode !== "forgot" && (
+                {mode === "login" || mode === "register" ? (
                   <FormField
                     label="Password"
                     icon={<Icons.Lock />}
@@ -441,6 +520,59 @@ export default function LoginModal({
                       </button>
                     </div>
                   </FormField>
+                ) : null}
+
+                {mode === "reset" && (
+                  <>
+                    <FormField label="New Password" icon={<Icons.Lock />} error={resetFieldErrors.newPassword}>
+                      <div className="relative">
+                        <input
+                          type={showPass ? "text" : "password"}
+                          value={resetForm.newPassword}
+                          onChange={(e) => {
+                            setResetFieldErrors((prev) => {
+                              if (!prev.newPassword) return prev;
+                              const next = { ...prev };
+                              delete next.newPassword;
+                              return next;
+                            });
+                            setResetForm((f) => ({ ...f, newPassword: e.target.value }));
+                          }}
+                          placeholder="Enter new password"
+                          required
+                          autoComplete="new-password"
+                          className={`${inputClass} pr-12 ${resetFieldErrors.newPassword ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPass((p) => !p)}
+                          className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#0a255d]"
+                          aria-label={showPass ? "Hide password" : "Show password"}
+                        >
+                          {showPass ? <Icons.EyeOff /> : <Icons.Eye />}
+                        </button>
+                      </div>
+                    </FormField>
+                    <FormField label="Confirm New Password" icon={<Icons.Lock />} error={resetFieldErrors.confirmPassword}>
+                      <input
+                        type={showPass ? "text" : "password"}
+                        value={resetForm.confirmPassword}
+                        onChange={(e) => {
+                          setResetFieldErrors((prev) => {
+                            if (!prev.confirmPassword) return prev;
+                            const next = { ...prev };
+                            delete next.confirmPassword;
+                            return next;
+                          });
+                          setResetForm((f) => ({ ...f, confirmPassword: e.target.value }));
+                        }}
+                        placeholder="Re-enter new password"
+                        required
+                        autoComplete="new-password"
+                        className={`${inputClass} ${resetFieldErrors.confirmPassword ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
+                      />
+                    </FormField>
+                  </>
                 )}
 
                 {mode === "login" && (
@@ -464,13 +596,15 @@ export default function LoginModal({
                         ? "Sign In"
                         : mode === "register"
                           ? "Create Account"
-                          : "Send Reset Link"}
+                          : mode === "reset"
+                            ? "Update Password"
+                            : "Send Reset Link"}
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                     </>
                   )}
                 </button>
 
-                {mode !== "forgot" && (
+                {mode !== "forgot" && mode !== "reset" && (
                   <>
                     <div className="flex items-center gap-3 py-1">
                       <div className="h-px flex-1 bg-gray-200" />
@@ -510,12 +644,12 @@ export default function LoginModal({
                   </>
                 )}
 
-                {mode === "forgot" && (
+                {(mode === "forgot" || mode === "reset") && (
                   <p className="text-center text-[13px] font-medium text-gray-500">
                     Remember your password?{" "}
                     <button
                       type="button"
-                      onClick={() => switchMode("login")}
+                      onClick={() => (initialMode === "reset" ? onClose() : switchMode("login"))}
                       className="cursor-pointer border-0 bg-transparent font-bold text-[#0a255d] hover:underline"
                     >
                       Sign In
