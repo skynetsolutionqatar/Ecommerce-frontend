@@ -71,7 +71,7 @@ export default function FlipkartProductRow({
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="absolute left-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition-all hover:border-gray-400 hover:shadow-lg"
+              className="absolute left-1 top-1/2 z-10 hidden sm:flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition-all hover:border-gray-400 hover:shadow-lg"
               style={{ marginTop: "-12px" }}
               aria-label="Previous"
             >
@@ -89,7 +89,7 @@ export default function FlipkartProductRow({
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="absolute right-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition-all hover:border-gray-400 hover:shadow-lg"
+              className="absolute right-1 top-1/2 z-10 hidden sm:flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition-all hover:border-gray-400 hover:shadow-lg"
               style={{ marginTop: "-12px" }}
               aria-label="Next"
             >

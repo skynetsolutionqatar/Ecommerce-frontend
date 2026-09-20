@@ -31,15 +31,18 @@ export default function BrandLogo({
         ? "object-left drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
         : "object-left";
 
+  const width = Math.round(height * 1.414);
+
   return (
     <span className={`inline-flex items-center ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}
+        width={width}
         height={height}
         className={`block w-auto max-w-full object-contain ${variantClass} ${imgClassName}`}
-        style={{ height, maxHeight: height }}
+        style={{ height, maxHeight: height, aspectRatio: "3508 / 2481" }}
         fetchPriority={priority ? "high" : undefined}
         draggable={false}
       />

@@ -6,10 +6,18 @@ interface LazyMountProps {
   children: ReactNode;
   /** Start loading before the element enters the viewport */
   rootMargin?: string;
+  /** Estimated min height to reserve space and prevent layout shifts (CLS) */
+  minHeight?: number | string;
+  className?: string;
 }
 
-/** Mount children only when near the viewport — defers below-fold work. */
-export default function LazyMount({ children, rootMargin = "240px" }: LazyMountProps) {
+/** Mount children only when near the viewport — defers below-fold work without CLS. */
+export default function LazyMount({
+  children,
+  rootMargin = "240px",
+  minHeight,
+  className = "",
+}: LazyMountProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -31,5 +39,23 @@ export default function LazyMount({ children, rootMargin = "240px" }: LazyMountP
     return () => observer.disconnect();
   }, [visible, rootMargin]);
 
-  return <div ref={ref}>{visible ? children : null}</div>;
+  const minHStyle = minHeight
+    ? typeof minHeight === "number"
+      ? `${minHeight}px`
+      : minHeight
+    : undefined;
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        minHeight: !visible ? minHStyle : undefined,
+        contentVisibility: "auto",
+        containIntrinsicSize: minHStyle ? `1px ${minHStyle}` : undefined,
+      }}
+    >
+      {visible ? children : null}
+    </div>
+  );
 }

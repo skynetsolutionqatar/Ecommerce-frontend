@@ -37,7 +37,7 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
         ))}
       </div>
       {reviews > 0 ? (
-        <span className="font-label text-[11px] md:text-[9px] text-gray-400">({reviews})</span>
+        <span className="font-label text-[11px] md:text-[9px] text-gray-600">({reviews})</span>
       ) : null}
     </div>
   );
@@ -67,7 +67,7 @@ export default function HomeScrollProductCard({
   const compareAt = product.compareAtPrice;
 
   return (
-    <motion.article
+    <motion.div
       role="button"
       tabIndex={0}
       onClick={() => onClick(product)}
@@ -107,6 +107,8 @@ export default function HomeScrollProductCard({
             <StoreImage
               src={image}
               alt={product.name}
+              width={160}
+              height={160}
               className="h-full w-full object-contain drop-shadow-sm"
             />
           </div>
@@ -157,7 +159,7 @@ export default function HomeScrollProductCard({
 
       <div className="flex flex-1 flex-col px-2.5 pt-2 pb-2.5">
         {showBrand && product.brand ? (
-          <div className={`mb-0.5 ${type.eyebrow} text-[9px] md:text-[7.5px] tracking-widest text-gray-400 uppercase`}>
+          <div className={`mb-0.5 ${type.eyebrow} text-[9px] md:text-[7.5px] tracking-widest text-gray-600 uppercase`}>
             {product.brand}
           </div>
         ) : null}
@@ -174,15 +176,15 @@ export default function HomeScrollProductCard({
 
         {compareAt && compareAt > product.price ? (
           <div className="flex items-center gap-1.5">
-            <span className={`${type.price} text-[11px] md:text-[10px] text-gray-400 line-through`}>
+            <span className={`${type.price} text-[11px] md:text-[10px] text-gray-500 line-through`}>
               {formatPrice(compareAt)}
             </span>
             {discount ? (
-              <span className="font-label text-[11px] md:text-[9.5px] font-bold text-green-600">{discount}% off</span>
+              <span className="font-label text-[11px] md:text-[9.5px] font-bold text-emerald-700">{discount}% off</span>
             ) : null}
           </div>
         ) : null}
       </div>
-    </motion.article>
+    </motion.div>
   );
 }

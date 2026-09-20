@@ -123,7 +123,13 @@ export default function PromoBannerStrip({ onCategoryClick }: PromoBannerStripPr
           </div>
 
           <div className={`relative z-[1] flex h-[92px] w-[92px] shrink-0 items-center justify-center overflow-hidden rounded-xl p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-transform duration-300 group-hover:scale-[1.03] sm:h-[110px] sm:w-[110px] sm:p-2 md:h-[130px] md:w-[130px] ${productImageSurfaceClass}`}>
-            <StoreImage src={b.img} alt={b.title} className="h-full w-full object-contain object-center" />
+            <StoreImage
+              src={b.img}
+              alt={b.title}
+              width={130}
+              height={130}
+              className="h-full w-full object-contain object-center"
+            />
           </div>
         </button>
       ))}

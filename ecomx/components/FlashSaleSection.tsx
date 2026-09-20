@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Flame } from "lucide-react";
 import HomeScrollProductCard from "@/components/store/HomeScrollProductCard";
 import HomeProductRowSkeleton from "@/components/store/HomeProductRowSkeleton";
 import * as Icons from "./Icons";
@@ -65,13 +66,9 @@ export default function FlashSaleSection({
         style={{ background: "linear-gradient(135deg, #0a255dff 0%, #1e293b 60%, #334155 100%)" }}
       >
         <div className="flex items-center gap-2">
-          <motion.span
-            className="text-xl"
-            animate={{ rotate: [-5, 5, -5], scale: [1, 1.1, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            🔥
-          </motion.span>
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+            <Flame className="h-4 w-4 fill-amber-400 text-amber-400" />
+          </span>
           <h2 className="font-display text-[14px] font-extrabold text-white sm:text-[17px] md:text-xl">
             Deal of the Day
           </h2>
@@ -86,18 +83,9 @@ export default function FlashSaleSection({
               { v: time.s, l: "S" },
             ].map(({ v, l }, i) => (
               <span key={l} className="flex items-center gap-1">
-                <AnimatePresence mode="popLayout">
-                  <motion.span
-                    key={v}
-                    initial={{ y: -10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 10, opacity: 0 }}
-                    transition={{ duration: 0.22 }}
-                    className="flex h-7 min-w-[28px] flex-col items-center justify-center rounded-md border border-white/20 bg-white/15 px-1.5 font-mono text-[13px] font-extrabold tabular-nums text-white"
-                  >
-                    {pad(v)}
-                  </motion.span>
-                </AnimatePresence>
+                <span className="flex h-7 min-w-[28px] flex-col items-center justify-center rounded-md border border-white/20 bg-white/15 px-1.5 font-mono text-[13px] font-extrabold tabular-nums text-white">
+                  {pad(v)}
+                </span>
                 {i < 2 ? <span className="text-sm font-bold text-white/60">:</span> : null}
               </span>
             ))}

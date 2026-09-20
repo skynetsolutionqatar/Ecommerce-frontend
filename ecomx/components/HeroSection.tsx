@@ -393,7 +393,7 @@ function HeroSlidePanel({
         <motion.div
           className="w-full min-w-0 max-w-[380px]"
           variants={contentStagger}
-          initial={isActive ? "hidden" : false}
+          initial={false}
           animate={isActive ? "show" : "idle"}
         >
           <motion.div className="mb-2 flex items-center gap-1.5" variants={contentUp}>
@@ -508,13 +508,15 @@ function HeroSlidePanel({
       <motion.div
         className="pointer-events-none relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 pt-0 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%]"
         variants={productEnter}
-        initial={isActive ? "hidden" : false}
+        initial={false}
         animate={isActive ? "show" : "idle"}
       >
         <div className={`${HERO_IMAGE_INNER} flex h-[140px] w-full max-w-[220px] items-center justify-center sm:h-[72%] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[340px] xl:max-w-[360px]`}>
           <StoreImage
             src={slide.img}
             alt={formatHeroTitle(slide.title).replace("\n", " ")}
+            width={400}
+            height={360}
             priority
             blend={false}
             className={getHeroImageClass()}
@@ -838,6 +840,8 @@ export default function HeroSection({
                         <StoreImage
                           src={sl.img}
                           alt=""
+                          width={44}
+                          height={28}
                           blend={false}
                           className="h-full w-full object-contain p-0.5"
                         />

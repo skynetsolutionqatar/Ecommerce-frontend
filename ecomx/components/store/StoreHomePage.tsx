@@ -114,7 +114,7 @@ export default function StoreHomePage() {
           />
         </div>
 
-        <LazyMount>
+        <LazyMount minHeight="140px">
           <div className="mb-2">
             <Suspense fallback={null}>
               <PromoBannerStrip onCategoryClick={(cat) => goToShop(cat)} />
@@ -122,7 +122,7 @@ export default function StoreHomePage() {
           </div>
         </LazyMount>
 
-        <LazyMount>
+        <LazyMount minHeight="360px">
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
               <FlipkartProductRow
@@ -140,7 +140,7 @@ export default function StoreHomePage() {
           </div>
         </LazyMount>
 
-        <LazyMount>
+        <LazyMount minHeight="240px">
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
               <CategoriesSection
@@ -151,7 +151,7 @@ export default function StoreHomePage() {
           </div>
         </LazyMount>
 
-        <LazyMount>
+        <LazyMount minHeight="360px">
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
               <FlipkartProductRow
@@ -216,7 +216,7 @@ export default function StoreHomePage() {
           </div>
         </div>
 
-        <LazyMount>
+        <LazyMount minHeight="280px">
           <Suspense fallback={null}>
             <NewsletterSection />
           </Suspense>
