@@ -204,7 +204,7 @@ export default function Header({
               whileTap={{ scale: 0.97 }}
             >
               <BrandLogo
-                height={48}
+                height={68}
                 priority
                 alt={client.name}
                 imgClassName="max-w-[180px] sm:max-w-[200px]"
@@ -537,9 +537,9 @@ export default function Header({
                     <button
                       type="button"
                       onClick={() => {
-                      goTo(ROUTES.shop);
-                      setMobileOpen(false);
-                    }}
+                        goTo(ROUTES.shop);
+                        setMobileOpen(false);
+                      }}
                       className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-[13px] font-medium text-gray-700"
                     >
                       <span className="flex h-5 w-5 items-center justify-center text-gray-500">
@@ -581,9 +581,9 @@ export default function Header({
               <nav className="flex-1 p-4">
                 <p
                   className={`mb-2 px-1 ${type.eyebrow} text-[11px] text-gray-400`}
-                  >
-                    NAVIGATION
-                  </p>
+                >
+                  NAVIGATION
+                </p>
                 {MOBILE_NAV_LINKS.map((item) => (
                   <motion.button
                     key={item.label}
