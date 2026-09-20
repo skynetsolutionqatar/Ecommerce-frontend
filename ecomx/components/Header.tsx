@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Truck, Lock, ShieldCheck, Headphones } from "lucide-react";
 import * as Icons from "./Icons";
 import type { CartItem, WishlistItem, StoreUser } from "@/lib/types";
 import Avatar from "./Avatar";
@@ -151,16 +152,20 @@ export default function Header({
           <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-3 sm:px-5 md:px-8 lg:px-[50px]">
             <div className="flex items-center gap-5 text-[12px] md:text-[11px] text-white/85">
               <span className="flex items-center gap-1.5">
-                🚚 Free Delivery on orders over QAR 299
+                <Truck className="h-3.5 w-3.5 shrink-0" />
+                Free Delivery on orders over QAR 299
               </span>
               <span className="hidden sm:flex items-center gap-1.5">
-                🔒 Secure Payments
+                <Lock className="h-3.5 w-3.5 shrink-0" />
+                Secure Payments
               </span>
               <span className="hidden md:flex items-center gap-1.5">
-                🛡️ Official Warranty
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+                Official Warranty
               </span>
               <span className="hidden lg:flex items-center gap-1.5">
-                🎧 Expert Support
+                <Headphones className="h-3.5 w-3.5 shrink-0" />
+                Expert Support
               </span>
             </div>
             <div className="flex items-center gap-3 text-[12px] md:text-[11px] text-white/85">
