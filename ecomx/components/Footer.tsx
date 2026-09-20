@@ -30,7 +30,7 @@ export default function Footer() {
               aria-label="Skynet Solution home"
             >
               <BrandLogo
-                height={54}
+                height={72}
                 variant="footer"
                 alt="Skynet Solution"
                 imgClassName="max-w-[220px] sm:max-w-[240px]"
