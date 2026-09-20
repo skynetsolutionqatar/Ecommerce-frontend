@@ -132,11 +132,17 @@ export async function apiDelete<T>(url: string) {
   return data;
 }
 
+/** Strip path separators and control characters so a server-supplied name cannot escape the download dir. */
+function safeDownloadName(filename: string): string {
+  const cleaned = filename.replace(/[\\/\u0000-\u001f\u007f]/g, "_").trim();
+  return cleaned.replace(/^\.+/, "") || "download";
+}
+
 export function triggerBrowserDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = filename;
+  link.download = safeDownloadName(filename);
   document.body.appendChild(link);
   link.click();
   link.remove();

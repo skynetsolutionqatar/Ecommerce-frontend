@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { AUTH_ROUTES } from "@/lib/config";
+import { AUTH_ROUTES, sanitizeRedirectPath } from "@/lib/config";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
   AuthAltActions,
@@ -24,7 +24,8 @@ type RegisterField = "name" | "email" | "phone" | "password";
 
 export default function RegisterForm() {
   const searchParams = useSearchParams();
-  const redirectParam = searchParams.get("redirect");
+  const rawRedirect = searchParams.get("redirect");
+  const redirectParam = rawRedirect ? sanitizeRedirectPath(rawRedirect) : null;
   const { register, loading, clearError, setError } = useAuth();
   const [form, setForm] = useState({
     name: "",

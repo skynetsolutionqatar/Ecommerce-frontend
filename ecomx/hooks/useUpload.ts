@@ -25,6 +25,10 @@ export function useUpload(options: UseUploadOptions = {}) {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
   const validateFiles = (files: File[]): string | null => {
+    if (files.length === 0) {
+      return 'No files selected';
+    }
+
     if (files.length > maxFiles) {
       return `Maximum ${maxFiles} files allowed`;
     }
@@ -35,8 +39,14 @@ export function useUpload(options: UseUploadOptions = {}) {
         return `"${file.name}" is too large. Maximum ${maxSizeMB}MB per file.`;
       }
 
+      if (file.size === 0) {
+        return `"${file.name}" is empty.`;
+      }
+
+      // Both MIME type and extension must match — either alone is trivially spoofed.
       const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      if (!allowed.includes(file.type)) {
+      const allowedExtensions = /\.(jpe?g|png|webp)$/i;
+      if (!allowed.includes(file.type) || !allowedExtensions.test(file.name)) {
         return `"${file.name}" is not a valid image. Only JPG, PNG, WebP allowed.`;
       }
     }

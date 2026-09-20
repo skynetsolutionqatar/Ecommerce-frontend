@@ -21,7 +21,11 @@ import {
   stockStatusBadgeClass,
 } from "@/lib/admin/stock-report";
 import { ADMIN_ROUTES } from "@/lib/config";
-import type { SetStockPayload, StockProduct } from "@/types/inventory.types";
+import type {
+  SetStockPayload,
+  StockProduct,
+  StockProductsQuery,
+} from "@/types/inventory.types";
 import { Button } from "@/components/ui/button";
 
 export default function AdminInventoryPage() {
@@ -29,7 +33,8 @@ export default function AdminInventoryPage() {
   const searchParams = useSearchParams();
   const updateId = searchParams.get("update");
   const [search, setSearch] = useState("");
-  const [stockStatus, setStockStatus] = useState("");
+  const [stockStatus, setStockStatus] =
+    useState<NonNullable<StockProductsQuery["stockStatus"]>>("");
   const [page, setPage] = useState(1);
   const [updateProduct, setUpdateProduct] = useState<StockProduct | null>(null);
   const debouncedSearch = useDebounce(search);
@@ -99,7 +104,7 @@ export default function AdminInventoryPage() {
             placeholder: "All products",
             options: STOCK_STATUS_FILTER_OPTIONS,
             onChange: (value) => {
-              setStockStatus(value);
+              setStockStatus(value === "low" || value === "ok" ? value : "");
               setPage(1);
             },
           },

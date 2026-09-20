@@ -60,7 +60,7 @@ function ReportPage({ reportType }: ReportPageProps) {
     return Object.entries(report.filterOptions).map(([key, field]) => ({
       key,
       label: formatFilterLabel(key),
-      value: filters[key as keyof ReportQueryParams] ?? field.value ?? "",
+      value: String(filters[key as keyof ReportQueryParams] ?? field.value ?? ""),
       placeholder: field.options.find((o) => o.value === "")?.label ?? "All",
       options: field.options,
       onChange: (value: string) => {

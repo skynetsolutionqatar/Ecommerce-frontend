@@ -4,15 +4,36 @@ import {
   AUTH_PATH,
   isAdminRole,
   ROUTE_PREFIX,
+  sanitizeRedirectPath,
   STORAGE_KEYS,
 } from "@/lib/Constant";
 
-function decodeTokenPayload(token: string): { role?: string; exp?: number } | null {
+interface TokenPayload {
+  role?: string;
+  exp?: number;
+}
+
+/**
+ * Best-effort read of the JWT claims for routing decisions only.
+ * The signature is NOT verified here — never treat the result as an
+ * authorization decision; the API re-validates every request.
+ */
+function decodeTokenPayload(token: string): TokenPayload | null {
   try {
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-    const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-    return decoded;
+    const segments = token.split(".");
+    if (segments.length !== 3) return null;
+
+    const base64 = segments[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const decoded: unknown = JSON.parse(atob(padded));
+
+    if (!decoded || typeof decoded !== "object") return null;
+
+    const { role, exp } = decoded as Record<string, unknown>;
+    return {
+      role: typeof role === "string" ? role : undefined,
+      exp: typeof exp === "number" ? exp : undefined,
+    };
   } catch {
     return null;
   }
@@ -32,9 +53,9 @@ export function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(STORAGE_KEYS.ACCESS_TOKEN)?.value
     ?? request.headers.get("authorization")?.replace("Bearer ", "");
 
-  const tokenFromHeader = request.cookies.get(STORAGE_KEYS.AUTH)?.value;
+  const tokenFromAuthCookie = request.cookies.get(STORAGE_KEYS.AUTH)?.value;
 
-  const token = accessToken || tokenFromHeader;
+  const token = accessToken || tokenFromAuthCookie;
   const payload = token ? decodeTokenPayload(token) : null;
   const isAuthenticated = !!payload?.exp && payload.exp * 1000 > Date.now();
   const isAdmin = isAdminRole(payload?.role);
@@ -44,7 +65,8 @@ export function proxy(request: NextRequest) {
   }
 
   if (isAuthRoute && !isAuthenticated) {
-    const redirect = request.nextUrl.searchParams.get("redirect");
+    const rawRedirect = request.nextUrl.searchParams.get("redirect");
+    const redirect = rawRedirect ? sanitizeRedirectPath(rawRedirect) : null;
     if (redirect && !redirect.startsWith(ROUTE_PREFIX.ADMIN)) {
       return NextResponse.redirect(new URL("/", request.url));
     }

@@ -2,10 +2,11 @@ import {
   AUTH_PATH,
   isAdminRole,
   ROUTE_PREFIX,
+  sanitizeRedirectPath,
   STORAGE_KEYS,
 } from "@/lib/Constant";
 
-export { isAdminRole };
+export { isAdminRole, sanitizeRedirectPath };
 
 export const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://api-skynet-ecommerce-store.onrender.com/api/v1",
@@ -59,7 +60,8 @@ export function getPostAuthRedirect(
   redirectTo?: string | null
 ): string | null {
   if (redirectTo === null) return null;
-  if (redirectTo) return redirectTo;
-  if (isAdminRole(role)) return ADMIN_ROUTES.dashboard;
-  return "/";
+
+  const fallback = isAdminRole(role) ? ADMIN_ROUTES.dashboard : "/";
+  if (redirectTo) return sanitizeRedirectPath(redirectTo, fallback);
+  return fallback;
 }

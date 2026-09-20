@@ -80,12 +80,6 @@ export function buildProductSpecs(
 }
 
 export function getProductTrustBadges(product: Product): ProductTrustBadge[] {
-  console.log(
-    "Building trust badges for product:",
-    product.name,
-    product.totalSold
-  );
-
   const badges: ProductTrustBadge[] = [];
 
   if (product.isFreeShipping) {

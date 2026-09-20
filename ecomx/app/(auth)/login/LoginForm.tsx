@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { AUTH_ROUTES } from "@/lib/config";
+import { AUTH_ROUTES, sanitizeRedirectPath } from "@/lib/config";
 import { getSessionExpiredMessage, isAuthSessionReason } from "@/lib/api/auth-errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
@@ -19,7 +19,8 @@ import * as Icons from "@/components/Icons";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const redirectParam = searchParams.get("redirect");
+  const rawRedirect = searchParams.get("redirect");
+  const redirectParam = rawRedirect ? sanitizeRedirectPath(rawRedirect) : null;
   const { login, loading, setError, clearError } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
 

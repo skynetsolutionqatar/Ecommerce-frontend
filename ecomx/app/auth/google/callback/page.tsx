@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth.api";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { TOKEN_KEYS } from "@/lib/config";
-import { ROLE } from "@/lib/Constant";
+import { ROLE, sanitizeRedirectPath } from "@/lib/Constant";
 import { useAuthStore } from "@/store/auth.store";
 import type { AuthUser } from "@/types/auth.types";
 
@@ -33,7 +33,7 @@ export default function GoogleOAuthCallbackPage() {
     const error = params.get("error");
     const accessToken = params.get("accessToken");
     const refreshToken = params.get("refreshToken");
-    const returnTo = params.get("returnTo") || "/";
+    const returnTo = sanitizeRedirectPath(params.get("returnTo"));
 
     if (error) {
       const msg =
@@ -70,7 +70,7 @@ export default function GoogleOAuthCallbackPage() {
           res.data.customer as unknown as Record<string, unknown>
         );
         setAuth(user, accessToken, refreshToken);
-        router.replace(returnTo.startsWith("/") ? returnTo : "/");
+        router.replace(returnTo);
       } catch (err) {
         if (cancelled) return;
         const msg = getAuthErrorMessage(err, "googleLogin");
