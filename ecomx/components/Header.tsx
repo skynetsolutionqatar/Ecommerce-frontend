@@ -313,7 +313,7 @@ export default function Header({
                   className="hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 md:flex hover:bg-gray-50 transition-all"
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Icons.Bag />
+                  <Icons.Package />
                   <span>Orders</span>
                 </motion.button>
               ) : null}
