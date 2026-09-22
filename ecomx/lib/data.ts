@@ -486,7 +486,7 @@ export const TESTIMONIALS: Testimonial[] = [
     product: "atACC ERP Software",
   },
   {
-    id: 3, name: "Mohammed Al-Thani", role: "Operations Head, Lusail Mall Branch", rating: 5,
+    id: 3, name: "John Doe", role: "Operations Head, Lusail Mall Branch", rating: 5,
     text: "The restaurant POS with KDS integration transformed our kitchen workflow. Orders go from POS to kitchen in real-time. Wait times dropped by 30%.",
     product: "KitchenView KDS 15\"",
   },

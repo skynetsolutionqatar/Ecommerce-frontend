@@ -13,11 +13,13 @@ import { showError, showSuccess } from "@/lib/toast";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
 import { getStoredAttribution } from "@/lib/utm";
+import { getCurrentCoords } from "@/lib/geolocation";
 import {
   clearDeliverySelection,
   hasVerifiedDeliverySelection,
-  loadCheckoutAddress,
+  loadCheckoutProgress,
   saveCheckoutAddress,
+  saveCheckoutProgress,
 } from "@/lib/store/checkout-address-cache";
 import {
   useCheckDeliveryMutation,
@@ -29,6 +31,11 @@ import type { ApiAreaSearchResult } from "@/types/location.types";
 import LocationAreaSearchInput, {
   formatAreaSearchLabel,
 } from "@/components/store/LocationAreaSearchInput";
+import {
+  isValidQatarPhone,
+  normalizeRegisterPhone,
+  sanitizeQatarPhoneInput,
+} from "@/lib/utils";
 
 const DeliveryMapPicker = dynamic(() => import("@/components/store/DeliveryMapPicker"), {
   ssr: false,
@@ -99,6 +106,16 @@ function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+/** Same local 8-digit format as login/register phone fields. */
+function toCheckoutPhoneDigits(phone: string): string {
+  if (!phone.trim()) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("974") && digits.length >= 11) {
+    return sanitizeQatarPhoneInput(digits.slice(3));
+  }
+  return sanitizeQatarPhoneInput(digits);
+}
+
 export default function CheckoutPage({
   onBack,
   cart,
@@ -119,6 +136,7 @@ export default function CheckoutPage({
   const [showMap, setShowMap] = useState(false);
   const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
   const [locationChecking, setLocationChecking] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const { data: countries = [] } = useCountries();
   const validateLocationMut = useValidateLocationMutation();
@@ -192,15 +210,16 @@ export default function CheckoutPage({
           districtName: "",
           areaName: "",
         }));
+        const reason = result.message || QATAR_ONLY_LOCATION_ERROR;
         setDeliveryStatus({
           deliverable: false,
-          message: QATAR_ONLY_LOCATION_ERROR,
+          message: reason,
           districtId: "",
           areaId: "",
           districtName: "",
           areaName: "",
         });
-        setErrors((prev) => ({ ...prev, areaId: QATAR_ONLY_LOCATION_ERROR }));
+        setErrors((prev) => ({ ...prev, areaId: reason }));
       }
     },
     []
@@ -276,48 +295,67 @@ export default function CheckoutPage({
 
   useEffect(() => {
     if (addressLoaded) return;
-    const cached = loadCheckoutAddress();
-    if (cached) {
+    const progress = loadCheckoutProgress();
+    if (progress) {
+      const cached = progress.form;
       setForm((prev) => ({
         ...prev,
         ...cached,
         fullName: initialContact?.fullName || cached.fullName,
         email: initialContact?.email || cached.email,
-        phone: initialContact?.phone || cached.phone,
+        phone: toCheckoutPhoneDigits(initialContact?.phone || cached.phone),
       }));
-      const label = formatLocationLabel(cached.areaName, cached.districtName);
-      if (hasVerifiedDeliverySelection(cached) && label) {
-        setLocationQuery(label);
-        setDeliveryStatus({
-          deliverable: true,
-          message: `Delivery available in ${label}`,
-          districtId: cached.districtId,
-          areaId: cached.areaId,
-          districtName: cached.districtName ?? "",
-          areaName: cached.areaName ?? "",
-        });
-      } else if (
-        cached.mapLat != null &&
-        cached.mapLng != null &&
-        hasVerifiedDeliverySelection(cached)
-      ) {
-        setShowMap(true);
-        void runDeliveryValidation({
-          mapLat: cached.mapLat,
-          mapLng: cached.mapLng,
-        });
+      setStep(progress.step);
+      if (progress.locationQuery) {
+        setLocationQuery(progress.locationQuery);
+      }
+      if (progress.deliveryStatus) {
+        setDeliveryStatus(progress.deliveryStatus);
+      } else {
+        const label = formatLocationLabel(cached.areaName, cached.districtName);
+        if (hasVerifiedDeliverySelection(cached) && label) {
+          setLocationQuery(label);
+          setDeliveryStatus({
+            deliverable: true,
+            message: `Delivery available in ${label}`,
+            districtId: cached.districtId,
+            areaId: cached.areaId,
+            districtName: cached.districtName ?? "",
+            areaName: cached.areaName ?? "",
+          });
+        } else if (
+          cached.mapLat != null &&
+          cached.mapLng != null &&
+          hasVerifiedDeliverySelection(cached)
+        ) {
+          setShowMap(true);
+          void runDeliveryValidation({
+            mapLat: cached.mapLat,
+            mapLng: cached.mapLng,
+          });
+        }
       }
     } else if (initialContact) {
       setForm((prev) => ({
         ...prev,
         fullName: initialContact.fullName || prev.fullName,
         email: initialContact.email || prev.email,
-        phone: initialContact.phone || prev.phone,
+        phone: toCheckoutPhoneDigits(initialContact.phone || prev.phone),
       }));
     }
     setAddressLoaded(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load cached address once
   }, [addressLoaded, initialContact]);
+
+  useEffect(() => {
+    if (!addressLoaded) return;
+    saveCheckoutProgress({
+      form,
+      step,
+      locationQuery,
+      deliveryStatus,
+    });
+  }, [addressLoaded, form, step, locationQuery, deliveryStatus]);
 
   const inputClass = (field: keyof CheckoutFormData) =>
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
@@ -400,15 +438,20 @@ export default function CheckoutPage({
     void runDeliveryValidation({ mapLat: lat, mapLng: lng });
   };
 
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      showError("Geolocation is not supported on this device.");
-      return;
+  const handleUseMyLocation = async () => {
+    setLocating(true);
+    try {
+      const { lat, lng } = await getCurrentCoords();
+      handleMapPick(lat, lng);
+    } catch (err) {
+      showError(
+        err instanceof Error
+          ? err.message
+          : "Could not get your location. Please pick a point on the map."
+      );
+    } finally {
+      setLocating(false);
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => handleMapPick(pos.coords.latitude, pos.coords.longitude),
-      () => showError("Could not get your location. Please pick a point on the map.")
-    );
   };
 
   const setField = (field: keyof CheckoutFormData, value: string) => {
@@ -424,6 +467,9 @@ export default function CheckoutPage({
     if (!form.email.trim()) next.email = "Email is required";
     else if (!validateEmail(form.email)) next.email = "Enter a valid email";
     if (!form.phone.trim()) next.phone = "Phone number is required";
+    else if (!isValidQatarPhone(form.phone)) {
+      next.phone = "Enter an 8-digit Qatar mobile number (starts with 3, 5, 6, or 7)";
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -480,7 +526,7 @@ export default function CheckoutPage({
       const orderNumber = await onPlaceOrder({
         deliveryAddress: {
           fullName: form.fullName.trim(),
-          phone: form.phone.trim(),
+          phone: normalizeRegisterPhone(form.phone),
           line1: form.line1.trim(),
           line2: resolvedAreaName ?? "",
           city: resolvedDistrictName ?? "",
@@ -591,17 +637,31 @@ export default function CheckoutPage({
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="phone">
-                    Phone (+974) <span className="text-red-500">*</span>
+                    Phone (Qatar) <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    required
-                    value={form.phone}
-                    onChange={(e) => setField("phone", e.target.value)}
-                    placeholder="Phone (+974)"
-                    className={inputClass("phone")}
-                  />
+                  <div
+                    className={`flex overflow-hidden rounded-xl border bg-bg focus-within:border-accent ${
+                      errors.phone ? "border-red-400 focus-within:border-red-400" : "border-border"
+                    }`}
+                  >
+                    <span className="flex items-center border-r border-border bg-bg-soft px-3 text-sm font-semibold text-primary">
+                      +974
+                    </span>
+                    <input
+                      id="phone"
+                      type="tel"
+                      inputMode="numeric"
+                      required
+                      maxLength={8}
+                      value={form.phone}
+                      onChange={(e) =>
+                        setField("phone", sanitizeQatarPhoneInput(e.target.value))
+                      }
+                      placeholder="00000000"
+                      autoComplete="tel-national"
+                      className="w-full border-0 bg-transparent px-3.5 py-3 text-sm text-primary outline-none placeholder:text-muted/50"
+                    />
+                  </div>
                   {errors.phone ? (
                     <p className="mt-1 text-sm md:text-xs text-red-600">{errors.phone}</p>
                   ) : null}
@@ -680,11 +740,11 @@ export default function CheckoutPage({
                       <p className="text-sm font-semibold text-primary">Pick delivery location</p>
                       <button
                         type="button"
-                        onClick={handleUseMyLocation}
-                        disabled={locationChecking}
+                        onClick={() => void handleUseMyLocation()}
+                        disabled={locationChecking || locating}
                         className="rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-gray-100 disabled:opacity-50"
                       >
-                        Use my location
+                        {locating ? "Locating..." : "Use my location"}
                       </button>
                     </div>
                     <DeliveryMapPicker

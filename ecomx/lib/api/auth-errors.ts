@@ -7,10 +7,10 @@ type ApiErrorBody = ApiResponse<unknown> & { error?: string };
 
 export const AUTH_SESSION_REASON = "session_expired";
 
-/** One message for sign-in failures — invalid credentials and expired session. */
+/** Default message when email/password sign-in fails. */
 export const AUTH_ERROR = {
   signInFailed:
-    "Unable to sign in. Your session may have expired, or your email or password is incorrect. Please try again.",
+    "Unable to sign in. Your email or password is incorrect. Please try again.",
   registerFailed: "Unable to create account. Please check your details and try again.",
   changePasswordFailed:
     "Unable to change password. Check your current password and try again.",
@@ -34,11 +34,7 @@ export function isAuthSessionReason(reason: string | null | undefined): boolean 
   return reason === AUTH_SESSION_REASON;
 }
 
-export function getSessionExpiredMessage(): string {
-  return AUTH_ERROR.signInFailed;
-}
-
-/** Single resolver — login, register, session expiry, and validation strings. */
+/** Single resolver — login, register, and validation strings. */
 export function getAuthErrorMessage(
   error: unknown,
   action:

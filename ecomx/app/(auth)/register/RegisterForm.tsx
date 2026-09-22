@@ -17,6 +17,7 @@ import {
   authInputClass,
 } from "@/components/auth/AuthShell";
 import { getApiFieldErrors } from "@/lib/api/errors";
+import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import * as Icons from "@/components/Icons";
 
@@ -77,7 +78,9 @@ export default function RegisterForm() {
       if (Object.keys(apiFieldErrors).length > 0) {
         setFieldErrors(apiFieldErrors);
         clearError();
+        return;
       }
+      setError(getAuthErrorMessage(err, "register"));
     }
   };
 
@@ -111,7 +114,7 @@ export default function RegisterForm() {
               setForm((f) => ({ ...f, name: e.target.value }));
             }}
             className={`${authInputClass} ${fieldErrors.name ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]" : ""}`}
-            placeholder="Mohammed Al-Thani"
+            placeholder="John Doe"
             autoComplete="name"
           />
         </AuthFormField>

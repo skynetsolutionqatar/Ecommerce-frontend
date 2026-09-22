@@ -15,12 +15,27 @@ const EMPTY_FORM: CheckoutFormData = {
   mapLng: null,
 };
 
-export function loadCheckoutAddress(): CheckoutFormData | null {
+export interface PersistedDeliveryStatus {
+  deliverable: boolean;
+  message: string;
+  districtId: string;
+  areaId: string;
+  districtName: string;
+  areaName: string;
+}
+
+type CheckoutStoragePayload = CheckoutFormData & {
+  checkoutStep?: number;
+  locationQuery?: string;
+  deliveryStatus?: PersistedDeliveryStatus | null;
+};
+
+function readPayload(): CheckoutStoragePayload | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CHECKOUT_ADDRESS);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CheckoutFormData>;
+    const parsed = JSON.parse(raw) as Partial<CheckoutStoragePayload>;
     if (!parsed || typeof parsed !== "object") return null;
     return {
       fullName: parsed.fullName ?? "",
@@ -35,15 +50,83 @@ export function loadCheckoutAddress(): CheckoutFormData | null {
       mapLng: parsed.mapLng ?? null,
       districtName: parsed.districtName ?? "",
       areaName: parsed.areaName ?? "",
+      checkoutStep: parsed.checkoutStep,
+      locationQuery: parsed.locationQuery ?? "",
+      deliveryStatus: parsed.deliveryStatus ?? null,
     };
   } catch {
     return null;
   }
 }
 
-export function saveCheckoutAddress(form: CheckoutFormData): void {
+function writePayload(payload: CheckoutStoragePayload): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEYS.CHECKOUT_ADDRESS, JSON.stringify(form));
+  localStorage.setItem(STORAGE_KEYS.CHECKOUT_ADDRESS, JSON.stringify(payload));
+}
+
+function formFromPayload(payload: CheckoutStoragePayload): CheckoutFormData {
+  return {
+    fullName: payload.fullName,
+    email: payload.email,
+    phone: payload.phone,
+    line1: payload.line1,
+    countryId: payload.countryId,
+    districtId: payload.districtId,
+    areaId: payload.areaId,
+    locationMode: payload.locationMode,
+    mapLat: payload.mapLat,
+    mapLng: payload.mapLng,
+    districtName: payload.districtName,
+    areaName: payload.areaName,
+  };
+}
+
+export function loadCheckoutAddress(): CheckoutFormData | null {
+  const payload = readPayload();
+  if (!payload) return null;
+  return formFromPayload(payload);
+}
+
+export function loadCheckoutProgress(): {
+  form: CheckoutFormData;
+  step: number;
+  locationQuery: string;
+  deliveryStatus: PersistedDeliveryStatus | null;
+} | null {
+  const payload = readPayload();
+  if (!payload) return null;
+  const step = payload.checkoutStep;
+  return {
+    form: formFromPayload(payload),
+    step: typeof step === "number" && step >= 1 && step <= 3 ? step : 1,
+    locationQuery: payload.locationQuery ?? "",
+    deliveryStatus: payload.deliveryStatus ?? null,
+  };
+}
+
+export function saveCheckoutAddress(form: CheckoutFormData): void {
+  const existing = readPayload();
+  writePayload({
+    ...(existing ?? EMPTY_FORM),
+    ...form,
+    checkoutStep: existing?.checkoutStep,
+    locationQuery: existing?.locationQuery,
+    deliveryStatus: existing?.deliveryStatus,
+  });
+}
+
+export function saveCheckoutProgress(input: {
+  form: CheckoutFormData;
+  step: number;
+  locationQuery: string;
+  deliveryStatus: PersistedDeliveryStatus | null;
+}): void {
+  writePayload({
+    ...input.form,
+    checkoutStep: input.step,
+    locationQuery: input.locationQuery,
+    deliveryStatus: input.deliveryStatus,
+  });
 }
 
 export type DeliverySelection = Pick<
@@ -60,8 +143,8 @@ export type DeliverySelection = Pick<
 
 /** Persist verified delivery area from product page (or map) into checkout cache. */
 export function saveDeliverySelection(selection: DeliverySelection): void {
-  const existing = loadCheckoutAddress() ?? EMPTY_FORM;
-  saveCheckoutAddress({
+  const existing = readPayload() ?? { ...EMPTY_FORM };
+  writePayload({
     ...existing,
     countryId: selection.countryId,
     districtId: selection.districtId,
@@ -77,9 +160,9 @@ export function saveDeliverySelection(selection: DeliverySelection): void {
 /** Clear cached delivery location (keeps contact / street address fields). */
 export function clearDeliverySelection(): void {
   if (typeof window === "undefined") return;
-  const existing = loadCheckoutAddress();
+  const existing = readPayload();
   if (!existing) return;
-  saveCheckoutAddress({
+  writePayload({
     ...existing,
     districtId: "",
     areaId: "",
@@ -88,6 +171,8 @@ export function clearDeliverySelection(): void {
     mapLng: null,
     districtName: "",
     areaName: "",
+    locationQuery: "",
+    deliveryStatus: null,
   });
 }
 

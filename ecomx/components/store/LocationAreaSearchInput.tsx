@@ -41,11 +41,17 @@ export default function LocationAreaSearchInput({
   showSearchIcon = false,
 }: LocationAreaSearchInputProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const skipSearchAfterSelectRef = useRef(false);
   const [results, setResults] = useState<ApiAreaSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [openResults, setOpenResults] = useState(false);
 
   useEffect(() => {
+    if (skipSearchAfterSelectRef.current) {
+      skipSearchAfterSelectRef.current = false;
+      return;
+    }
+
     const term = value.trim();
     if (term.length < 2) {
       setResults([]);
@@ -58,7 +64,7 @@ export default function LocationAreaSearchInput({
       void searchAreas({ countryId, q: term })
         .then((areas) => {
           setResults(areas);
-          setOpenResults(true);
+          if (areas.length > 0) setOpenResults(true);
         })
         .catch(() => setResults([]))
         .finally(() => setSearching(false));
@@ -78,9 +84,12 @@ export default function LocationAreaSearchInput({
   }, []);
 
   const handleSelect = (area: ApiAreaSearchResult) => {
+    skipSearchAfterSelectRef.current = true;
+    setResults([]);
+    setSearching(false);
+    setOpenResults(false);
     onChange(formatAreaSearchLabel(area));
     onSelect?.(area);
-    setOpenResults(false);
   };
 
   const paddingClass = showSearchIcon ? "pl-9 pr-3" : "px-3";
@@ -105,15 +114,11 @@ export default function LocationAreaSearchInput({
         autoComplete="off"
         className={`w-full ${paddingClass} ${className}`}
       />
-      {openResults && value.trim().length >= 2 ? (
+      {openResults && value.trim().length >= 2 && (searching || results.length > 0) ? (
         <div className="absolute z-[1000] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
           {searching ? (
             <p className="px-3 py-2.5 text-sm text-gray-500">Searching...</p>
-          ) 
-          // : results.length === 0 ? (
-          //   <p className="px-3 py-2.5 text-sm text-gray-500">No areas found in Qatar</p>
-          // ) 
-          : (
+          ) : (
             results.map((area) => (
               <button
                 key={area._id}

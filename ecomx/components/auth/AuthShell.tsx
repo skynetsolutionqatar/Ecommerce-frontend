@@ -91,7 +91,7 @@ export function AuthPhoneField({
           value={value}
           onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 8))}
           className="w-full border-0 bg-transparent px-4 py-3.5 text-sm text-primary outline-none placeholder:text-muted/50"
-          placeholder="51882350"
+          placeholder="00000000"
           autoComplete="tel-national"
         />
       </div>

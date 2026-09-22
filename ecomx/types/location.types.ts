@@ -52,4 +52,8 @@ export const DISTRICT_MAP_CENTERS: Record<string, { lat: number; lng: number; zo
   "al-rayyan": { lat: 25.278, lng: 51.462, zoom: 12 },
   "al-wakrah": { lat: 25.168, lng: 51.574, zoom: 12 },
   "al-daayen": { lat: 25.408, lng: 51.498, zoom: 12 },
+  "umm-salal": { lat: 25.408, lng: 51.398, zoom: 12 },
+  "al-khor": { lat: 25.68, lng: 51.496, zoom: 11 },
+  "al-shamal": { lat: 26.118, lng: 51.218, zoom: 11 },
+  "al-shahaniya": { lat: 25.368, lng: 51.228, zoom: 10 },
 };

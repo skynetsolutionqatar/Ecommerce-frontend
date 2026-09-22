@@ -33,6 +33,7 @@ export default function DeliveryMapPicker({
   const mapReadyRef = useRef(false);
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const pendingPosRef = useRef<{ lat: number; lng: number; zoom: number } | null>(null);
+  const skipSearchAfterSelectRef = useRef(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ApiAreaSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -141,6 +142,11 @@ export default function DeliveryMapPicker({
   }, [lat, lng, syncPosition]);
 
   useEffect(() => {
+    if (skipSearchAfterSelectRef.current) {
+      skipSearchAfterSelectRef.current = false;
+      return;
+    }
+
     const term = query.trim();
     if (!canSearch || term.length < 2) {
       setResults([]);
@@ -156,7 +162,7 @@ export default function DeliveryMapPicker({
       })
         .then((areas) => {
           setResults(areas);
-          setOpenResults(true);
+          if (areas.length > 0) setOpenResults(true);
         })
         .catch(() => setResults([]))
         .finally(() => setSearching(false));
@@ -176,8 +182,11 @@ export default function DeliveryMapPicker({
   }, []);
 
   const handleSelectResult = (area: ApiAreaSearchResult) => {
-    setQuery(area.districtName ? `${area.name}, ${area.districtName}` : area.name);
+    skipSearchAfterSelectRef.current = true;
+    setResults([]);
+    setSearching(false);
     setOpenResults(false);
+    setQuery(area.districtName ? `${area.name}, ${area.districtName}` : area.name);
     syncPosition(area.lat, area.lng, 15);
     onPick(area.lat, area.lng);
   };
@@ -209,12 +218,10 @@ export default function DeliveryMapPicker({
               className="w-full rounded-xl border border-border bg-white py-2.5 pl-9 pr-3 text-sm text-primary outline-none focus:border-accent"
             />
           </form>
-          {openResults && query.trim().length >= 2 ? (
+          {openResults && query.trim().length >= 2 && (searching || results.length > 0) ? (
             <div className="absolute z-[1100] mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-border bg-white shadow-lg">
               {searching ? (
                 <p className="px-3 py-2.5 text-sm text-muted">Searching...</p>
-              ) : results.length === 0 ? (
-                <p className="px-3 py-2.5 text-sm text-muted">No areas found</p>
               ) : (
                 results.map((area) => (
                   <button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Avatar from "./Avatar";
 import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +12,8 @@ import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import AuthFormError from "@/components/auth/AuthFormError";
 import { getGoogleOAuthStartUrl, isGoogleOAuthConfigured } from "@/lib/google-oauth";
 import * as Icons from "./Icons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { sanitizeRedirectPath } from "@/lib/Constant";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 
 interface LoginModalProps {
@@ -51,6 +52,13 @@ export default function LoginModal({
   resetToken = "",
 }: LoginModalProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const googleReturnTo = useMemo(() => {
+    const qs = searchParams.toString();
+    const path = qs ? `${pathname}?${qs}` : pathname;
+    return sanitizeRedirectPath(path);
+  }, [pathname, searchParams]);
   const { login, register, forgotPassword, resetPassword, loading, clearError, setError } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
@@ -180,10 +188,23 @@ export default function LoginModal({
       }, 1400);
     } catch (err) {
       const apiFieldErrors = getApiFieldErrors(err);
-      if (mode === "register" && Object.keys(apiFieldErrors).length > 0) {
-        setFieldErrors(apiFieldErrors);
-        clearError();
-        return;
+      if (mode === "register") {
+        if (Object.keys(apiFieldErrors).length > 0) {
+          setFieldErrors(apiFieldErrors);
+          clearError();
+          return;
+        }
+        const registerMsg = getAuthErrorMessage(err, "register");
+        if (/email is already registered/i.test(registerMsg)) {
+          setFieldErrors({ email: registerMsg });
+          clearError();
+          return;
+        }
+        if (/phone number is already registered/i.test(registerMsg)) {
+          setFieldErrors({ phone: registerMsg });
+          clearError();
+          return;
+        }
       }
       if (mode === "reset" && Object.keys(apiFieldErrors).length > 0) {
         const mappedErrors: Partial<Record<ResetField, string>> = {};
@@ -216,7 +237,7 @@ export default function LoginModal({
       return;
     }
     setGoogleLoading(true);
-    window.location.href = getGoogleOAuthStartUrl("/");
+    window.location.href = getGoogleOAuthStartUrl(googleReturnTo);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -434,7 +455,7 @@ export default function LoginModal({
                         clearFieldError("name");
                         setForm((f) => ({ ...f, name: e.target.value }));
                       }}
-                      placeholder="Mohammed Al-Thani"
+                      placeholder="John Doe"
                       required
                       className={`${inputClass} ${fieldErrors.name ? "border-red-400 focus:border-red-400 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.12)]" : ""}`}
                     />
@@ -484,7 +505,7 @@ export default function LoginModal({
                             phone: e.target.value.replace(/\D/g, "").slice(0, 8),
                           }));
                         }}
-                        placeholder="51882350"
+                        placeholder="00000000"
                         autoComplete="tel-national"
                         className={`${inputClass} rounded-none border-0 shadow-none focus:shadow-none`}
                       />

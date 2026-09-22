@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/store/auth.store";
 import { AuthError } from "@/components/auth/AuthShell";
 
-/** Single inline auth error — login, register, session expired, invalid credentials. */
+/** Single inline auth error — login, register, and related auth actions. */
 export default function AuthFormError() {
   const error = useAuthStore((s) => s.authError);
   if (!error) return null;

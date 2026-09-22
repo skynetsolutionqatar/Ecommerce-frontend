@@ -8,7 +8,7 @@ interface BrandLogoProps {
   priority?: boolean;
   /**
    * default — full-color on light backgrounds
-   * light — white mark on dark gradients (auth panel, mobile menu)
+   * light — full-color transparent logo on dark backgrounds (mobile menu)
    * footer — transparent PNG, full brand colors on dark footer
    */
   variant?: "default" | "light" | "footer";
@@ -22,14 +22,13 @@ export default function BrandLogo({
   priority = false,
   variant = "default",
 }: BrandLogoProps) {
-  const src = variant === "footer" ? BRAND_LOGO_FOOTER : BRAND_LOGO;
+  const src =
+    variant === "footer" || variant === "light" ? BRAND_LOGO_FOOTER : BRAND_LOGO;
 
   const variantClass =
-    variant === "light"
-      ? "brightness-0 invert opacity-95"
-      : variant === "footer"
-        ? "object-left drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-        : "object-left";
+    variant === "light" || variant === "footer"
+      ? "object-left drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+      : "object-left";
 
   const width = Math.round(height * 1.414);
 

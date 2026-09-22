@@ -501,7 +501,12 @@ export default function Header({
                   }}
                   className="border-0 bg-transparent p-0 text-left cursor-pointer"
                 >
-                  <BrandLogo height={40} variant="light" alt={client.name} imgClassName="max-w-[160px]" />
+                  <BrandLogo
+                    height={40}
+                    variant="footer"
+                    alt={client.name}
+                    imgClassName="max-w-[160px] object-left"
+                  />
                 </button>
                 <motion.button
                   type="button"

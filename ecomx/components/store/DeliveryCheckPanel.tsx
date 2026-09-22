@@ -4,15 +4,13 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Colors } from "@/lib/theme";
 import { showError } from "@/lib/toast";
+import { getCurrentCoords } from "@/lib/geolocation";
 import { saveDeliverySelection, clearDeliverySelection } from "@/lib/store/checkout-address-cache";
 import {
   useCheckDeliveryMutation,
   useValidateLocationMutation,
 } from "@/hooks/useLocations";
-import {
-  DEFAULT_COUNTRY_ID,
-  QATAR_ONLY_LOCATION_ERROR,
-} from "@/types/location.types";
+import { DEFAULT_COUNTRY_ID } from "@/types/location.types";
 import type { ApiAreaSearchResult, LocationValidationResult } from "@/types/location.types";
 import LocationAreaSearchInput, {
   formatAreaSearchLabel,
@@ -39,6 +37,7 @@ export default function DeliveryCheckPanel() {
   const [isDeliverable, setIsDeliverable] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
   const [resolvingMap, setResolvingMap] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const validateLocationMut = useValidateLocationMutation();
   const checkDeliveryMut = useCheckDeliveryMutation();
@@ -104,18 +103,20 @@ export default function DeliveryCheckPanel() {
     void resolveMapLocation(lat, lng);
   };
 
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      showError("Geolocation is not supported on this device.");
-      return;
+  const handleUseMyLocation = async () => {
+    setLocating(true);
+    try {
+      const { lat, lng } = await getCurrentCoords();
+      handleMapPick(lat, lng);
+    } catch (err) {
+      showError(
+        err instanceof Error
+          ? err.message
+          : "Could not get your location. Please pick a point on the map."
+      );
+    } finally {
+      setLocating(false);
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => handleMapPick(pos.coords.latitude, pos.coords.longitude),
-      () =>
-        showError(
-          "Could not get your location. Please pick a point on the map."
-        )
-    );
   };
 
   const applyResult = (
@@ -125,9 +126,7 @@ export default function DeliveryCheckPanel() {
     const label = formatLocationLabel(result);
     if (label) setQuery(label);
     setIsDeliverable(result.deliverable);
-    setMessage(
-      result.deliverable ? result.message : QATAR_ONLY_LOCATION_ERROR
-    );
+    setMessage(result.message);
     if (result.deliverable) persistDelivery(result, coords);
     else clearDeliverySelection();
   };
@@ -214,16 +213,19 @@ export default function DeliveryCheckPanel() {
         <div className="mt-2 rounded-xl border border-gray-200 bg-white p-3">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-gray-600">
-              {resolvingMap
-                ? "Finding area..."
-                : "Search or tap the map, then click Check"}
+              {locating
+                ? "Getting your location..."
+                : resolvingMap
+                  ? "Finding area..."
+                  : "Search or tap the map, then click Check"}
             </p>
             <button
               type="button"
-              onClick={handleUseMyLocation}
-              className="rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50"
+              onClick={() => void handleUseMyLocation()}
+              disabled={locating}
+              className="rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              Use my location
+              {locating ? "Locating..." : "Use my location"}
             </button>
           </div>
           <DeliveryMapPicker

@@ -18,6 +18,9 @@ export const IMAGE_FALLBACK = categoryImage("pos");
 /** Store / admin brand mark */
 export const BRAND_LOGO = "/images/skynet-logo.png";
 
+/** Globe mark only — favicon / browser tab (no wordmark) */
+export const BRAND_ICON = "/images/fav-sky.jpeg";
+
 /** Transparent-background logo for dark footer */
 export const BRAND_LOGO_FOOTER = "/images/skynet-logo-footer.png";
 
