@@ -14,6 +14,7 @@ interface FormTextareaProps {
   required?: boolean;
   rows?: number;
   fullWidth?: boolean;
+  dir?: "ltr" | "rtl" | "auto";
   error?: string;
   touched?: boolean;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -28,6 +29,7 @@ function FormTextarea({
   required = false,
   rows = 2,
   fullWidth = false,
+  dir,
   error,
   touched,
   onChange,
@@ -45,6 +47,7 @@ function FormTextarea({
           name={name}
           value={value}
           rows={rows}
+          dir={dir}
           placeholder={placeholder}
           onChange={onChange}
           onBlur={onBlur}

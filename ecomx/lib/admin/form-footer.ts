@@ -8,6 +8,7 @@ export const TENANT_FORM_ID = "tenant-form";
 export const COMPANY_FORM_ID = "company-form";
 export const CHANGE_PASSWORD_FORM_ID = "change-password-form";
 export const CUSTOMER_FORM_ID = "customer-form";
+export const CONTENT_PAGE_FORM_ID = "content-page-form";
 
 const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:opacity-90`;
 const cancelBtn = "rounded-lg px-6 py-2";
@@ -57,6 +58,33 @@ export const tenantFormFooterButtons = (opts: Omit<Parameters<typeof createFormF
 
 export const companyFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
   createFormFooterButtons({ ...opts, formId: COMPANY_FORM_ID, entityLabel: "Company" });
+
+export function fixedContentPageFooterButtons({
+  saveLabel,
+  isPending = false,
+  onCancel,
+}: {
+  saveLabel: string;
+  isPending?: boolean;
+  onCancel: () => void;
+}): FooterButton[] {
+  return [
+    {
+      label: "Cancel",
+      variant: "outline",
+      disabled: isPending,
+      onClick: onCancel,
+      className: cancelBtn,
+    },
+    {
+      label: isPending ? "Saving..." : saveLabel,
+      type: "submit",
+      form: CONTENT_PAGE_FORM_ID,
+      disabled: isPending,
+      className: primaryBtn,
+    },
+  ];
+}
 
 export function customerDetailFooterButtons({
   isPending = false,

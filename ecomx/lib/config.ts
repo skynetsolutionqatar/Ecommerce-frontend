@@ -40,6 +40,9 @@ export const ADMIN_ROUTES = {
   tenant: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/${slug}`,
   tenantEdit: (slug: string) => `${ROUTE_PREFIX.ADMIN}/tenants/edit/${slug}`,
   company: `${ROUTE_PREFIX.ADMIN}/company`,
+  faq: `${ROUTE_PREFIX.ADMIN}/faq`,
+  terms: `${ROUTE_PREFIX.ADMIN}/terms-and-conditions`,
+  cancellationPolicy: `${ROUTE_PREFIX.ADMIN}/cancellation-policy`,
 } as const;
 
 export const AUTH_ROUTES = {

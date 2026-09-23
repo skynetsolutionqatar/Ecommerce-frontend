@@ -13,6 +13,9 @@ import {
   Settings,
   Building2,
   FileBarChart,
+  HelpCircle,
+  ScrollText,
+  Ban,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { REPORT_MENU } from "@/lib/admin/reports.config";
@@ -136,6 +139,21 @@ export const adminSections: AdminMenuSection[] = [
             name: "Company",
             path: ADMIN_ROUTES.company,
             icon: <Building2 size={16} />,
+          },
+          {
+            name: "FAQ",
+            path: ADMIN_ROUTES.faq,
+            icon: <HelpCircle size={16} />,
+          },
+          {
+            name: "Terms & Conditions",
+            path: ADMIN_ROUTES.terms,
+            icon: <ScrollText size={16} />,
+          },
+          {
+            name: "Cancellation Policy",
+            path: ADMIN_ROUTES.cancellationPolicy,
+            icon: <Ban size={16} />,
           },
           // { name: "Tenants", path: ADMIN_ROUTES.tenants, icon: <Settings size={16} /> },
         ],

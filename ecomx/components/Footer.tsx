@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
+import { useFooterContentPages } from "@/hooks/useContentPages";
+import { FIXED_CONTENT_PAGE_RESOURCES } from "@/lib/admin/content-page-resources";
 import { ROUTES } from "@/lib/routes";
 import {
   Phone,
@@ -15,7 +17,27 @@ import {
   Lock,
 } from "lucide-react";
 
+const linkClass =
+  "block text-[13px] md:text-[11.5px] text-white/50 no-underline hover:text-white transition-colors";
+
 export default function Footer() {
+  const { data } = useFooterContentPages();
+  const pagesBySlug = Object.fromEntries(
+    (data?.contentPages ?? []).map((page) => [page.slug, page])
+  );
+
+  const footerLinks = FIXED_CONTENT_PAGE_RESOURCES.map((resource) => {
+    const page = pagesBySlug[resource.slug];
+    return {
+      slug: resource.slug,
+      label: page?.footerLabel?.trim() || page?.title || resource.menuLabel,
+      href: resource.storeRoute,
+    };
+  });
+
+  const pageHref = (slug: string) =>
+    footerLinks.find((l) => l.slug === slug)?.href ?? ROUTES.page(slug);
+
   return (
     <footer className="text-white" style={{ background: "#0a1731ff" }}>
       <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px] pt-10 pb-6">
@@ -116,8 +138,17 @@ export default function Footer() {
           <div>
             <div className="mb-3 text-[12px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">SUPPORT</div>
             <ul className="flex flex-col gap-2">
-              {["Help Center", "Installation Guide", "Warranty Claims", "Track Order", "Contact Us", "Book Demo"].map(l => (
-                <li key={l}><a href="#" className="block text-[13px] md:text-[11.5px] text-white/50 no-underline hover:text-white transition-colors">{l}</a></li>
+              <li>
+                <Link href={pageHref("faq")} className={linkClass}>
+                  FAQ
+                </Link>
+              </li>
+              {["Help Center", "Installation Guide", "Warranty Claims", "Track Order", "Contact Us", "Book Demo"].map((l) => (
+                <li key={l}>
+                  <a href="#" className={linkClass}>
+                    {l}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>
@@ -126,9 +157,18 @@ export default function Footer() {
           <div>
             <div className="mb-3 text-[12px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">COMPANY</div>
             <ul className="flex flex-col gap-2">
-              {["About Us", "Careers", "Blog", "Partner Program", "Terms & Conditions"].map(l => (
-                <li key={l}><a href="#" className="block text-[13px] md:text-[11.5px] text-white/50 no-underline hover:text-white transition-colors">{l}</a></li>
+              {["About Us", "Careers", "Blog", "Partner Program"].map((l) => (
+                <li key={l}>
+                  <a href="#" className={linkClass}>
+                    {l}
+                  </a>
+                </li>
               ))}
+              <li>
+                <Link href={pageHref("terms-and-conditions")} className={linkClass}>
+                  Terms & Conditions
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -172,16 +212,31 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-3">
+        {/* Bottom bar — Flipkart-style policy links on the right */}
+        <div className="flex flex-col gap-3 border-t border-white/8 pt-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-[12px] md:text-[10.5px] text-white/25">
             © {new Date().getFullYear()} Skynet Solution Qatar. All rights reserved.
           </div>
-          <div className="flex items-center gap-4 text-[12px] md:text-[10.5px] text-white/25">
-            <a href="#" className="no-underline text-white/25 hover:text-white/60 transition-colors">Privacy Policy</a>
-            <a href="#" className="no-underline text-white/25 hover:text-white/60 transition-colors">Terms & Conditions</a>
-            <a href="#" className="no-underline text-white/25 hover:text-white/60 transition-colors">Warranty</a>
-          </div>
+          <nav
+            aria-label="Footer policies"
+            className="flex flex-wrap items-center gap-x-1 gap-y-2 text-[12px] md:text-[10.5px] text-white/25"
+          >
+            {footerLinks.map((link, index) => (
+              <span key={link.slug} className="inline-flex items-center">
+                {index > 0 ? (
+                  <span className="mx-2 hidden text-white/15 sm:inline" aria-hidden="true">
+                    |
+                  </span>
+                ) : null}
+                <Link
+                  href={link.href}
+                  className="no-underline text-white/25 transition-colors hover:text-white/60"
+                >
+                  {link.label}
+                </Link>
+              </span>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

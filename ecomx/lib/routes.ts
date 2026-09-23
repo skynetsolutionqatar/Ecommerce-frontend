@@ -7,6 +7,10 @@ export const ROUTES = {
   checkout: "/checkout",
   product: (slug: string) => `/product/${slug}`,
   productReviews: (slug: string) => `/product/${slug}/reviews`,
+  page: (slug: string) => `/pages/${slug}`,
+  faq: "/pages/faq",
+  terms: "/pages/terms-and-conditions",
+  cancellationPolicy: "/pages/cancellation-policy",
 } as const;
 
 export function shopUrl(options?: { categoryId?: string; search?: string }) {
