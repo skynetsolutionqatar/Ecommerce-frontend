@@ -1,15 +1,19 @@
 "use client";
 
 import { use } from "react";
+import toast from "react-hot-toast";
 import BackPanel from "@/components/admin/utils/BackPanel";
 import ViewSection from "@/components/admin/utils/ViewSection";
 import ViewField from "@/components/admin/utils/ViewField";
+import CustomerForm from "@/components/admin/customers/CustomerForm";
+import { customerDetailFooterButtons } from "@/lib/admin/form-footer";
 import { adminType } from "@/lib/admin/typography";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { useCustomer, useCustomerMutations } from "@/hooks/useCustomers";
-import { formatDate } from "@/lib/utils";
 
 const TABS = [
   { key: "profile", label: "Profile" },
+  { key: "access", label: "Access" },
   { key: "addresses", label: "Addresses" },
 ];
 
@@ -20,7 +24,7 @@ export default function AdminCustomerDetailPage({
 }) {
   const { id } = use(params);
   const { data: customer, isLoading, isError } = useCustomer(id);
-  const { toggleStatus } = useCustomerMutations();
+  const { toggleStatus, update } = useCustomerMutations();
 
   if (isLoading) {
     return (
@@ -39,51 +43,39 @@ export default function AdminCustomerDetailPage({
   }
 
   return (
-    <BackPanel tabs={TABS}>
+    <BackPanel
+      tabs={TABS}
+      buttons={customerDetailFooterButtons({
+        isPending: update.isPending,
+        togglePending: toggleStatus.isPending,
+        isActive: customer.isActive,
+        onToggleStatus: () => {
+          void toggleStatus.mutateAsync(customer._id).then(
+            () => toast.success(customer.isActive ? "Customer deactivated" : "Customer activated"),
+            (err) => toast.error(getApiErrorMessage(err, "Could not update customer status"))
+          );
+        },
+      })}
+    >
       <div className="space-y-6">
-        <ViewSection id="profile" title="Profile">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <ViewField label="Name" value={customer.name} />
-            <ViewField label="Email" value={customer.email} />
-            <ViewField label="Phone" value={customer.phone || "—"} />
-            <ViewField label="Role" value={customer.role} />
-            <ViewField
-              label="Status"
-              value={customer.isActive ? "Active" : "Inactive"}
-              badge
-              badgeColor={customer.isActive ? "green" : "gray"}
-            />
-            <ViewField
-              label="Email verified"
-              value={customer.isEmailVerified ? "Yes" : "No"}
-            />
-            <ViewField
-              label="Joined"
-              value={customer.createdAt ? formatDate(customer.createdAt) : "—"}
-            />
-          </div>
-
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => void toggleStatus.mutateAsync(customer._id)}
-              disabled={toggleStatus.isPending}
-              className="rounded-md border px-4 py-2 text-sm font-semibold hover:bg-gray-50 disabled:opacity-50"
-            >
-              {toggleStatus.isPending
-                ? "Updating..."
-                : customer.isActive
-                  ? "Deactivate customer"
-                  : "Activate customer"}
-            </button>
-          </div>
-        </ViewSection>
+        <CustomerForm
+          customer={customer}
+          isPending={update.isPending}
+          onSubmit={async (payload) => {
+            try {
+              await update.mutateAsync({ id: customer._id, payload });
+              toast.success("Customer updated");
+            } catch (err) {
+              toast.error(getApiErrorMessage(err, "Could not update customer"));
+            }
+          }}
+        />
 
         <ViewSection id="addresses" title="Saved Addresses">
           {(customer.addresses ?? []).length > 0 ? (
             <div className="space-y-4">
               {customer.addresses!.map((address, index) => (
-                <div key={address._id ?? index} className="rounded-lg border p-4">
+                <div key={address._id ?? index} className="rounded-lg border border-border p-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <ViewField label="Name" value={address.fullName} />
                     <ViewField label="Phone" value={address.phone} />
@@ -96,7 +88,7 @@ export default function AdminCustomerDetailPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">No saved addresses</p>
+            <p className="text-sm text-muted-foreground">No saved addresses</p>
           )}
         </ViewSection>
       </div>

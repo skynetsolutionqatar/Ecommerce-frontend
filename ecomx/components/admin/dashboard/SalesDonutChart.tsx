@@ -76,10 +76,10 @@ function SalesDonutBody({
         </ChartContainer>
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className={isExpanded ? "text-3xl font-bold text-gray-800" : adminType.emphasisTotal}>
+          <span className={isExpanded ? "text-3xl font-bold text-foreground" : adminType.emphasisTotal}>
             {totalValue}
           </span>
-          <span className={`${adminType.badge} text-gray-500`}>{totalLabel}</span>
+          <span className={`${adminType.badge} text-muted-foreground`}>{totalLabel}</span>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ function SalesDonutBody({
             key={item.id}
             className={`flex items-center justify-between ${adminType.badge} ${isExpanded ? "text-sm" : ""}`}
           >
-            <span className="flex items-center gap-2 text-gray-600">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <span
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: item.color }}

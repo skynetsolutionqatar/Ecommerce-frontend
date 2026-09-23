@@ -16,7 +16,9 @@ interface StatCardProps {
 
 function StatCard({ stat }: StatCardProps) {
   const isUp = stat.trend.direction === "up";
-  const trendColor = isUp ? "text-emerald-600" : "text-red-500";
+  const trendColor = isUp
+    ? "text-emerald-600 dark:text-emerald-400"
+    : "text-red-500 dark:text-red-400";
   const TrendIcon = isUp ? ArrowUpRight : ArrowDownRight;
 
   return (

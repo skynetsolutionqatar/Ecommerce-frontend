@@ -14,9 +14,9 @@ const TYPE_ICONS = {
 };
 
 const TYPE_BG = {
-  "new-order": "bg-blue-50",
-  "new-review": "bg-yellow-50",
-  "low-stock": "bg-red-50",
+  "new-order": "bg-blue-50 dark:bg-blue-500/15",
+  "new-review": "bg-yellow-50 dark:bg-amber-500/15",
+  "low-stock": "bg-red-50 dark:bg-red-500/15",
 };
 
 type Tab = "unread" | "read";
@@ -65,7 +65,7 @@ export default function NotificationBell({ tone = "default" }: { tone?: "default
         />
 
         {unreadCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 animate-pulse items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+          <span className="admin-notification-count-badge absolute -right-0.5 -top-0.5 z-10 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         ) : null}
@@ -91,7 +91,7 @@ export default function NotificationBell({ tone = "default" }: { tone?: "default
                 <button
                   type="button"
                   onClick={() => markAllRead()}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                  className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Mark all read
                 </button>
@@ -155,8 +155,12 @@ function TabButton({
     >
       {label}
       <span
-        className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-          active ? "bg-muted text-foreground" : "bg-muted/60 text-muted-foreground"
+        className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+          label === "Unread" && count > 0
+            ? "admin-notification-count-badge min-w-[1.125rem] border-0 px-1.5 shadow-none"
+            : active
+              ? "bg-muted text-foreground"
+              : "bg-muted/60 text-muted-foreground"
         }`}
       >
         {count}

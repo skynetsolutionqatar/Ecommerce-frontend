@@ -739,3 +739,163 @@ html.admin-theme-transition .admin-sidebar-brand img,
 .dark .admin-shell [class*="hover:bg-gray-50"]:hover {
   background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }
+
+/* ─── Extended dark mode: colored status text (-800) ─── */
+.dark .admin-shell .text-yellow-800,
+.dark .admin-shell .text-amber-800 {
+  color: oklch(0.82 0.14 85);
+}
+
+.dark .admin-shell .text-blue-800 {
+  color: oklch(0.78 0.12 250);
+}
+
+.dark .admin-shell .text-indigo-800 {
+  color: oklch(0.78 0.12 275);
+}
+
+.dark .admin-shell .text-purple-800 {
+  color: oklch(0.78 0.12 300);
+}
+
+.dark .admin-shell .text-green-800,
+.dark .admin-shell .text-emerald-800 {
+  color: oklch(0.78 0.14 145);
+}
+
+.dark .admin-shell .text-red-800 {
+  color: oklch(0.75 0.14 25);
+}
+
+.dark .admin-shell .text-indigo-700 {
+  color: oklch(0.78 0.12 275);
+}
+
+.dark .admin-shell .text-purple-700 {
+  color: oklch(0.78 0.12 300);
+}
+
+.dark .admin-shell .text-amber-700 {
+  color: oklch(0.82 0.14 75);
+}
+
+.dark .admin-shell .text-emerald-700 {
+  color: oklch(0.78 0.14 155);
+}
+
+/* ─── Extended dark mode: tinted -50 backgrounds (token match — not bg-*-500) ─── */
+.dark .admin-shell [class~="bg-yellow-50"],
+.dark .admin-shell [class*="bg-yellow-50/"],
+.dark .admin-shell [class~="bg-amber-50"],
+.dark .admin-shell [class*="bg-amber-50/"] {
+  background-color: oklch(0.34 0.08 85 / 35%);
+}
+
+.dark .admin-shell [class~="bg-blue-50"],
+.dark .admin-shell [class*="bg-blue-50/"] {
+  background-color: oklch(0.32 0.08 250 / 35%);
+}
+
+.dark .admin-shell [class~="bg-indigo-50"],
+.dark .admin-shell [class*="bg-indigo-50/"] {
+  background-color: oklch(0.32 0.08 275 / 35%);
+}
+
+.dark .admin-shell [class~="bg-purple-50"],
+.dark .admin-shell [class*="bg-purple-50/"] {
+  background-color: oklch(0.32 0.08 300 / 35%);
+}
+
+.dark .admin-shell [class~="bg-green-50"],
+.dark .admin-shell [class*="bg-green-50/"],
+.dark .admin-shell [class~="bg-emerald-50"],
+.dark .admin-shell [class*="bg-emerald-50/"] {
+  background-color: oklch(0.32 0.08 145 / 35%);
+}
+
+.dark .admin-shell [class~="bg-red-50"],
+.dark .admin-shell [class*="bg-red-50/"] {
+  background-color: oklch(0.32 0.08 25 / 35%);
+}
+
+/* Notification bell count — always solid red (light + dark) */
+.admin-shell .admin-notification-count-badge {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgb(239 68 68 / 0.35);
+}
+
+.dark .admin-shell .admin-notification-count-badge {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* ─── Extended dark mode: alert / badge borders ─── */
+.dark .admin-shell .border-yellow-200,
+.dark .admin-shell .border-amber-200 {
+  border-color: oklch(0.55 0.12 85 / 45%);
+}
+
+.dark .admin-shell .border-red-200 {
+  border-color: oklch(0.55 0.12 25 / 45%);
+}
+
+.dark .admin-shell .border-blue-200 {
+  border-color: oklch(0.55 0.12 250 / 45%);
+}
+
+/* ─── Extended dark mode: accent link & trend colors ─── */
+.dark .admin-shell .text-blue-600 {
+  color: oklch(0.75 0.12 250);
+}
+
+.dark .admin-shell .hover\:text-blue-700:hover {
+  color: oklch(0.78 0.12 250);
+}
+
+.dark .admin-shell .text-emerald-600 {
+  color: oklch(0.75 0.14 155);
+}
+
+.dark .admin-shell .text-red-500 {
+  color: oklch(0.72 0.14 25);
+}
+
+.dark .admin-shell .text-red-600 {
+  color: oklch(0.72 0.14 25);
+}
+
+/* ─── Extended dark mode: indigo / purple badge backgrounds ─── */
+.dark .admin-shell .bg-indigo-100 {
+  background-color: oklch(0.32 0.08 275);
+}
+
+.dark .admin-shell .bg-purple-100 {
+  background-color: oklch(0.32 0.08 300);
+}
+
+.dark .admin-shell .bg-amber-100 {
+  background-color: oklch(0.34 0.08 75);
+}
+
+.dark .admin-shell .bg-emerald-100 {
+  background-color: oklch(0.32 0.08 155);
+}
+
+/* ─── Recharts default tooltip (light border fix) ─── */
+.dark .admin-shell .recharts-default-tooltip {
+  background-color: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+.dark .admin-shell .recharts-tooltip-label,
+.dark .admin-shell .recharts-tooltip-item {
+  color: var(--popover-foreground) !important;
+}
+
+.dark .admin-shell .bg-gray-300 {
+  background-color: oklch(0.45 0.01 260);
+}

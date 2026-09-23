@@ -24,12 +24,12 @@ export function getStockStatusLabel(stock: number, alert = 5) {
 export function stockStatusBadgeClass(status: string) {
   switch (status) {
     case "OK":
-      return "bg-green-50 text-green-700";
+      return "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400";
     case "Low stock":
-      return "bg-amber-50 text-amber-700";
+      return "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400";
     case "Out of stock":
-      return "bg-red-50 text-red-700";
+      return "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400";
     default:
-      return "bg-gray-50 text-gray-600";
+      return "bg-muted text-muted-foreground";
   }
 }

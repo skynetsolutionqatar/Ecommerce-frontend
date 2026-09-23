@@ -18,7 +18,8 @@ const socketOrigin = apiOrigin.replace(/^http/, "ws");
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js inlines its bootstrap/hydration scripts; dev also needs eval for HMR.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  // @react-pdf/renderer (invoice PDF) compiles WebAssembly in the browser — wasm-unsafe-eval in prod.
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
   // Tailwind/framer-motion/react-pdf all emit inline style attributes.
   "style-src 'self' 'unsafe-inline'",
   // Remote product images (Cloudinary/Unsplash) and OpenStreetMap tiles.

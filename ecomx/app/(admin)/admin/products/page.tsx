@@ -27,11 +27,11 @@ const STATUS_OPTIONS = [
 
 function statusBadge(status: string) {
   const map: Record<string, string> = {
-    [PRODUCT_STATUS.ACTIVE]: "bg-green-100 text-green-700",
-    [PRODUCT_STATUS.DRAFT]: "bg-gray-100 text-gray-600",
-    [PRODUCT_STATUS.ARCHIVED]: "bg-orange-100 text-orange-700",
+    [PRODUCT_STATUS.ACTIVE]: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+    [PRODUCT_STATUS.DRAFT]: "bg-muted text-muted-foreground",
+    [PRODUCT_STATUS.ARCHIVED]: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-400",
   };
-  return map[status] ?? "bg-gray-100 text-gray-600";
+  return map[status] ?? "bg-muted text-muted-foreground";
 }
 
 export default function AdminProductsPage() {
@@ -156,7 +156,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-5 py-4 text-gray-500">{product.brand ?? "—"}</td>
                   <td className="px-5 py-4 font-medium">{formatPrice(product.price)}</td>
-                  <td className={`px-5 py-4 font-medium ${product.isLowStock ? "text-red-600" : ""}`}>
+                  <td className={`px-5 py-4 font-medium ${product.isLowStock ? "text-red-600 dark:text-red-400" : ""}`}>
                     {product.stock ?? 0}
                   </td>
                   <td className="px-5 py-4">

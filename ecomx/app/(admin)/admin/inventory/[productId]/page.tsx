@@ -102,7 +102,7 @@ export default function AdminInventoryProductPage({
                       <tr key={entry._id} className="border-t">
                         <td className="px-4 py-3 text-gray-500">{formatDateTime(entry.createdAt)}</td>
                         <td className="px-4 py-3 capitalize">{entry.type.replace("_", " ")}</td>
-                        <td className={`px-4 py-3 font-medium ${entry.quantity < 0 ? "text-red-600" : "text-green-700"}`}>
+                        <td className={`px-4 py-3 font-medium ${entry.quantity < 0 ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400"}`}>
                           {entry.quantity > 0 ? `+${entry.quantity}` : entry.quantity}
                         </td>
                         <td className="px-4 py-3">{entry.stockAfter}</td>

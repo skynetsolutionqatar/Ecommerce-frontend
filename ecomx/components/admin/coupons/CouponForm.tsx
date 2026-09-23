@@ -289,7 +289,7 @@ function CouponForm({
         </FormSection>
 
         {isPending && (
-          <p className="text-sm text-gray-500">Saving coupon...</p>
+          <p className="text-sm text-muted-foreground">Saving coupon...</p>
         )}
       </form>
     </div>

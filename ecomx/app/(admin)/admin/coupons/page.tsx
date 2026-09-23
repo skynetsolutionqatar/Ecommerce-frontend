@@ -74,7 +74,7 @@ export default function AdminCouponsPage() {
       />
 
       {isError && (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
           Coupons API is not available yet. Mount the /coupons route on the backend to enable this feature.
         </div>
       )}

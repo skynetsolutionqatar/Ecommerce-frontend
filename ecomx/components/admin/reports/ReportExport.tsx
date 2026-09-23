@@ -173,7 +173,7 @@ function ReportExport({ reportType, title, columns, params }: ReportExportProps)
               ))}
             </div>
 
-            {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+            {error ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
           </div>
 
           <DialogFooter>

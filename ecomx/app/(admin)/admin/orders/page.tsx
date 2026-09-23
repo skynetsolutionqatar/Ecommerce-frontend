@@ -29,14 +29,14 @@ const STATUS_OPTIONS = ORDER_STATUS_LIST.map((status) => ({
 
 function statusClass(status: string) {
   const map: Record<string, string> = {
-    [ORDER_STATUS.PENDING]: "bg-yellow-100 text-yellow-800",
-    [ORDER_STATUS.CONFIRMED]: "bg-blue-100 text-blue-800",
-    [ORDER_STATUS.PROCESSING]: "bg-indigo-100 text-indigo-800",
-    [ORDER_STATUS.SHIPPED]: "bg-purple-100 text-purple-800",
-    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-800",
-    [ORDER_STATUS.CANCELLED]: "bg-red-100 text-red-800",
+    [ORDER_STATUS.PENDING]: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
+    [ORDER_STATUS.CONFIRMED]: "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+    [ORDER_STATUS.PROCESSING]: "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400",
+    [ORDER_STATUS.SHIPPED]: "bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400",
+    [ORDER_STATUS.DELIVERED]: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400",
+    [ORDER_STATUS.CANCELLED]: "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400",
   };
-  return map[status] ?? "bg-gray-100 text-gray-600";
+  return map[status] ?? "bg-muted text-muted-foreground";
 }
 
 export default function AdminOrdersPage() {

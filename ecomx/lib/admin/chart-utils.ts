@@ -47,8 +47,16 @@ export const axisTickStyle = {
 export const tooltipStyle = {
   contentStyle: {
     borderRadius: 8,
-    border: "1px solid #E2E8F0",
+    border: "1px solid var(--border)",
+    backgroundColor: "var(--popover)",
+    color: "var(--popover-foreground)",
     fontSize: 12,
     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+  },
+  labelStyle: {
+    color: "var(--popover-foreground)",
+  },
+  itemStyle: {
+    color: "var(--popover-foreground)",
   },
 };

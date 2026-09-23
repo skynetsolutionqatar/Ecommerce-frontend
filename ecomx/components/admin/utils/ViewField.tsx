@@ -34,7 +34,7 @@ function ExpandableText({
         <button
           type="button"
           onClick={() => setExpanded((open) => !open)}
-          className="mt-1 border-0 bg-transparent p-0 text-[13px] font-semibold text-blue-600 hover:underline"
+          className="mt-1 border-0 bg-transparent p-0 text-[13px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
         >
           {expanded ? "Show less" : "Read more"}
         </button>

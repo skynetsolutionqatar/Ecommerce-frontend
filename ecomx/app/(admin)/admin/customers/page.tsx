@@ -145,7 +145,9 @@ export default function AdminCustomersPage() {
                   >
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        customer.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                        customer.isActive
+                          ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {customer.isActive ? "Active" : "Inactive"}

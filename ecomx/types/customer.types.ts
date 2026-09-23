@@ -36,3 +36,9 @@ export interface CustomerQueryParams extends PaginationParams {
   isEmailVerified?: boolean;
   sortBy?: "name" | "email" | "createdAt";
 }
+
+export interface UpdateCustomerPayload {
+  name?: string;
+  phone?: string;
+  isAdmin?: boolean;
+}

@@ -39,7 +39,7 @@ function ProgressRing({ percent, color = CHART_COLORS.primary }: ProgressRingPro
           />
         </RadialBarChart>
       </ResponsiveContainer>
-      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold leading-none tabular-nums text-gray-700">
+      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold leading-none tabular-nums text-foreground">
         {centerLabel}
       </span>
     </div>

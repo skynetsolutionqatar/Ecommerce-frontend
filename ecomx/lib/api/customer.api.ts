@@ -1,6 +1,6 @@
 import { apiGet, apiPatch } from "./client";
 import type { PaginationMeta } from "@/types/api.types";
-import type { ApiCustomer, CustomerQueryParams } from "@/types/customer.types";
+import type { ApiCustomer, CustomerQueryParams, UpdateCustomerPayload } from "@/types/customer.types";
 
 export const customerApi = {
   getProfile: () => apiGet<{ customer: ApiCustomer }>("/customers/profile"),
@@ -12,6 +12,9 @@ export const customerApi = {
 
   toggleStatus: (id: string) =>
     apiPatch<{ customer: ApiCustomer }>(`/customers/${id}/toggle-status`),
+
+  update: (id: string, payload: UpdateCustomerPayload) =>
+    apiPatch<{ customer: ApiCustomer }>(`/customers/${id}`, payload),
 };
 
 export type CustomersResult = {

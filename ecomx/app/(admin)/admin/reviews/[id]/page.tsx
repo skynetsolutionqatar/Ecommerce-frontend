@@ -113,7 +113,7 @@ export default function AdminReviewDetailPage({
           <ViewSection id="moderate" title="Moderation">
             <div className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   Rejection reason (required to reject)
                 </label>
                 <textarea

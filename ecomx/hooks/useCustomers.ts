@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchCustomers, customerApi } from "@/lib/api/customer.api";
-import type { CustomerQueryParams } from "@/types/customer.types";
+import type { CustomerQueryParams, UpdateCustomerPayload } from "@/types/customer.types";
 
 export const CUSTOMERS_KEY = "customers";
 export const CUSTOMER_KEY = "customer";
@@ -40,5 +40,11 @@ export function useCustomerMutations() {
     onSuccess: invalidate,
   });
 
-  return { toggleStatus };
+  const update = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerPayload }) =>
+      customerApi.update(id, payload),
+    onSuccess: invalidate,
+  });
+
+  return { toggleStatus, update };
 }

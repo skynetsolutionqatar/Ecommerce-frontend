@@ -7,6 +7,7 @@ export const COUPON_FORM_ID = "coupon-form";
 export const TENANT_FORM_ID = "tenant-form";
 export const COMPANY_FORM_ID = "company-form";
 export const CHANGE_PASSWORD_FORM_ID = "change-password-form";
+export const CUSTOMER_FORM_ID = "customer-form";
 
 const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:opacity-90`;
 const cancelBtn = "rounded-lg px-6 py-2";
@@ -56,3 +57,33 @@ export const tenantFormFooterButtons = (opts: Omit<Parameters<typeof createFormF
 
 export const companyFormFooterButtons = (opts: Omit<Parameters<typeof createFormFooterButtons>[0], "formId" | "entityLabel">) =>
   createFormFooterButtons({ ...opts, formId: COMPANY_FORM_ID, entityLabel: "Company" });
+
+export function customerDetailFooterButtons({
+  isPending = false,
+  togglePending = false,
+  isActive,
+  onToggleStatus,
+}: {
+  isPending?: boolean;
+  togglePending?: boolean;
+  isActive: boolean;
+  onToggleStatus: () => void;
+}): FooterButton[] {
+  return [
+    {
+      label: togglePending ? "Updating..." : isActive ? "Deactivate" : "Activate",
+      type: "button",
+      variant: "outline",
+      disabled: togglePending || isPending,
+      onClick: onToggleStatus,
+      className: cancelBtn,
+    },
+    {
+      label: isPending ? "Saving..." : "Save Customer",
+      type: "submit",
+      form: CUSTOMER_FORM_ID,
+      disabled: isPending || togglePending,
+      className: primaryBtn,
+    },
+  ];
+}

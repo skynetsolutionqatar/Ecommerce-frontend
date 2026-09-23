@@ -80,7 +80,7 @@ export default function AdminReviewsPage() {
       <PageHeader title="Reviews" description="Moderate customer reviews" />
 
       {isError && (
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
           Reviews API is not available yet. Mount the /reviews route on the backend to enable this feature.
         </div>
       )}

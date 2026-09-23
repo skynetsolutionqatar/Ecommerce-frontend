@@ -71,10 +71,10 @@ function LabeledPieBody({
           </ChartContainer>
 
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className={isExpanded ? "text-3xl font-bold text-gray-800" : "text-xl font-bold text-gray-800"}>
+            <span className={isExpanded ? "text-3xl font-bold text-foreground" : "text-xl font-bold text-foreground"}>
               {total}%
             </span>
-            <span className={`${adminType.badge} text-gray-500`}>Total</span>
+            <span className={`${adminType.badge} text-muted-foreground`}>Total</span>
           </div>
         </div>
       </div>
@@ -83,16 +83,16 @@ function LabeledPieBody({
         {items.map((item) => (
           <li key={item.id}>
             <div className={`mb-1.5 flex items-center justify-between ${adminType.badge}`}>
-              <span className="flex min-w-0 items-center gap-2 text-gray-700">
+              <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
                 <span
                   className="h-3 w-3 shrink-0 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
                 <span className="truncate font-medium">{item.label}</span>
               </span>
-              <span className="ml-3 shrink-0 font-semibold text-gray-900">{item.value}%</span>
+              <span className="ml-3 shrink-0 font-semibold text-foreground">{item.value}%</span>
             </div>
-            <div className={`overflow-hidden rounded-full bg-gray-100 ${isExpanded ? "h-3" : "h-2"}`}>
+            <div className={`overflow-hidden rounded-full bg-muted ${isExpanded ? "h-3" : "h-2"}`}>
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${item.value}%`, backgroundColor: item.color }}

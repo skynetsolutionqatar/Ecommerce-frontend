@@ -72,10 +72,10 @@ function OrderStatusDonutBody({
         </ChartContainer>
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className={isExpanded ? "text-3xl font-bold text-gray-800" : adminType.emphasisTotal}>
+          <span className={isExpanded ? "text-3xl font-bold text-foreground" : adminType.emphasisTotal}>
             {totalValue}
           </span>
-          <span className={`${adminType.badge} text-gray-500`}>{totalLabel}</span>
+          <span className={`${adminType.badge} text-muted-foreground`}>{totalLabel}</span>
         </div>
       </div>
 
@@ -92,8 +92,8 @@ function OrderStatusDonutBody({
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <span className="truncate text-gray-600">{item.label}</span>
-            <span className="ml-auto font-semibold text-gray-800">{item.value}%</span>
+            <span className="truncate text-muted-foreground">{item.label}</span>
+            <span className="ml-auto font-semibold text-foreground">{item.value}%</span>
           </li>
         ))}
       </ul>

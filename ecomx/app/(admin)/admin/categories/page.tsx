@@ -155,8 +155,8 @@ export default function AdminCategoriesPage() {
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         cat.isActive !== false
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {cat.isActive !== false ? "Active" : "Inactive"}
