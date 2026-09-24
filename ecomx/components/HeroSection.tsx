@@ -10,6 +10,8 @@ import {
   getHeroImageClass,
   HERO_IMAGE_INNER,
   HERO_SLIDE_MIN_H,
+  HERO_MOBILE_IMAGE_AREA,
+  HERO_MOBILE_IMAGE_FRAME,
   getHeroSurfaceStyle,
   getHeroMeshOrbs,
   getHeroAuroraGradient,
@@ -390,14 +392,14 @@ function HeroSlidePanel({
     <div
       className={`${HERO_SLIDE_MIN_H} relative flex h-full w-full min-w-0 shrink-0 basis-full flex-col overflow-hidden sm:block`}
     >
-      <div className="relative z-10 min-w-0 shrink-0 px-3 pb-1 pt-3 sm:absolute sm:inset-0 sm:flex sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
+      <div className="relative z-10 min-w-0 shrink-0 px-3 pb-0 pt-2 sm:absolute sm:inset-0 sm:flex sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 sm:pb-1 sm:pt-3 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
         <motion.div
           className="w-full min-w-0 max-w-[380px]"
           variants={contentStagger}
           initial={false}
           animate={isActive ? "show" : "idle"}
         >
-          <motion.div className="mb-2 flex items-center gap-1.5" variants={contentUp}>
+          <motion.div className="mb-1.5 flex items-center gap-1.5 sm:mb-2" variants={contentUp}>
             <span className="relative flex h-1.5 w-1.5 shrink-0 sm:h-2 sm:w-2">
               <motion.span
                 className="absolute inline-flex h-full w-full rounded-full"
@@ -416,7 +418,7 @@ function HeroSlidePanel({
           </motion.div>
 
           <motion.div variants={contentUp}>
-            <h2 className="mb-1.5 line-clamp-2 max-w-[240px] font-display text-[14px] font-bold leading-[1.25] text-gray-950 sm:max-w-[260px] sm:text-[15px] md:text-[16px]">
+            <h2 className="mb-1 line-clamp-2 max-w-[200px] font-display text-[13px] font-bold leading-[1.22] text-gray-950 sm:mb-1.5 sm:max-w-[260px] sm:text-[15px] md:text-[16px]">
               <SlideTitle text={slide.title} animateIn={animateIn} />
             </h2>
           </motion.div>
@@ -452,7 +454,7 @@ function HeroSlidePanel({
           ) : null}
 
           <motion.p
-            className="mb-3 line-clamp-2 max-w-[300px] text-[11px] leading-relaxed text-slate-600 sm:text-[12px] md:mb-3"
+            className="mb-2 line-clamp-1 max-w-[220px] text-[10.5px] leading-snug text-slate-600 sm:mb-3 sm:line-clamp-2 sm:max-w-[300px] sm:text-[12px]"
             variants={contentUp}
           >
             {slide.sub}
@@ -461,7 +463,7 @@ function HeroSlidePanel({
           <motion.div className="flex flex-wrap items-center gap-2" variants={contentUp}>
             <MagneticButton
               onClick={() => onPrimaryAction(slide)}
-              className="group/cta relative flex cursor-pointer items-center gap-1.5 overflow-hidden rounded-full px-5 py-2.5 font-label text-[11px] font-bold text-white sm:px-6 sm:text-[12px]"
+              className="group/cta relative flex cursor-pointer items-center gap-1.5 overflow-hidden rounded-full px-4 py-2 font-label text-[10.5px] font-bold text-white sm:px-6 sm:py-2.5 sm:text-[12px]"
               style={{
                 background: `linear-gradient(135deg, ${ac.color} 0%, ${ac.neon} 100%)`,
                 boxShadow: `0 6px 24px ${ac.glow}, inset 0 1px 0 rgba(255,255,255,0.28)`,
@@ -507,17 +509,17 @@ function HeroSlidePanel({
       </div>
 
       <motion.div
-        className="pointer-events-none relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 pt-0 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%]"
+        className={`pointer-events-none relative z-[2] mt-auto flex shrink-0 items-center justify-center px-3 pb-2 pt-0 sm:mt-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%] ${HERO_MOBILE_IMAGE_AREA}`}
         variants={productEnter}
         initial={false}
         animate={isActive ? "show" : "idle"}
       >
-        <div className={`${HERO_IMAGE_INNER} flex h-[140px] w-full max-w-[220px] items-center justify-center sm:h-[72%] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[340px] xl:max-w-[360px]`}>
+        <div className={`${HERO_IMAGE_INNER} flex items-center justify-center ${HERO_MOBILE_IMAGE_FRAME}`}>
           <StoreImage
             src={slide.img}
             alt={formatHeroTitle(slide.title).replace("\n", " ")}
-            width={400}
-            height={360}
+            width={280}
+            height={240}
             priority
             blend={false}
             className={getHeroImageClass()}
@@ -548,8 +550,8 @@ function HeroSkeleton() {
         <div className="mt-2 h-8 w-full max-w-sm rounded-lg bg-slate-200/80" />
         <div className="mt-2 h-9 w-32 rounded-full bg-slate-200/80" />
       </div>
-      <div className="relative z-[2] mt-auto flex min-h-[160px] shrink-0 items-center justify-center px-4 pb-3 sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:justify-center sm:pb-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%]">
-        <div className="h-[140px] w-full max-w-[220px] animate-pulse rounded-2xl bg-slate-200/60 sm:h-[230px] sm:max-w-[270px] md:h-[280px] md:max-w-[340px]" />
+      <div className={`relative z-[2] mt-auto flex shrink-0 items-center justify-center px-3 pb-2 sm:mt-0 sm:justify-center sm:pb-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] ${HERO_MOBILE_IMAGE_AREA}`}>
+        <div className={`animate-pulse rounded-2xl bg-slate-200/60 ${HERO_MOBILE_IMAGE_FRAME} sm:h-[230px] md:h-[280px]`} />
       </div>
     </div>
   );

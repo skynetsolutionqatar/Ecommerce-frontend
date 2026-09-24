@@ -195,7 +195,14 @@ export const HERO_IMAGE_INNER =
   "relative flex h-full w-full items-center justify-center";
 
 export const HERO_SLIDE_MIN_H =
-  "min-h-[440px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[380px]";
+  "min-h-[252px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[380px]";
+
+/** Compact product image frame on stacked (mobile) hero layout. */
+export const HERO_MOBILE_IMAGE_FRAME =
+  "h-[88px] w-full max-w-[132px] sm:h-[72%] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[340px] xl:max-w-[360px]";
+
+export const HERO_MOBILE_IMAGE_AREA =
+  "min-h-[96px] h-[96px] sm:absolute sm:inset-0 sm:mt-0 sm:min-h-0 sm:h-auto";
 
 import { productImageClass } from "./product-image-utils";
 
