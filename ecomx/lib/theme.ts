@@ -10,8 +10,7 @@ export const type = {
 } as const;
 
 export const tw = {
-  pageTopOffset:
-    "pt-[var(--page-top)] transition-[padding-top] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+  pageTopOffset: "pt-[var(--page-top)]",
   storeBackLink:
     "inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm cursor-pointer transition hover:bg-gray-50",
   heroSlider:

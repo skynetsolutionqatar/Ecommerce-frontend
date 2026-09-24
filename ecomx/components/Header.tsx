@@ -27,6 +27,10 @@ interface HeaderProps {
   onCategorySelect?: (category: ApiCategory) => void;
 }
 
+const CATEGORY_STRIP_HEIGHT = 56;
+const SCROLL_TOP_THRESHOLD = 24;
+const SCROLL_DIRECTION_DELTA = 16;
+
 const MOBILE_NAV_LINKS = [
   { label: "Products", href: ROUTES.shop },
   { label: "Solutions", href: ROUTES.shop },
@@ -99,10 +103,12 @@ export default function Header({
     if (!node) return;
 
     const syncHeaderHeight = () => {
-      document.documentElement.style.setProperty(
-        "--header-height",
-        `${Math.ceil(node.getBoundingClientRect().height)}px`
-      );
+      requestAnimationFrame(() => {
+        document.documentElement.style.setProperty(
+          "--header-height",
+          `${Math.ceil(node.getBoundingClientRect().height)}px`
+        );
+      });
     };
 
     syncHeaderHeight();
@@ -117,23 +123,39 @@ export default function Header({
   }, []);
 
   useEffect(() => {
-    const fn = () => {
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
       const y = window.scrollY;
-      if (y <= 10) {
+      const nearBottom =
+        y + window.innerHeight >= document.documentElement.scrollHeight - 100;
+
+      if (y <= SCROLL_TOP_THRESHOLD) {
         setScrolled(false);
         setCatVisible(true);
       } else {
         setScrolled(true);
-        if (y > lastScrollY.current + 4) {
-          setCatVisible(false);
-        } else if (y < lastScrollY.current - 4) {
-          setCatVisible(true);
+        if (!nearBottom) {
+          const delta = y - lastScrollY.current;
+          if (delta > SCROLL_DIRECTION_DELTA) {
+            setCatVisible(false);
+          } else if (delta < -SCROLL_DIRECTION_DELTA) {
+            setCatVisible(true);
+          }
         }
       }
       lastScrollY.current = y;
     };
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -321,8 +343,9 @@ export default function Header({
               <motion.button
                 type="button"
                 onClick={onLoginOpen}
-                className="hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 md:flex hover:bg-gray-50 transition-all"
+                className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all"
                 whileTap={{ scale: 0.97 }}
+                aria-label={user ? "Account" : "Login or Register"}
               >
                 {user ? (
                   <Avatar
@@ -334,6 +357,9 @@ export default function Header({
                 ) : (
                   <Icons.User />
                 )}
+                <span className="hidden min-[480px]:inline md:hidden">
+                  Login / Signup
+                </span>
                 <span className="hidden md:inline">
                   {user ? user.name.split(" ")[0] : "Login / Signup"}
                 </span>
@@ -342,7 +368,7 @@ export default function Header({
               <motion.button
                 type="button"
                 onClick={onWishlistOpen}
-                className="relative flex items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                className="relative hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all md:flex"
                 whileTap={{ scale: 0.97 }}
                 aria-label="Wishlist"
               >
@@ -400,11 +426,12 @@ export default function Header({
         {/* ── Category icon strip ── */}
         <motion.div
           className="overflow-hidden border-b border-gray-200 bg-white"
+          initial={false}
           animate={{
-            height: catVisible ? "auto" : 0,
+            height: catVisible ? CATEGORY_STRIP_HEIGHT : 0,
             opacity: catVisible ? 1 : 0,
           }}
-          transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className="mx-auto w-full max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px]">
             <div
@@ -417,13 +444,11 @@ export default function Header({
               ) : categories.length > 0 ? (
                 <>
                   {categories.map((cat) => (
-                    <motion.button
+                    <button
                       key={cat._id}
                       type="button"
                       onClick={() => handleCategoryClick(cat)}
-                      className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer md:px-4"
-                      whileHover={{ y: -1 }}
-                      whileTap={{ scale: 0.95 }}
+                      className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95 md:px-4"
                     >
                       <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                         {resolveCategoryIcon(cat.name)}
@@ -431,14 +456,12 @@ export default function Header({
                       <span className="whitespace-nowrap font-label text-[11px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
                         {cat.name}
                       </span>
-                    </motion.button>
+                    </button>
                   ))}
-                  <motion.button
+                  <button
                     type="button"
                     onClick={() => goTo(ROUTES.shop)}
-                    className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer md:px-4"
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="group flex shrink-0 flex-col items-center gap-0.5 border-0 bg-transparent px-3 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95 md:px-4"
                   >
                     <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                       {CategoryIcons.More}
@@ -446,7 +469,7 @@ export default function Header({
                     <span className="whitespace-nowrap font-label text-[11px] font-medium text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px] leading-tight">
                       More Categories
                     </span>
-                  </motion.button>
+                  </button>
                 </>
               ) : (
                 <button

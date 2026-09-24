@@ -40,17 +40,18 @@ const SLIDE_COUNT = 4;
 const SWIPE_THRESHOLD = 48;
 
 const SLIDE_EASE = [0.32, 0.72, 0, 1] as const;
-const SLIDE_DURATION = 2.5;
+const SLIDE_MOVE_DURATION = 0.55;
+const HERO_THEME_DURATION = 0.9;
 
 const SPRING_SNAPPY = { type: "spring" as const, stiffness: 380, damping: 32 };
 const SPRING_SMOOTH = { type: "spring" as const, stiffness: 260, damping: 28 };
 const SPRING_MAGNET = { stiffness: 300, damping: 18, mass: 0.4 };
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
-const SLIDE_TRANSITION: Transition = { duration: SLIDE_DURATION, ease: SLIDE_EASE };
-const HERO_THEME_TRANSITION: Transition = { duration: SLIDE_DURATION, ease: SLIDE_EASE };
+const SLIDE_TRANSITION: Transition = { duration: SLIDE_MOVE_DURATION, ease: SLIDE_EASE };
+const HERO_THEME_TRANSITION: Transition = { duration: HERO_THEME_DURATION, ease: SLIDE_EASE };
 const DRAG_SNAP: Transition = { type: "spring", stiffness: 180, damping: 32, mass: 0.95 };
 const INSTANT_TRANSITION: Transition = { duration: 0 };
-const HERO_BG_CSS_TRANSITION = `background-color ${SLIDE_DURATION}s cubic-bezier(0.32, 0.72, 0, 1), background-image ${SLIDE_DURATION}s cubic-bezier(0.32, 0.72, 0, 1)`;
+const HERO_BG_CSS_TRANSITION = `background-color ${HERO_THEME_DURATION}s cubic-bezier(0.32, 0.72, 0, 1), background-image ${HERO_THEME_DURATION}s cubic-bezier(0.32, 0.72, 0, 1)`;
 
 const contentStagger: Variants = {
   hidden: { opacity: 0 },
@@ -574,6 +575,7 @@ export default function HeroSection({
   const [instant, setInstant] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSliding, setIsSliding] = useState(false);
   const trackIndexRef = useRef(0);
   const remainingRef = useRef(AUTO_MS);
 
@@ -584,17 +586,17 @@ export default function HeroSection({
   const displayIndex = trackIndex % SLIDE_COUNT;
   const accent = getSlideAccent(displayIndex, slides[displayIndex]?.slideKind);
   const heroSurface = getHeroSurfaceStyle(accent);
-  const bgPaused = isDragging || instant;
+  const bgPaused = isDragging || instant || isSliding;
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const spotX = useMotionValue(-500);
   const spotY = useMotionValue(-500);
   const progress = useMotionValue(0);
-  const parallaxX = useSpring(mx, { stiffness: 200, damping: 26 });
-  const parallaxY = useSpring(my, { stiffness: 200, damping: 26 });
-  const smoothSpotX = useSpring(spotX, { stiffness: 220, damping: 30 });
-  const smoothSpotY = useSpring(spotY, { stiffness: 220, damping: 30 });
+  const parallaxX = useTransform(mx, (v) => v * 8);
+  const parallaxY = useTransform(my, (v) => v * 8);
+  const smoothSpotX = useTransform(spotX, (v) => v);
+  const smoothSpotY = useTransform(spotY, (v) => v);
   const heroSpotlight = useMotionTemplate`radial-gradient(340px circle at ${smoothSpotX}px ${smoothSpotY}px, ${accent.neon}1f, transparent 72%)`;
 
   const goTo = useCallback((index: number) => {
@@ -613,10 +615,11 @@ export default function HeroSection({
   }, []);
 
   const handleTrackComplete = useCallback(() => {
+    setIsSliding(false);
     if (trackIndexRef.current !== SLIDE_COUNT) return;
     setInstant(true);
     setTrackIndex(0);
-    requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
+    requestAnimationFrame(() => setInstant(false));
   }, []);
 
   const handleDragEnd = useCallback(
@@ -641,7 +644,7 @@ export default function HeroSection({
 
   useEffect(() => {
     if (trackIndex !== SLIDE_COUNT) return;
-    const id = window.setTimeout(handleTrackComplete, SLIDE_DURATION * 1000 + 40);
+    const id = window.setTimeout(handleTrackComplete, SLIDE_MOVE_DURATION * 1000 + 40);
     return () => window.clearTimeout(id);
   }, [trackIndex, handleTrackComplete]);
 
@@ -765,7 +768,7 @@ export default function HeroSection({
               ) : null}
             </AnimatePresence> */}
 
-            <div className={`relative min-h-0 flex-1 overflow-hidden ${HERO_SLIDE_MIN_H}`}>
+            <div className={`hero-slide-viewport relative min-h-0 flex-1 overflow-hidden ${HERO_SLIDE_MIN_H}`}>
               {/* One shared background — avoids 5× duplicated blur animations while sliding */}
               <div
                 className={`pointer-events-none absolute inset-0 z-0 ${bgPaused ? "hero-bg-paused" : ""}`}
@@ -783,7 +786,7 @@ export default function HeroSection({
               </div>
 
               <motion.div
-                className="relative z-10 flex h-full min-h-[inherit] w-full min-w-0 cursor-grab touch-pan-y active:cursor-grabbing will-change-transform"
+                className="hero-slide-track relative z-10 flex h-full min-h-[inherit] w-full min-w-0 cursor-grab touch-pan-y active:cursor-grabbing"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.1}
@@ -793,10 +796,14 @@ export default function HeroSection({
                 onDragEnd={handleDragEnd}
                 animate={{ x: `-${trackIndex * 100}%` }}
                 transition={instant ? INSTANT_TRANSITION : SLIDE_TRANSITION}
+                onAnimationStart={() => setIsSliding(true)}
                 onAnimationComplete={handleTrackComplete}
               >
                 {trackSlides.map((s, i) => (
-                  <div key={`track-${i}`} className="flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full">
+                  <div
+                    key={`track-${i}`}
+                    className="flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full"
+                  >
                     <HeroSlidePanel
                       slide={s}
                       index={i < SLIDE_COUNT ? i : 0}

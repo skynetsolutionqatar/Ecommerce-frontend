@@ -50,8 +50,8 @@ export default function LazyMount({
       ref={ref}
       className={className}
       style={{
-        minHeight: !visible ? minHStyle : undefined,
-        contentVisibility: "auto",
+        minHeight: minHStyle,
+        contentVisibility: visible ? "visible" : "auto",
         containIntrinsicSize: minHStyle ? `1px ${minHStyle}` : undefined,
       }}
     >

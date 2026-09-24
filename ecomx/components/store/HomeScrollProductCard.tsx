@@ -86,9 +86,6 @@ export default function HomeScrollProductCard({
         overflow: "hidden",
         boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
       }}
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.055, duration: 0.35 }}
       whileHover={{
         boxShadow: "0 8px 24px rgba(17,24,39,0.12)",
         borderColor: "#9CA3AF",

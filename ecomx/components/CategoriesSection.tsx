@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
@@ -37,14 +36,13 @@ export default function CategoriesSection({
             Browse our wide range of product categories
           </p>
         </div>
-        <motion.button
+        <button
           type="button"
           onClick={onViewAll}
-          className="flex items-center gap-1.5 rounded-full border border-gray-800 px-4 py-2 md:py-1.5 font-label text-[13px] md:text-[12px] font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
-          whileTap={{ scale: 0.97 }}
+          className="flex items-center gap-1.5 rounded-full border border-gray-800 px-4 py-2 md:py-1.5 font-label text-[13px] md:text-[12px] font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white active:scale-[0.97]"
         >
           View All Categories
-        </motion.button>
+        </button>
       </div>
 
       {isLoading ? (
@@ -55,25 +53,16 @@ export default function CategoriesSection({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 pb-4 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6 lg:pb-5">
-          {categories.map((cat, i) => (
-            <motion.button
+          {categories.map((cat) => (
+            <button
               key={cat._id}
               type="button"
               onClick={() => onCategoryClick?.(cat._id)}
-              className="group flex flex-col items-center gap-2 rounded-xl bg-white p-3 text-center cursor-pointer"
+              className="group flex flex-col items-center gap-2 rounded-xl bg-white p-3 text-center cursor-pointer transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_8px_24px_rgba(17,24,39,0.10)] active:scale-[0.98]"
               style={{
                 border: "1.5px solid #f0f0f0",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
               }}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.3 }}
-              whileHover={{
-                y: -3,
-                boxShadow: "0 8px 24px rgba(17,24,39,0.10)",
-                borderColor: "#CBD5E1",
-              }}
-              whileTap={{ scale: 0.96 }}
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-all group-hover:scale-105 group-hover:text-blue-600">
                 <span className="flex h-8 w-8 items-center justify-center [&_svg]:h-8 [&_svg]:w-8">
@@ -91,7 +80,7 @@ export default function CategoriesSection({
                   </span>
                 ) : null}
               </div>
-            </motion.button>
+            </button>
           ))}
         </div>
       )}
