@@ -103,7 +103,6 @@ export default function HomeScrollProductCard({
               alt={product.name}
               width={224}
               height={224}
-              sizes="(min-width: 2560px) 224px, (min-width: 1920px) 208px, 188px"
               className="h-full w-full object-contain drop-shadow-sm"
             />
           </div>

@@ -522,7 +522,6 @@ function HeroSlidePanel({
             height={460}
             priority
             blend={false}
-            sizes="(min-width: 2560px) 520px, (min-width: 1920px) 440px, (min-width: 1280px) 380px, 280px"
             className={getHeroImageClass()}
             style={{ background: "transparent", maxHeight: "100%", width: "auto", height: "100%" }}
           />

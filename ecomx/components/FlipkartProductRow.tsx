@@ -38,7 +38,7 @@ export default function FlipkartProductRow({
     const el = scrollRef.current;
     if (!el) return;
     const step = Math.max(280, Math.round(el.clientWidth * 0.72));
-    scrollRef.current.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" });
+    el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" });
   };
 
   if (!isLoading && products.length === 0) return null;
