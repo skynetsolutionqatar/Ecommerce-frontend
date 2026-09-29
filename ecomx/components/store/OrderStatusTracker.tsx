@@ -60,7 +60,7 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
   return (
     <div className="rounded-2xl border border-border bg-white p-5">
-      <h2 className="mb-4 text-sm font-bold text-primary">Order Tracking</h2>
+      <h2 className="mb-4 text-base font-bold text-gray-900 sm:text-sm">Order Tracking</h2>
 
       {isCancelled ? (
         <p className="mb-4 text-sm md:text-xs font-medium text-muted">This order was cancelled.</p>
@@ -102,16 +102,16 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
 
                   <div className="min-w-0 pb-4 sm:pb-0 sm:text-center">
                     <p
-                      className={`text-sm md:text-xs font-semibold ${
-                        state === "upcoming" ? "text-gray-400" : "text-gray-900"
+                      className={`text-sm font-semibold leading-snug ${
+                        state === "upcoming" ? "text-gray-600" : "text-gray-900"
                       }`}
                     >
                       {ORDER_STATUS_LABEL[step]}
                     </p>
                     {ts ? (
-                      <p className="mt-0.5 text-[12px] md:text-[10px] text-muted">{formatDate(ts)}</p>
+                      <p className="mt-0.5 text-xs text-gray-600">{formatDate(ts)}</p>
                     ) : state === "current" ? (
-                      <p className="mt-0.5 text-[12px] md:text-[10px] font-medium text-blue-600">In progress</p>
+                      <p className="mt-0.5 text-xs font-medium text-blue-700">In progress</p>
                     ) : null}
                   </div>
                 </div>
@@ -170,7 +170,7 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
       ) : null}
 
       {order.trackingNumber ? (
-        <p className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-sm md:text-xs font-semibold text-primary">
+        <p className="mt-4 rounded-lg bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-900">
           Tracking number: {order.trackingNumber}
         </p>
       ) : null}

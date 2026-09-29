@@ -121,7 +121,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
         <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
           <div className="flex flex-col gap-4">
             <div className="rounded-2xl border border-border bg-white p-5">
-              <h2 className="mb-4 text-sm font-bold text-primary">Items</h2>
+              <h2 className="mb-4 text-base font-bold text-gray-900 sm:text-sm">Items</h2>
               <div className="flex flex-col gap-4">
                 {order.items.map((item, i) => (
                   <div key={`${item.productId}-${i}`} className="flex gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
@@ -169,25 +169,25 @@ export default function OrderDetailClient({ id }: { id: string }) {
 
           <div className="flex flex-col gap-4">
             <div className="rounded-2xl border border-border bg-white p-5">
-              <h2 className="mb-3 text-sm font-bold text-primary">Summary</h2>
+              <h2 className="mb-3 text-base font-bold text-gray-900 sm:text-sm">Summary</h2>
               <div className="flex justify-between text-sm py-1">
-                <span className="text-muted">Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+                <span className="font-medium text-gray-700">Subtotal</span>
+                <span className="text-gray-900">{formatPrice(order.subtotal)}</span>
               </div>
               {order.shippingCharge != null ? (
                 <div className="flex justify-between text-sm py-1">
-                  <span className="text-muted">Shipping</span>
-                  <span>{formatPrice(order.shippingCharge)}</span>
+                  <span className="font-medium text-gray-700">Shipping</span>
+                  <span className="text-gray-900">{formatPrice(order.shippingCharge)}</span>
                 </div>
               ) : null}
-              <div className="mt-2 flex justify-between border-t border-gray-100 pt-2 text-base font-bold">
+              <div className="mt-2 flex justify-between border-t border-gray-100 pt-2 text-base font-bold text-gray-900">
                 <span>Total</span>
                 <span className="text-accent">{formatPrice(orderTotal(order))}</span>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-white p-5">
-              <h2 className="mb-3 text-sm font-bold text-primary">Delivery</h2>
+              <h2 className="mb-3 text-base font-bold text-gray-900 sm:text-sm">Delivery</h2>
               <p className="text-sm font-medium text-gray-900">{address.fullName}</p>
               <p className="text-sm text-muted">{address.phone}</p>
               <p className="mt-2 text-sm text-muted">

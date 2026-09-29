@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { connectSocket } from "@/lib/socket";
 import { ADMIN_ROUTES } from "@/lib/config";
-import { showInfo } from "@/lib/toast";
+import { showInfo, showNavigableInfo } from "@/lib/toast";
 import {
   fetchNotifications,
   markNotificationRead,
@@ -14,6 +15,12 @@ import {
 import type { AdminNotification, ApiNotification } from "@/types/notification.types";
 
 export const NOTIFICATIONS_KEY = "notifications";
+
+function notificationProductId(d: ApiNotification["data"]): string | null {
+  if (!d || !("productId" in d) || d.productId == null) return null;
+  const id = d.productId;
+  return typeof id === "string" && id.trim() ? id.trim() : String(id);
+}
 
 function hrefForNotification(n: ApiNotification): string {
   const d = n.data;
@@ -26,10 +33,10 @@ function hrefForNotification(n: ApiNotification): string {
       return d && "reviewId" in d && d.reviewId
         ? ADMIN_ROUTES.review(d.reviewId)
         : ADMIN_ROUTES.reviews;
-    case "low-stock":
-      return d && "productId" in d && d.productId
-        ? ADMIN_ROUTES.inventoryProduct(d.productId)
-        : ADMIN_ROUTES.inventory;
+    case "low-stock": {
+      const productId = notificationProductId(d);
+      return productId ? ADMIN_ROUTES.inventoryUpdate(productId) : ADMIN_ROUTES.inventory;
+    }
   }
 }
 
@@ -47,6 +54,7 @@ function mapNotification(n: ApiNotification): AdminNotification {
 }
 
 export function useNotifications() {
+  const router = useRouter();
   const { isAdmin, isHydrated } = useAuth();
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
@@ -84,9 +92,20 @@ export function useNotifications() {
       showInfo(`New review: ${payload.rating}★ for ${payload.product}`, { duration: 8000 });
     };
 
-    const onLowStock = (payload: { product: string; stock: number }) => {
+    const onLowStock = (payload: { product: string; stock: number; productId?: string }) => {
       refresh();
-      showInfo(`Low stock: ${payload.product} (${payload.stock} left)`, { duration: 10000 });
+      const message = `Low stock: ${payload.product} (${payload.stock} left)`;
+      const productId =
+        typeof payload.productId === "string" && payload.productId.trim()
+          ? payload.productId.trim()
+          : null;
+      const href = productId ? ADMIN_ROUTES.inventoryUpdate(productId) : ADMIN_ROUTES.inventory;
+
+      if (productId) {
+        showNavigableInfo(message, () => router.push(href), { duration: 10000 });
+      } else {
+        showInfo(message, { duration: 10000 });
+      }
     };
 
     socket.on("connect", onConnect);
@@ -104,7 +123,7 @@ export function useNotifications() {
       socket.off("new-review", onNewReview);
       socket.off("low-stock", onLowStock);
     };
-  }, [isHydrated, isAdmin, queryClient]);
+  }, [isHydrated, isAdmin, queryClient, router]);
 
   const markReadMutation = useMutation({
     mutationFn: markNotificationRead,

@@ -125,7 +125,14 @@ export default function NotificationBell({ tone = "default" }: { tone?: "default
                 </p>
               </div>
             ) : (
-              list.map((n) => <NotificationItem key={n.id} notification={n} onRead={markRead} />)
+              list.map((n) => (
+                <NotificationItem
+                  key={n.id}
+                  notification={n}
+                  onRead={markRead}
+                  onNavigate={() => setOpen(false)}
+                />
+              ))
             )}
           </div>
         </div>
@@ -172,14 +179,17 @@ function TabButton({
 function NotificationItem({
   notification: n,
   onRead,
+  onNavigate,
 }: {
   notification: AdminNotification;
   onRead: (id: string) => void;
+  onNavigate?: () => void;
 }) {
   const router = useRouter();
 
   const handleClick = () => {
     if (!n.read) onRead(n.id);
+    onNavigate?.();
     router.push(n.href);
   };
 

@@ -361,7 +361,7 @@ export default function CheckoutPage({
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
       errors[field] ? "border-red-400" : "border-border"
     }`;
-  const labelClass = "mb-1.5 block text-sm md:text-xs font-bold text-primary/80";
+  const labelClass = "mb-1.5 block text-sm font-bold text-gray-800";
 
   const scheduleLocationValidation = () => {
     if (debounceTimerRef.current != null) {
@@ -585,11 +585,11 @@ export default function CheckoutPage({
               key={s}
               type="button"
               onClick={() => goToStep(i + 1)}
-              className={`flex-1 border-0 py-3 text-[11px] font-semibold cursor-pointer transition-all sm:text-[13px] ${
-                step === i + 1 ? "bg-primary text-white" : "bg-white text-muted"
+              className={`flex-1 border-0 px-1 py-3 text-[13px] font-semibold leading-snug cursor-pointer transition-all sm:text-[13px] ${
+                step === i + 1 ? "bg-primary text-white" : "bg-white text-gray-700"
               } ${i < 2 ? "sm:border-r sm:border-border" : ""} ${i > 0 ? "border-t border-border sm:border-t-0" : ""}`}
             >
-              <span className="sm:hidden">{i + 1}. {s.split(" ")[0]}</span>
+              <span className="sm:hidden">{i + 1}. {s}</span>
               <span className="hidden sm:inline">{i + 1}. {s}</span>
             </button>
           ))}
@@ -835,7 +835,7 @@ export default function CheckoutPage({
           </div>
 
           <div className="sticky top-[100px] rounded-3xl border border-border bg-white p-4 sm:p-6">
-            <div className="mb-4 text-sm font-bold text-primary">
+            <div className="mb-4 text-base font-bold text-gray-900 sm:text-sm">
               Order Summary ({cart.length} item{cart.length !== 1 ? "s" : ""})
             </div>
             {cart.slice(0, 3).map((item) => (
@@ -860,13 +860,13 @@ export default function CheckoutPage({
                     className={`flex justify-between ${i === 2 ? "mt-1 border-t border-border pt-2" : ""}`}
                   >
                     <span
-                      className={`${i === 2 ? "text-sm font-bold text-primary" : "text-sm md:text-xs text-muted"}`}
+                      className={`${i === 2 ? "text-sm font-bold text-primary" : "text-sm font-medium text-gray-700"}`}
                     >
                       {l}
                     </span>
                     <span
-                      className={`${i === 2 ? `${type.price} text-sm font-extrabold text-primary` : "text-sm md:text-xs font-medium"} ${
-                        i === 1 ? "text-gray-600" : "text-primary/80"
+                      className={`${i === 2 ? `${type.price} text-sm font-extrabold text-primary` : "text-sm font-medium"} ${
+                        i === 1 ? "text-gray-700" : "text-gray-900"
                       }`}
                     >
                       {v}
