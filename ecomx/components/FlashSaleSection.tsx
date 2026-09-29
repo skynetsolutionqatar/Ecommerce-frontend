@@ -105,7 +105,7 @@ export default function FlashSaleSection({
 
       {isLoading ? (
         <div className="bg-gray-50 py-3 sm:py-4">
-          <HomeProductRowSkeleton count={6} />
+          <HomeProductRowSkeleton count={10} />
         </div>
       ) : (
         <div
@@ -116,7 +116,6 @@ export default function FlashSaleSection({
               <HomeScrollProductCard
                 product={product}
                 index={i}
-                imageHeight={120}
                 showBrand={false}
                 onClick={onProductClick}
                 onWishlistToggle={onWishlistToggle}

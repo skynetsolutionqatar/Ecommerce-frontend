@@ -35,8 +35,10 @@ export default function FlipkartProductRow({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: "left" | "right") => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({ left: dir === "right" ? 300 : -300, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const step = Math.max(280, Math.round(el.clientWidth * 0.72));
+    scrollRef.current.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" });
   };
 
   if (!isLoading && products.length === 0) return null;
@@ -107,7 +109,7 @@ export default function FlipkartProductRow({
         ) : null}
 
         {isLoading ? (
-          <HomeProductRowSkeleton count={6} />
+          <HomeProductRowSkeleton count={10} />
         ) : (
           <div
             ref={scrollRef}

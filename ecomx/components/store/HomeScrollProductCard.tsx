@@ -7,11 +7,12 @@ import { formatPrice } from "@/lib/utils";
 import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 import type { ApiProduct } from "@/types/product.types";
 import type { WishlistItem } from "@/lib/types";
-import { type } from "@/lib/theme";
+import { tw, type } from "@/lib/theme";
 
 interface HomeScrollProductCardProps {
   product: ApiProduct;
   index?: number;
+  /** Overrides responsive image height (px); omit to use `tw.homeScrollProductImage`. */
   imageHeight?: number;
   onClick: (product: ApiProduct) => void;
   onWishlistToggle?: (item: WishlistItem) => void;
@@ -56,7 +57,7 @@ function discountPercent(product: ApiProduct): number | null {
 export default function HomeScrollProductCard({
   product,
   index = 0,
-  imageHeight = 130,
+  imageHeight,
   onClick,
   onWishlistToggle,
   isWishlisted = false,
@@ -77,9 +78,8 @@ export default function HomeScrollProductCard({
           onClick(product);
         }
       }}
-      className="group relative flex shrink-0 cursor-pointer flex-col text-left transition-[box-shadow,border-color] duration-200 hover:z-20"
+      className={`group relative flex shrink-0 cursor-pointer flex-col text-left transition-[box-shadow,border-color] duration-200 hover:z-20 ${tw.homeScrollProductCard}`}
       style={{
-        width: "clamp(145px, 21vw, 188px)",
         background: "#fff",
         borderRadius: "14px",
         border: "1.5px solid #f0f0f0",
@@ -93,19 +93,17 @@ export default function HomeScrollProductCard({
       whileTap={{ scale: 0.99 }}
     >
       <div
-        className={`relative mx-2 mt-2 flex items-center justify-center overflow-hidden ${productImageSurfaceClass}`}
-        style={{
-          borderRadius: "10px",
-          height: imageHeight,
-        }}
+        className={`relative mx-2 mt-2 flex items-center justify-center overflow-hidden rounded-[10px] ${productImageSurfaceClass} ${imageHeight == null ? tw.homeScrollProductImage : ""}`}
+        style={imageHeight != null ? { height: imageHeight } : undefined}
       >
         {image ? (
           <div className="flex h-full w-full items-center justify-center p-3 transition-transform duration-300 group-hover:scale-[1.04]">
             <StoreImage
               src={image}
               alt={product.name}
-              width={160}
-              height={160}
+              width={224}
+              height={224}
+              sizes="(min-width: 2560px) 224px, (min-width: 1920px) 208px, 188px"
               className="h-full w-full object-contain drop-shadow-sm"
             />
           </div>

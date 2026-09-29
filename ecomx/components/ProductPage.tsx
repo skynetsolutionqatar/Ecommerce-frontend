@@ -91,7 +91,7 @@ export default function ProductPage({
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen pb-10`} style={{ background: "#f1f3f6" }}>
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-3 pt-4 sm:px-5 md:px-8 lg:px-[50px]">
+      <div className={`${tw.storeContainer} flex flex-col gap-3 pt-4`}>
         <ProductBreadcrumb crumbs={crumbs} onNavigateBack={onBack} />
 
         <div className="rounded-2xl border border-gray-100 bg-white px-4 py-6 shadow-sm sm:px-6 md:px-8 lg:py-8">

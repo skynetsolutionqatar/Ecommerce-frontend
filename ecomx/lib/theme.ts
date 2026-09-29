@@ -10,11 +10,19 @@ export const type = {
 } as const;
 
 export const tw = {
+  /** Centered store layout; max-width grows on xl / 2K / 4K via --store-max-width in globals.css */
+  storeContainer:
+    "mx-auto w-full max-w-[var(--store-max-width)] px-3 sm:px-5 md:px-8 lg:px-[50px] min-[2560px]:px-16",
+  /** Home horizontal product rows — wider cards on 2K / 4K so the row fills the store shell */
+  homeScrollProductCard:
+    "w-[clamp(145px,21vw,188px)] min-[1920px]:w-[clamp(176px,11vw,208px)] min-[2560px]:w-[clamp(188px,8.8vw,224px)]",
+  homeScrollProductImage:
+    "h-[120px] sm:h-[130px] min-[1920px]:h-[146px] min-[2560px]:h-[162px]",
   pageTopOffset: "pt-[var(--page-top)]",
   storeBackLink:
     "inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm cursor-pointer transition hover:bg-gray-50",
   heroSlider:
-    "min-h-[320px] sm:min-h-[360px] md:min-h-[400px] lg:min-h-[420px]",
+    "min-h-[320px] sm:min-h-[360px] md:min-h-[400px] lg:min-h-[420px] xl:min-h-[440px] min-[1920px]:min-h-[480px] min-[2560px]:min-h-[540px]",
   scrollbarHide:
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   scrollbarThin:

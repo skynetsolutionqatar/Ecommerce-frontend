@@ -171,7 +171,7 @@ export default function Header({
           className="flex items-center justify-between py-1"
           style={{ background: `${Colors.base_color}` }}
         >
-          <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-3 sm:px-5 md:px-8 lg:px-[50px]">
+          <div className={`${tw.storeContainer} flex items-center justify-between`}>
             <div className="flex items-center gap-5 text-[12px] md:text-[11px] text-white/85">
               <span className="flex items-center gap-1.5">
                 <Truck className="h-3.5 w-3.5 shrink-0" />
@@ -217,7 +217,7 @@ export default function Header({
               : "0 1px 3px rgba(0,0,0,0.04)",
           }}
         >
-          <div className="mx-auto flex max-w-[1440px] items-center gap-3 py-1.5 px-3 sm:px-5 md:px-8 md:gap-4 lg:px-[50px]">
+          <div className={`${tw.storeContainer} flex items-center gap-3 py-1.5 md:gap-4`}>
             <motion.button
               type="button"
               onClick={() => goTo(ROUTES.home)}
@@ -433,7 +433,7 @@ export default function Header({
           }}
           transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
         >
-          <div className="mx-auto w-full max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px]">
+          <div className={tw.storeContainer}>
             <div
               className={`flex items-center overflow-x-auto scroll-smooth ${tw.scrollbarHide} justify-between p-1`}
             >

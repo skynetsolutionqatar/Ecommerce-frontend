@@ -183,6 +183,32 @@ html {
   --header-height: 136px;
   --header-gap: 12px;
   --page-top: calc(var(--header-height) + var(--header-gap));
+  /* Store shell width — scales on large / 4K viewports (see tw.storeContainer) */
+  --store-max-width: 1440px;
+}
+
+@media (min-width: 1280px) {
+  html {
+    --store-max-width: 1580px;
+  }
+}
+
+@media (min-width: 1536px) {
+  html {
+    --store-max-width: 1720px;
+  }
+}
+
+@media (min-width: 1920px) {
+  html {
+    --store-max-width: 1860px;
+  }
+}
+
+@media (min-width: 2560px) {
+  html {
+    --store-max-width: 2360px;
+  }
 }
 
 @media (max-width: 768px) {

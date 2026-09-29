@@ -5,6 +5,7 @@ import BrandLogo from "@/components/BrandLogo";
 import { useFooterContentPages } from "@/hooks/useContentPages";
 import { FIXED_CONTENT_PAGE_RESOURCES } from "@/lib/admin/content-page-resources";
 import { ROUTES } from "@/lib/routes";
+import { tw } from "@/lib/theme";
 import {
   Phone,
   Mail,
@@ -40,7 +41,7 @@ export default function Footer() {
 
   return (
     <footer className="text-white" style={{ background: "#0a1731ff" }}>
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px] pt-10 pb-6">
+      <div className={`${tw.storeContainer} pt-10 pb-6`}>
         {/* Main grid — Brand + 5 columns */}
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-[200px_1fr_1fr_1fr_1fr_200px] lg:mb-8">
 

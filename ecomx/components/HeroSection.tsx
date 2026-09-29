@@ -518,10 +518,11 @@ function HeroSlidePanel({
           <StoreImage
             src={slide.img}
             alt={formatHeroTitle(slide.title).replace("\n", " ")}
-            width={280}
-            height={240}
+            width={520}
+            height={460}
             priority
             blend={false}
+            sizes="(min-width: 2560px) 520px, (min-width: 1920px) 440px, (min-width: 1280px) 380px, 280px"
             className={getHeroImageClass()}
             style={{ background: "transparent", maxHeight: "100%", width: "auto", height: "100%" }}
           />
@@ -551,7 +552,7 @@ function HeroSkeleton() {
         <div className="mt-2 h-9 w-32 rounded-full bg-slate-200/80" />
       </div>
       <div className={`relative z-[2] mt-auto flex shrink-0 items-center justify-center px-3 pb-2 sm:mt-0 sm:justify-center sm:pb-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] ${HERO_MOBILE_IMAGE_AREA}`}>
-        <div className={`animate-pulse rounded-2xl bg-slate-200/60 ${HERO_MOBILE_IMAGE_FRAME} sm:h-[230px] md:h-[280px]`} />
+        <div className={`animate-pulse rounded-2xl bg-slate-200/60 ${HERO_MOBILE_IMAGE_FRAME} sm:h-[230px] md:h-[280px] xl:h-[320px] min-[1920px]:h-[360px] min-[2560px]:h-[420px]`} />
       </div>
     </div>
   );

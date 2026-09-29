@@ -247,7 +247,7 @@ export default function ShopPage({
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen`} style={{ background: "#f3f4f6" }}>
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px] py-3 sm:py-4">
+      <div className={`${tw.storeContainer} py-3 sm:py-4`}>
         <nav className="mb-4 flex items-center gap-1 text-[13px] md:text-[11.5px] text-gray-500">
           <button
             type="button"

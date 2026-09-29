@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map, Marker } from "leaflet";
 import { Search } from "lucide-react";
 import { searchAreas } from "@/lib/api/location.api";
+import { STORE_MAP_TILE } from "@/lib/store/map-basemap";
 import { MAP_DEFAULT_CENTER, DISTRICT_MAP_CENTERS } from "@/types/location.types";
 import type { ApiAreaSearchResult } from "@/types/location.types";
 import "leaflet/dist/leaflet.css";
@@ -100,8 +101,9 @@ export default function DeliveryMapPicker({
       leaflet.control.zoom({ position: "bottomright" }).addTo(map);
 
       leaflet
-        .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "&copy; OpenStreetMap contributors",
+        .tileLayer(STORE_MAP_TILE.url, {
+          attribution: STORE_MAP_TILE.attribution,
+          maxZoom: STORE_MAP_TILE.maxZoom,
         })
         .addTo(map);
 

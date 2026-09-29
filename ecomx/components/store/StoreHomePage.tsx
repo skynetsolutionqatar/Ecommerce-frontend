@@ -30,7 +30,7 @@ export default function StoreHomePage() {
   const { data: dealData, isLoading: dealsLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
     hasDiscount: true,
-    limit: 8,
+    limit: 16,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -38,7 +38,7 @@ export default function StoreHomePage() {
   const { data: bestSellerData, isLoading: bestLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
     isBestSeller: true,
-    limit: 12,
+    limit: 20,
     sortBy: "totalSold",
     sortOrder: "desc",
   });
@@ -46,14 +46,14 @@ export default function StoreHomePage() {
   const { data: newArrivalData, isLoading: newLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
     isNew: true,
-    limit: 12,
+    limit: 20,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
 
   const { data: fallbackData, isLoading: fallbackLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
-    limit: 12,
+    limit: 20,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -64,9 +64,9 @@ export default function StoreHomePage() {
   const fallbackProducts = fallbackData?.products ?? [];
 
   const bestSellerProducts =
-    bestSellers.length > 0 ? bestSellers : fallbackProducts.slice(0, 12);
+    bestSellers.length > 0 ? bestSellers : fallbackProducts.slice(0, 20);
   const newArrivalProducts =
-    newArrivals.length > 0 ? newArrivals : fallbackProducts.slice(4, 16);
+    newArrivals.length > 0 ? newArrivals : fallbackProducts.slice(4, 24);
 
   const handleProductClick = useCallback(
     (product: ApiProduct) => {
@@ -93,7 +93,7 @@ export default function StoreHomePage() {
 
   return (
     <div className={`${tw.pageTopOffset} min-h-screen`} style={{ background: "#f1f3f6" }}>
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-5 md:px-8 lg:px-[50px]">
+      <div className={tw.storeContainer}>
         <div className="mb-2">
           <HeroSection
             slides={heroSlides}
