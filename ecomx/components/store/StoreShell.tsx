@@ -39,7 +39,7 @@ export default function StoreShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <>
+    <div className="store-shell flex min-h-0 w-full flex-1 flex-col">
       <Header
         cart={cart}
         wishlist={wishlist}
@@ -106,6 +106,6 @@ export default function StoreShell({ children }: { children: ReactNode }) {
           />
         </Suspense>
       ) : null}
-    </>
+    </div>
   );
 }

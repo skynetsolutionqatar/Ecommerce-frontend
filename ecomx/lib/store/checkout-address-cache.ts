@@ -22,6 +22,8 @@ export interface PersistedDeliveryStatus {
   areaId: string;
   districtName: string;
   areaName: string;
+  distanceKm?: number | null;
+  deliveryCharge?: number | null;
 }
 
 type CheckoutStoragePayload = CheckoutFormData & {
@@ -177,7 +179,10 @@ export function clearDeliverySelection(): void {
 }
 
 export function hasVerifiedDeliverySelection(
-  cached: Pick<CheckoutFormData, "districtId" | "areaId">
+  cached: Pick<CheckoutFormData, "districtId" | "areaId" | "mapLat" | "mapLng">
 ): boolean {
-  return !!cached.districtId && !!cached.areaId;
+  return (
+    (cached.mapLat != null && cached.mapLng != null) ||
+    (!!cached.districtId && !!cached.areaId)
+  );
 }

@@ -37,24 +37,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAtBottom, setIsAtBottom] = useState(false);
 
   const checkScrollBottom = useCallback(() => {
-    const el = mainRef.current;
-    if (!el) return;
+    const main = mainRef.current;
+    if (!main) return;
+    const el =
+      main.querySelector<HTMLElement>("[data-admin-panel-scroll]") ?? main;
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 4;
     setIsAtBottom(atBottom);
   }, []);
 
   useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
+    const main = mainRef.current;
+    if (!main) return;
+
+    const scrollEl =
+      main.querySelector<HTMLElement>("[data-admin-panel-scroll]") ?? main;
 
     checkScrollBottom();
-    el.addEventListener("scroll", checkScrollBottom, { passive: true });
+    scrollEl.addEventListener("scroll", checkScrollBottom, { passive: true });
 
     const resizeObserver = new ResizeObserver(checkScrollBottom);
-    resizeObserver.observe(el);
+    resizeObserver.observe(scrollEl);
+    resizeObserver.observe(main);
 
     return () => {
-      el.removeEventListener("scroll", checkScrollBottom);
+      scrollEl.removeEventListener("scroll", checkScrollBottom);
       resizeObserver.disconnect();
     };
   }, [checkScrollBottom]);
@@ -62,8 +68,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminAuthGuard>
       <AdminThemeProvider>
-        <div className="flex h-screen w-full overflow-hidden">
-          <div className="hidden h-full shrink-0 md:block">
+        <div className="flex h-screen max-h-screen min-h-0 w-full overflow-hidden">
+          <div className="hidden h-full min-h-0 shrink-0 md:block">
             <Sidebar />
           </div>
 
@@ -81,15 +87,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </>
           ) : null}
 
-          <div className={`flex min-w-0 flex-1 flex-col overflow-hidden ${colors.mainColor}`}>
+          <div
+            className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${colors.mainColor}`}
+          >
             <div className="relative z-[100] h-16 shrink-0">
               <Navbar onMenuClick={() => setMobileNavOpen(true)} />
             </div>
-            <div className="flex-1 overflow-hidden p-2 pt-0 md:p-3 md:pt-0">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 pt-0 md:p-3 md:pt-0">
               <main
                 ref={mainRef}
                 className={cn(
-                  "h-full overflow-y-auto overflow-x-hidden rounded-t-xl bg-background p-2 shadow-sm ring-1 ring-border/50 transition-[border-radius] duration-200 sm:p-3 md:p-4 dark:ring-border/30",
+                  "min-h-0 flex-1 overflow-hidden rounded-t-xl bg-background p-2 shadow-sm ring-1 ring-border/50 transition-[border-radius] duration-200 sm:p-3 md:p-4 dark:ring-border/30",
                   isAtBottom && "rounded-bl-xl rounded-br-xl",
                 )}
               >

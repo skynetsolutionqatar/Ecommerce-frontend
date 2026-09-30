@@ -41,8 +41,11 @@ export function adminFormSelectClass({
   );
 }
 
-export const adminFormSectionClass =
-  "scroll-mt-28 rounded-xl border border-border bg-card p-6 shadow-sm";
+export const adminFormSectionBase =
+  "rounded-xl border border-border bg-card p-6 shadow-sm";
+
+/** Tabbed admin forms — extra top scroll margin for sticky section tabs. */
+export const adminFormSectionClass = `${adminFormSectionBase} scroll-mt-28`;
 
 export const adminFormSectionTitle =
   "mb-5 text-xs font-semibold uppercase tracking-widest text-muted-foreground";

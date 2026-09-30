@@ -34,6 +34,14 @@ export function isAuthSessionReason(reason: string | null | undefined): boolean 
   return reason === AUTH_SESSION_REASON;
 }
 
+/** Shown on admin login after session-expired redirect (not used on store). */
+export const AUTH_SESSION_EXPIRED_MESSAGE =
+  "Your session has expired. Please sign in again to continue.";
+
+export function getSessionExpiredMessage(): string {
+  return AUTH_SESSION_EXPIRED_MESSAGE;
+}
+
 /** Single resolver — login, register, and validation strings. */
 export function getAuthErrorMessage(
   error: unknown,

@@ -338,7 +338,7 @@ export function InvoiceDocument({ data }: { data: InvoicePayload }) {
         ]
       : []),
     ...(order.shippingCharge
-      ? [{ label: "Shipping", value: fmtMoney(order.shippingCharge, currency) }]
+      ? [{ label: "Delivery", value: fmtMoney(order.shippingCharge, currency) }]
       : []),
     ...(order.taxAmount
       ? [{ label: "Tax (VAT)", value: fmtMoney(order.taxAmount, currency) }]

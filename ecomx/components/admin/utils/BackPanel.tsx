@@ -28,6 +28,8 @@ export interface FooterButton {
 type BackPanelProps = {
   children: React.ReactNode;
   showBack?: boolean;
+  /** Shorter pages: panel height fits content (avoids empty scroll below the form). */
+  compact?: boolean;
   tabs?: Tab[];
   editPath?: string;
   deleteItemName?: string;
@@ -39,6 +41,7 @@ type BackPanelProps = {
 export default function BackPanel({
   children,
   showBack = true,
+  compact = false,
   tabs,
   editPath,
   deleteItemName,
@@ -90,9 +93,17 @@ export default function BackPanel({
   footerButtons.push(...buttons);
 
   return (
-    <div className="h-full p-3">
-      <div className="mx-auto flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-        <div className="flex-1 overflow-y-auto">
+    <div className={cn("h-full min-h-0 p-3", compact && "!h-auto")}>
+      <div
+        className={cn(
+          "mx-auto flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm",
+          compact && "!h-auto"
+        )}
+      >
+        <div
+          data-admin-panel-scroll
+          className={cn("min-h-0 flex-1 overflow-y-auto", compact && "!flex-none")}
+        >
           {showBack && (
             <div className="px-2 pt-3">
               <Button
@@ -132,7 +143,7 @@ export default function BackPanel({
             </div>
           )}
 
-          <div className="p-4 sm:p-6">{children}</div>
+          <div className="p-4 pb-8 sm:p-6 sm:pb-10">{children}</div>
         </div>
 
         {footerButtons.length > 0 && (

@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import toast, { type ToastOptions } from "react-hot-toast";
-import { getApiErrorMessage } from "@/lib/api/errors";
+import { getApiErrorMessage, shouldSuppressStoreAuthFeedback } from "@/lib/api/errors";
 
 const baseOptions: ToastOptions = {
   duration: 4000,
@@ -11,6 +11,7 @@ export function showSuccess(message: string, options?: ToastOptions) {
 }
 
 export function showError(error: unknown, fallback?: string, options?: ToastOptions) {
+  if (shouldSuppressStoreAuthFeedback(error)) return;
   return toast.error(getApiErrorMessage(error, fallback ?? "Something went wrong"), {
     ...baseOptions,
     duration: 5000,

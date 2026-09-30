@@ -16,6 +16,7 @@ import {
   HelpCircle,
   ScrollText,
   Ban,
+  Truck,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { REPORT_MENU } from "@/lib/admin/reports.config";
@@ -139,6 +140,11 @@ export const adminSections: AdminMenuSection[] = [
             name: "Company",
             path: ADMIN_ROUTES.company,
             icon: <Building2 size={16} />,
+          },
+          {
+            name: "Delivery zones",
+            path: ADMIN_ROUTES.delivery,
+            icon: <Truck size={16} />,
           },
           {
             name: "FAQ",

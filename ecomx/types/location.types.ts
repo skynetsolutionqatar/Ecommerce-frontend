@@ -37,6 +37,9 @@ export interface LocationValidationResult {
   district?: ApiDistrict;
   lat?: number;
   lng?: number;
+  distanceKm?: number | null;
+  deliveryCharge?: number | null;
+  distanceDeliveryCharge?: number | null;
 }
 
 export const DEFAULT_COUNTRY_ID = "qa";

@@ -1,5 +1,5 @@
 import type { AxiosError } from "axios";
-import { HTTP_STATUS } from "@/lib/Constant";
+import { HTTP_STATUS, isAdminAppPath } from "@/lib/Constant";
 import type { ApiResponse } from "@/types/api.types";
 
 export type ValidationErrors =
@@ -78,6 +78,18 @@ export function getApiFieldErrors(error: unknown): Record<string, string> {
   }
 
   return fieldErrors;
+}
+
+export function isApiUnauthorized(error: unknown): boolean {
+  const axiosError = error as AxiosError;
+  return !!axiosError?.isAxiosError && axiosError.response?.status === HTTP_STATUS.UNAUTHORIZED;
+}
+
+/** Store: no session-expiry toasts or login prompts — admin keeps full auth UX. */
+export function shouldSuppressStoreAuthFeedback(error: unknown): boolean {
+  if (typeof window === "undefined") return false;
+  if (isAdminAppPath(window.location.pathname)) return false;
+  return isApiUnauthorized(error);
 }
 
 function messageFromStatus(status?: number): string | null {

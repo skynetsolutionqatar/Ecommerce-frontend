@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES, sanitizeRedirectPath } from "@/lib/config";
+import { getSessionExpiredMessage, isAuthSessionReason } from "@/lib/api/auth-errors";
+import { ROUTE_PREFIX } from "@/lib/Constant";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
   AuthAltActions,
@@ -20,8 +22,14 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect");
   const redirectParam = rawRedirect ? sanitizeRedirectPath(rawRedirect) : null;
-  const { login, loading, clearError } = useAuth();
+  const { login, loading, setError, clearError } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+
+  useEffect(() => {
+    if (!isAuthSessionReason(searchParams.get("reason"))) return;
+    if (redirectParam && !redirectParam.startsWith(ROUTE_PREFIX.ADMIN)) return;
+    setError(getSessionExpiredMessage());
+  }, [searchParams, redirectParam, setError]);
 
   const registerHref = redirectParam
     ? `${AUTH_ROUTES.register}?redirect=${encodeURIComponent(redirectParam)}`

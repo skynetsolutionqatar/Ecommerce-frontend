@@ -33,16 +33,27 @@ export const locationApi = {
       q: params.q,
     }),
 
-  validate: (lat: number, lng: number, districtId?: string, countryId?: string) =>
+  validate: (
+    lat: number,
+    lng: number,
+    districtId?: string,
+    countryId?: string,
+    subtotal?: number
+  ) =>
     apiGet<LocationValidationResult>("/locations/validate", {
       lat,
       lng,
       ...(districtId ? { districtId } : {}),
       ...(countryId ? { countryId } : {}),
+      ...(subtotal != null && subtotal > 0 ? { subtotal: String(subtotal) } : {}),
     }),
 
-  checkDelivery: (countryId: string, q: string) =>
-    apiGet<LocationValidationResult>("/locations/check-delivery", { countryId, q }),
+  checkDelivery: (countryId: string, q: string, subtotal?: number) =>
+    apiGet<LocationValidationResult>("/locations/check-delivery", {
+      countryId,
+      q,
+      ...(subtotal != null && subtotal > 0 ? { subtotal: String(subtotal) } : {}),
+    }),
 };
 
 export async function fetchCountries(): Promise<ApiCountry[]> {
@@ -84,16 +95,18 @@ export async function validateLocation(
   lat: number,
   lng: number,
   districtId?: string,
-  countryId?: string
+  countryId?: string,
+  subtotal?: number
 ): Promise<LocationValidationResult> {
-  const res = await locationApi.validate(lat, lng, districtId, countryId);
+  const res = await locationApi.validate(lat, lng, districtId, countryId, subtotal);
   return res.data;
 }
 
 export async function checkDelivery(
   countryId: string,
-  q: string
+  q: string,
+  subtotal?: number
 ): Promise<LocationValidationResult> {
-  const res = await locationApi.checkDelivery(countryId, q);
+  const res = await locationApi.checkDelivery(countryId, q, subtotal);
   return res.data;
 }

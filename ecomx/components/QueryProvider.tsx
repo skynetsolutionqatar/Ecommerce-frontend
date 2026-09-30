@@ -2,6 +2,7 @@
 
 import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { shouldSuppressStoreAuthFeedback } from "@/lib/api/errors";
 import { showError } from "@/lib/toast";
 
 export default function QueryProvider({ children }: { children: ReactNode }) {
@@ -11,6 +12,7 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
         queryCache: new QueryCache({
           onError: (error, query) => {
             if (!query.meta?.toastOnError) return;
+            if (shouldSuppressStoreAuthFeedback(error)) return;
             showError(error, "Failed to load data");
           },
         }),
@@ -22,6 +24,7 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
           mutations: {
             onError: (error, _variables, _context, mutation) => {
               if (mutation.meta?.silentError) return;
+              if (shouldSuppressStoreAuthFeedback(error)) return;
               showError(error);
             },
           },

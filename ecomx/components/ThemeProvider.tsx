@@ -11,7 +11,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function applyTheme(client: ClientConfig, pageId?: string) {
+export function applyStoreTheme(client: ClientConfig, pageId?: string) {
   const root = document.documentElement;
   root.dataset.client = client.id;
   if (pageId) root.dataset.page = pageId;
@@ -47,7 +47,7 @@ export default function ThemeProvider({ children, clientId, pageId }: ThemeProvi
   }, [client, pageId]);
 
   useEffect(() => {
-    applyTheme(client, pageId);
+    applyStoreTheme(client, pageId);
   }, [client, pageId]);
 
   const value = useMemo(() => ({ client, theme }), [client, theme]);
@@ -67,8 +67,8 @@ export function useClientTheme() {
 export function PageTheme({ pageId, children }: { pageId: string; children: React.ReactNode }) {
   const { client } = useClientTheme();
   useEffect(() => {
-    applyTheme(client, pageId);
-    return () => applyTheme(client);
+    applyStoreTheme(client, pageId);
+    return () => applyStoreTheme(client);
   }, [client, pageId]);
   return <>{children}</>;
 }

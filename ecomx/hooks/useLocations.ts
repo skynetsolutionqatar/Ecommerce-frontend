@@ -55,18 +55,27 @@ export function useValidateLocationMutation() {
       lng,
       districtId,
       countryId,
+      subtotal,
     }: {
       lat: number;
       lng: number;
       districtId?: string;
       countryId?: string;
-    }) => validateLocation(lat, lng, districtId, countryId),
+      subtotal?: number;
+    }) => validateLocation(lat, lng, districtId, countryId, subtotal),
   });
 }
 
 export function useCheckDeliveryMutation() {
   return useMutation({
-    mutationFn: ({ countryId, q }: { countryId: string; q: string }) =>
-      checkDelivery(countryId, q),
+    mutationFn: ({
+      countryId,
+      q,
+      subtotal,
+    }: {
+      countryId: string;
+      q: string;
+      subtotal?: number;
+    }) => checkDelivery(countryId, q, subtotal),
   });
 }

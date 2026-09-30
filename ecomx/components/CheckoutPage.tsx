@@ -26,6 +26,7 @@ import {
   useCountries,
   useValidateLocationMutation,
 } from "@/hooks/useLocations";
+import { usePublicDeliverySettings } from "@/hooks/useDeliverySettings";
 import { DEFAULT_COUNTRY_ID, QATAR_ONLY_LOCATION_ERROR } from "@/types/location.types";
 import type { ApiAreaSearchResult } from "@/types/location.types";
 import LocationAreaSearchInput, {
@@ -70,6 +71,8 @@ interface DeliveryStatus {
   areaId: string;
   districtName: string;
   areaName: string;
+  distanceKm?: number | null;
+  deliveryCharge?: number | null;
 }
 
 function formatLocationLabel(areaName?: string, districtName?: string) {
@@ -126,6 +129,9 @@ export default function CheckoutPage({
 }: CheckoutPageProps) {
   const router = useRouter();
   const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const subRef = useRef(sub);
+  subRef.current = sub;
+  const { data: deliverySettings } = usePublicDeliverySettings();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<CheckoutFormData>(INITIAL_FORM);
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
@@ -137,6 +143,10 @@ export default function CheckoutPage({
   const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
   const [locationChecking, setLocationChecking] = useState(false);
   const [locating, setLocating] = useState(false);
+
+  const deliveryCharge =
+    deliveryStatus?.deliverable === true ? (deliveryStatus.deliveryCharge ?? 0) : 0;
+  const orderTotal = sub + deliveryCharge;
 
   const { data: countries = [] } = useCountries();
   const validateLocationMut = useValidateLocationMutation();
@@ -156,16 +166,20 @@ export default function CheckoutPage({
   const resolvedAreaName = deliveryStatus?.areaName ?? form.areaName ?? "";
   const deliveryReady =
     deliveryStatus?.deliverable === true &&
-    !!form.districtId &&
-    !!form.areaId;
+    form.mapLat != null &&
+    form.mapLng != null;
 
   const applyDeliveryResult = useCallback(
     (
       result: {
         deliverable: boolean;
         message: string;
-        area?: { _id: string; name: string };
+        area?: { _id: string; name: string; districtId?: string };
         district?: { _id: string; name: string };
+        distanceKm?: number | null;
+        deliveryCharge?: number | null;
+        lat?: number;
+        lng?: number;
       },
       coords?: { lat: number | null; lng: number | null }
     ) => {
@@ -173,13 +187,15 @@ export default function CheckoutPage({
         const { area, district } = result;
         const label = formatLocationLabel(area.name, district.name);
         setLocationQuery(label);
+        const lat = coords?.lat ?? result.lat ?? formRef.current.mapLat;
+        const lng = coords?.lng ?? result.lng ?? formRef.current.mapLng;
         setForm((prev) => ({
           ...prev,
           districtId: district._id,
           areaId: area._id,
-          locationMode: "list",
-          mapLat: coords?.lat ?? prev.mapLat,
-          mapLng: coords?.lng ?? prev.mapLng,
+          locationMode: lat != null && lng != null ? "map" : "list",
+          mapLat: lat ?? prev.mapLat,
+          mapLng: lng ?? prev.mapLng,
           districtName: district.name,
           areaName: area.name,
         }));
@@ -190,14 +206,16 @@ export default function CheckoutPage({
           areaId: area._id,
           districtName: district.name,
           areaName: area.name,
+          distanceKm: result.distanceKm,
+          deliveryCharge: result.deliveryCharge,
         });
         saveCheckoutAddress({
           ...formRef.current,
           districtId: district._id,
           areaId: area._id,
-          locationMode: "list",
-          mapLat: coords?.lat ?? formRef.current.mapLat,
-          mapLng: coords?.lng ?? formRef.current.mapLng,
+          locationMode: lat != null && lng != null ? "map" : "list",
+          mapLat: lat ?? formRef.current.mapLat,
+          mapLng: lng ?? formRef.current.mapLng,
           districtName: district.name,
           areaName: area.name,
         });
@@ -232,9 +250,10 @@ export default function CheckoutPage({
       const mapLat = override?.mapLat ?? currentForm.mapLat;
       const mapLng = override?.mapLng ?? currentForm.mapLng;
       const hasCoords = mapLat != null && mapLng != null;
+      const orderSubtotal = subRef.current;
       const key = hasCoords
-        ? `map:${mapLat.toFixed(5)},${mapLng.toFixed(5)}`
-        : `text:${query.toLowerCase()}`;
+        ? `map:${mapLat.toFixed(5)},${mapLng.toFixed(5)}:${orderSubtotal.toFixed(2)}`
+        : `text:${query.toLowerCase()}:${orderSubtotal.toFixed(2)}`;
 
       if (!hasCoords && !query) {
         lastValidatedKeyRef.current = null;
@@ -260,6 +279,7 @@ export default function CheckoutPage({
             lat: mapLat,
             lng: mapLng,
             countryId: currentForm.countryId || DEFAULT_COUNTRY_ID,
+            subtotal: orderSubtotal,
           });
           applyDeliveryResult(result, { lat: mapLat, lng: mapLng });
           return;
@@ -268,6 +288,7 @@ export default function CheckoutPage({
         const result = await checkDeliveryRef.current({
           countryId: currentForm.countryId || DEFAULT_COUNTRY_ID,
           q: query,
+          subtotal: orderSubtotal,
         });
         applyDeliveryResult(result);
       } catch {
@@ -356,6 +377,16 @@ export default function CheckoutPage({
       deliveryStatus,
     });
   }, [addressLoaded, form, step, locationQuery, deliveryStatus]);
+
+  useEffect(() => {
+    if (!addressLoaded) return;
+    const hasCoords = form.mapLat != null && form.mapLng != null;
+    const query = locationQuery.trim();
+    if (!hasCoords && !query) return;
+    lastValidatedKeyRef.current = null;
+    void runDeliveryValidation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-quote when cart subtotal changes
+  }, [sub, addressLoaded]);
 
   const inputClass = (field: keyof CheckoutFormData) =>
     `w-full rounded-xl border bg-bg px-3.5 py-3 text-sm text-primary outline-none focus:border-accent ${
@@ -532,6 +563,8 @@ export default function CheckoutPage({
           city: resolvedDistrictName ?? "",
           state: resolvedDistrictName ?? "",
           country: selectedCountry?.name ?? "Qatar",
+          lat: form.mapLat ?? undefined,
+          lng: form.mapLng ?? undefined,
         },
         paymentMethod: "cash_on_delivery",
         attribution,
@@ -751,13 +784,24 @@ export default function CheckoutPage({
                       lat={form.mapLat}
                       lng={form.mapLng}
                       countryId={form.countryId}
+                      storeOrigin={
+                        deliverySettings
+                          ? {
+                              lat: deliverySettings.originLat,
+                              lng: deliverySettings.originLng,
+                              maxRadiusKm: deliverySettings.maxRadiusKm,
+                              label: deliverySettings.originLabel,
+                            }
+                          : undefined
+                      }
                       onPick={handleMapPick}
                     />
                   </div>
                 ) : null}
 
                 <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[13px] text-gray-700">
-                  ✓ Free installation included · Est. delivery 1–2 business days
+                  ✓ Delivery within {deliverySettings?.maxRadiusKm ?? 20} km of our store · Free
+                  installation included
                 </div>
                 <div className="flex gap-2.5">
                   <button
@@ -826,7 +870,7 @@ export default function CheckoutPage({
                     onClick={() => void handlePlaceOrder()}
                     className={`${tw.btnPrimary} flex-[2] justify-center disabled:opacity-60`}
                   >
-                    {placing ? "Placing Order..." : `Place Order · QAR ${sub.toLocaleString()}`}{" "}
+                    {placing ? "Placing Order..." : `Place Order · QAR ${orderTotal.toLocaleString()}`}{" "}
                     {!placing ? <Icons.ArrowRight /> : null}
                   </button>
                 </div>
@@ -853,20 +897,32 @@ export default function CheckoutPage({
               </div>
             ))}
             <div className="flex flex-col gap-2 border-t border-border pt-3">
-              {[["Subtotal", `QAR ${sub.toLocaleString()}`], ["Installation", "FREE"], ["Total", `QAR ${sub.toLocaleString()}`]].map(
+              {[
+                ["Subtotal", `QAR ${sub.toLocaleString()}`],
+                [
+                  "Delivery",
+                  deliveryStatus?.deliverable
+                    ? deliveryCharge === 0
+                      ? "FREE"
+                      : `QAR ${deliveryCharge.toLocaleString()}`
+                    : "—",
+                ],
+                ["Installation", "FREE"],
+                ["Total", `QAR ${orderTotal.toLocaleString()}`],
+              ].map(
                 ([l, v], i) => (
                   <div
                     key={l}
-                    className={`flex justify-between ${i === 2 ? "mt-1 border-t border-border pt-2" : ""}`}
+                    className={`flex justify-between ${i === 3 ? "mt-1 border-t border-border pt-2" : ""}`}
                   >
                     <span
-                      className={`${i === 2 ? "text-sm font-bold text-primary" : "text-sm font-medium text-gray-700"}`}
+                      className={`${i === 3 ? "text-sm font-bold text-primary" : "text-sm font-medium text-gray-700"}`}
                     >
                       {l}
                     </span>
                     <span
-                      className={`${i === 2 ? `${type.price} text-sm font-extrabold text-primary` : "text-sm font-medium"} ${
-                        i === 1 ? "text-gray-700" : "text-gray-900"
+                      className={`${i === 3 ? `${type.price} text-sm font-extrabold text-primary` : "text-sm font-medium"} ${
+                        i === 2 ? "text-gray-700" : "text-gray-900"
                       }`}
                     >
                       {v}

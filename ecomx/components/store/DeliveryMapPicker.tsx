@@ -9,12 +9,20 @@ import { MAP_DEFAULT_CENTER, DISTRICT_MAP_CENTERS } from "@/types/location.types
 import type { ApiAreaSearchResult } from "@/types/location.types";
 import "leaflet/dist/leaflet.css";
 
+export interface StoreMapOrigin {
+  lat: number;
+  lng: number;
+  maxRadiusKm: number;
+  label?: string;
+}
+
 interface DeliveryMapPickerProps {
   lat: number | null;
   lng: number | null;
   countryId?: string;
   districtId?: string;
   districtName?: string;
+  storeOrigin?: StoreMapOrigin;
   onPick: (lat: number, lng: number) => void;
 }
 
@@ -24,6 +32,7 @@ export default function DeliveryMapPicker({
   countryId,
   districtId,
   districtName,
+  storeOrigin,
   onPick,
 }: DeliveryMapPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,9 +99,11 @@ export default function DeliveryMapPicker({
       }
 
       const center =
-        districtId && DISTRICT_MAP_CENTERS[districtId]
-          ? DISTRICT_MAP_CENTERS[districtId]
-          : { ...MAP_DEFAULT_CENTER, zoom: 11 };
+        storeOrigin != null
+          ? { lat: storeOrigin.lat, lng: storeOrigin.lng, zoom: 11 }
+          : districtId && DISTRICT_MAP_CENTERS[districtId]
+            ? DISTRICT_MAP_CENTERS[districtId]
+            : { ...MAP_DEFAULT_CENTER, zoom: 11 };
       const map = leaflet.map(containerRef.current, {
         preferCanvas: true,
         zoomControl: false,
@@ -106,6 +117,28 @@ export default function DeliveryMapPicker({
           maxZoom: STORE_MAP_TILE.maxZoom,
         })
         .addTo(map);
+
+      if (storeOrigin) {
+        leaflet
+          .circle([storeOrigin.lat, storeOrigin.lng], {
+            radius: storeOrigin.maxRadiusKm * 1000,
+            color: "#0a255dff",
+            fillColor: "#0a255dff",
+            fillOpacity: 0.07,
+            weight: 2,
+          })
+          .addTo(map);
+        leaflet
+          .circleMarker([storeOrigin.lat, storeOrigin.lng], {
+            radius: 7,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: "#0a255dff",
+            fillOpacity: 1,
+          })
+          .addTo(map)
+          .bindTooltip(storeOrigin.label ?? "Store", { direction: "top" });
+      }
 
       map.on("click", (e) => {
         const { lat: pickedLat, lng: pickedLng } = e.latlng;
@@ -136,7 +169,7 @@ export default function DeliveryMapPicker({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [districtId, flushPendingPosition, syncPosition]);
+  }, [districtId, storeOrigin, flushPendingPosition, syncPosition]);
 
   useEffect(() => {
     if (lat == null || lng == null) return;
