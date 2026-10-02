@@ -17,6 +17,7 @@ import {
   ScrollText,
   Ban,
   Truck,
+  Footprints,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { REPORT_MENU } from "@/lib/admin/reports.config";
@@ -82,6 +83,11 @@ export const adminSections: AdminMenuSection[] = [
             path: ADMIN_ROUTES.customers,
             icon: <Users size={16} />,
           },
+          // {
+          //   name: "Guest activity",
+          //   path: ADMIN_ROUTES.guestActivity,
+          //   icon: <Footprints size={16} />,
+          // },adminDashboard.tsx-151
         ],
       },
     ],

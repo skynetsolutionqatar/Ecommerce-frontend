@@ -1,14 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CartItem } from "@/lib/types";
 import type { PlaceOrderPayload } from "@/types/order.types";
 import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
 import StoreImage from "@/components/StoreImage";
 import * as Icons from "@/components/Icons";
-import { tw, type } from "@/lib/theme";
+import { Colors, tw, type } from "@/lib/theme";
 import { showError, showSuccess } from "@/lib/toast";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/routes";
@@ -21,6 +21,13 @@ import {
   saveCheckoutAddress,
   saveCheckoutProgress,
 } from "@/lib/store/checkout-address-cache";
+import {
+  customerAddressToCheckoutPatch,
+  formatCustomerAddressLines,
+} from "@/lib/store/customer-address-checkout";
+import CheckoutAddressPickerModal from "@/components/store/CheckoutAddressPickerModal";
+import { useCustomerAddresses } from "@/hooks/useCustomerAddresses";
+import type { CustomerAddress } from "@/types/customer.types";
 import {
   useCheckDeliveryMutation,
   useCountries,
@@ -37,6 +44,8 @@ import {
   normalizeRegisterPhone,
   sanitizeQatarPhoneInput,
 } from "@/lib/utils";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
+import { submitGuestPhone } from "@/lib/store/guest-activity-link";
 
 const DeliveryMapPicker = dynamic(() => import("@/components/store/DeliveryMapPicker"), {
   ssr: false,
@@ -143,6 +152,23 @@ export default function CheckoutPage({
   const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
   const [locationChecking, setLocationChecking] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [addressPickerOpen, setAddressPickerOpen] = useState(false);
+  const [selectedSavedAddressId, setSelectedSavedAddressId] = useState<string | null>(null);
+  const defaultSavedAddressAppliedRef = useRef(false);
+  const checkoutTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (checkoutTrackedRef.current || isLoggedIn) return;
+    checkoutTrackedRef.current = true;
+    trackGuestActivityIfAnonymous({ eventType: "checkout_started" }, cart);
+  }, [cart, isLoggedIn]);
+
+  const { data: savedAddresses = [] } = useCustomerAddresses();
+
+  const selectedSavedAddress = useMemo(() => {
+    if (!selectedSavedAddressId) return null;
+    return savedAddresses.find((a) => a._id === selectedSavedAddressId) ?? null;
+  }, [savedAddresses, selectedSavedAddressId]);
 
   const deliveryCharge =
     deliveryStatus?.deliverable === true ? (deliveryStatus.deliveryCharge ?? 0) : 0;
@@ -159,6 +185,10 @@ export default function CheckoutPage({
   const debounceTimerRef = useRef<number | null>(null);
   const formRef = useRef(form);
   formRef.current = form;
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  const deliveryStatusRef = useRef(deliveryStatus);
+  deliveryStatusRef.current = deliveryStatus;
   const locationQueryRef = useRef(locationQuery);
   locationQueryRef.current = locationQuery;
   const selectedCountry = countries.find((c) => c._id === form.countryId);
@@ -314,6 +344,68 @@ export default function CheckoutPage({
     [applyDeliveryResult]
   );
 
+  const applySavedAddress = useCallback(
+    (address: CustomerAddress) => {
+      const patch = customerAddressToCheckoutPatch(
+        address,
+        formRef.current.email || initialContact?.email || ""
+      );
+      const addressId = address._id ?? null;
+      const nextForm: CheckoutFormData = {
+        ...formRef.current,
+        fullName: patch.fullName,
+        email: patch.email || formRef.current.email,
+        phone: patch.phone,
+        line1: patch.line1,
+        countryId: patch.countryId,
+        districtId: patch.districtId,
+        areaId: patch.areaId,
+        mapLat: patch.mapLat,
+        mapLng: patch.mapLng,
+        districtName: patch.districtName,
+        areaName: patch.areaName,
+        locationMode: patch.locationMode,
+      };
+
+      setSelectedSavedAddressId(addressId);
+      setForm(nextForm);
+      setLocationQuery(patch.locationQuery);
+      lastValidatedKeyRef.current = null;
+
+      saveCheckoutProgress({
+        form: nextForm,
+        step: stepRef.current,
+        locationQuery: patch.locationQuery,
+        deliveryStatus: deliveryStatusRef.current,
+        savedAddressId: addressId,
+      });
+
+      if (patch.mapLat != null && patch.mapLng != null) {
+        void runDeliveryValidation({ mapLat: patch.mapLat, mapLng: patch.mapLng });
+      } else if (patch.locationQuery.trim()) {
+        void runDeliveryValidation({ query: patch.locationQuery });
+      } else if (patch.districtId && patch.areaId) {
+        const interimStatus: DeliveryStatus = {
+          deliverable: true,
+          message: `Delivery available in ${patch.locationQuery || "saved address"}`,
+          districtId: patch.districtId,
+          areaId: patch.areaId,
+          districtName: patch.districtName ?? "",
+          areaName: patch.areaName ?? "",
+        };
+        setDeliveryStatus(interimStatus);
+        saveCheckoutProgress({
+          form: nextForm,
+          step: stepRef.current,
+          locationQuery: patch.locationQuery,
+          deliveryStatus: interimStatus,
+          savedAddressId: addressId,
+        });
+      }
+    },
+    [initialContact?.email, runDeliveryValidation]
+  );
+
   useEffect(() => {
     if (addressLoaded) return;
     const progress = loadCheckoutProgress();
@@ -329,6 +421,9 @@ export default function CheckoutPage({
       setStep(progress.step);
       if (progress.locationQuery) {
         setLocationQuery(progress.locationQuery);
+      }
+      if (progress.savedAddressId) {
+        setSelectedSavedAddressId(progress.savedAddressId);
       }
       if (progress.deliveryStatus) {
         setDeliveryStatus(progress.deliveryStatus);
@@ -369,14 +464,37 @@ export default function CheckoutPage({
   }, [addressLoaded, initialContact]);
 
   useEffect(() => {
+    if (!addressLoaded || !isLoggedIn || defaultSavedAddressAppliedRef.current) return;
+    if (savedAddresses.length === 0) return;
+
+    const progress = loadCheckoutProgress();
+    const hasCachedDelivery =
+      progress &&
+      progress.form.line1.trim() &&
+      (hasVerifiedDeliverySelection(progress.form) || progress.locationQuery.trim());
+    if (hasCachedDelivery) {
+      defaultSavedAddressAppliedRef.current = true;
+      return;
+    }
+
+    const defaultAddr =
+      savedAddresses.find((a) => a.isDefault) ?? savedAddresses[0];
+    if (defaultAddr) {
+      applySavedAddress(defaultAddr);
+    }
+    defaultSavedAddressAppliedRef.current = true;
+  }, [addressLoaded, isLoggedIn, savedAddresses, applySavedAddress]);
+
+  useEffect(() => {
     if (!addressLoaded) return;
     saveCheckoutProgress({
       form,
       step,
       locationQuery,
       deliveryStatus,
+      savedAddressId: selectedSavedAddressId,
     });
-  }, [addressLoaded, form, step, locationQuery, deliveryStatus]);
+  }, [addressLoaded, form, step, locationQuery, deliveryStatus, selectedSavedAddressId]);
 
   useEffect(() => {
     if (!addressLoaded) return;
@@ -702,7 +820,13 @@ export default function CheckoutPage({
                 <button
                   type="button"
                   className={`${tw.btnPrimary} justify-center`}
-                  onClick={() => validateStep1() && setStep(2)}
+                  onClick={() => {
+                    if (!validateStep1()) return;
+                    if (!isLoggedIn && form.phone.trim()) {
+                      void submitGuestPhone(normalizeRegisterPhone(form.phone));
+                    }
+                    setStep(2);
+                  }}
                 >
                   Continue to Delivery <Icons.ArrowRight />
                 </button>
@@ -711,9 +835,72 @@ export default function CheckoutPage({
 
             {step === 2 && (
               <div className="flex flex-col gap-4">
-                <h3 className="mb-1 font-display text-[22px] font-bold text-primary">
-                  Delivery Details
-                </h3>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="mb-0 font-display text-[22px] font-bold text-primary">
+                    Delivery Details
+                  </h3>
+                  {isLoggedIn ? (
+                    <button
+                      type="button"
+                      onClick={() => setAddressPickerOpen(true)}
+                      className="shrink-0 self-start text-left text-sm font-bold underline underline-offset-2 transition-opacity hover:opacity-80 sm:self-center sm:text-right"
+                      style={{ color: Colors.base_color }}
+                      aria-label="Change or add new delivery address"
+                    >
+                      Change address
+                    </button>
+                  ) : null}
+                </div>
+                {isLoggedIn ? (
+                  <div
+                    className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 sm:px-4 sm:py-3.5"
+                    style={{ borderLeftWidth: 4, borderLeftColor: Colors.base_color }}
+                  >
+                    <p
+                      className="mb-2 text-[11px] font-bold uppercase tracking-wide"
+                      style={{ color: Colors.base_color }}
+                    >
+                      Delivering to
+                    </p>
+                    {selectedSavedAddress || form.line1.trim() ? (
+                      <>
+                        {selectedSavedAddress ? (
+                          <div className="mb-1 flex flex-wrap items-center gap-2">
+                            {selectedSavedAddress.label ? (
+                              <span className="text-[10px] font-bold uppercase text-gray-600">
+                                {selectedSavedAddress.label}
+                              </span>
+                            ) : null}
+                            {selectedSavedAddress.isDefault ? (
+                              <span
+                                className="rounded bg-white px-1.5 py-0.5 text-[10px] font-bold ring-1 ring-gray-200"
+                                style={{ color: Colors.base_color }}
+                              >
+                                Default
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        <p className="text-sm font-semibold text-gray-900">
+                          {form.fullName || selectedSavedAddress?.fullName}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {form.phone || selectedSavedAddress?.phone}
+                        </p>
+                        <p className="mt-1 break-words text-sm text-gray-700">
+                          {selectedSavedAddress
+                            ? formatCustomerAddressLines(selectedSavedAddress)
+                            : [form.line1, locationQuery].filter(Boolean).join(", ")}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm font-medium text-gray-700">
+                        Pick a saved address or add a new one using the link above, or fill in
+                        the fields below.
+                      </p>
+                    )}
+                  </div>
+                ) : null}
                 <div>
                   <label className={labelClass} htmlFor="line1">
                     Street Address <span className="text-red-500">*</span>
@@ -900,7 +1087,7 @@ export default function CheckoutPage({
               {[
                 ["Subtotal", `QAR ${sub.toLocaleString()}`],
                 [
-                  "Delivery",
+                  "Delivery charge",
                   deliveryStatus?.deliverable
                     ? deliveryCharge === 0
                       ? "FREE"
@@ -934,6 +1121,15 @@ export default function CheckoutPage({
           </div>
         </div>
       </div>
+
+      <CheckoutAddressPickerModal
+        open={addressPickerOpen && isLoggedIn}
+        selectedId={selectedSavedAddressId}
+        defaultFullName={form.fullName || initialContact?.fullName}
+        defaultPhone={form.phone || initialContact?.phone}
+        onClose={() => setAddressPickerOpen(false)}
+        onSelect={applySavedAddress}
+      />
     </div>
   );
 }

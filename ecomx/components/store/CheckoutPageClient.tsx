@@ -37,7 +37,7 @@ export default function CheckoutPageClient() {
   return (
     <CheckoutPage
       cart={cart}
-      onBack={() => router.push(ROUTES.shop)}
+      onBack={() => router.back()}
       isLoggedIn={isLoggedIn}
       onLoginOpen={() => setLoginOpen(true)}
       onPlaceOrder={handlePlaceOrder}

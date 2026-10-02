@@ -11,6 +11,8 @@ import {
 import { saveGuestWishlist } from "@/lib/store/guest-wishlist";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { WishlistItem } from "@/lib/types";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
+import { loadGuestCartItems } from "@/lib/store/cart-sync";
 
 export function useWishlist() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -95,6 +97,14 @@ export function useWishlist() {
 
       if (!isLoggedIn) {
         persistGuestWishlist(nextItems, nextIds);
+        trackGuestActivityIfAnonymous(
+          {
+            eventType: wasWishlisted ? "remove_from_wishlist" : "add_to_wishlist",
+            productId,
+            metadata: { productName: item.name },
+          },
+          loadGuestCartItems()
+        );
         return;
       }
 

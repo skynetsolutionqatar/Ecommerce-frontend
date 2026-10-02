@@ -5,6 +5,8 @@ export const ROUTES = {
   orders: "/orders",
   orderDetail: (id: string) => `/orders/${id}`,
   checkout: "/checkout",
+  account: "/account",
+  accountAddresses: "/account/addresses",
   product: (slug: string) => `/product/${slug}`,
   productReviews: (slug: string) => `/product/${slug}/reviews`,
   page: (slug: string) => `/pages/${slug}`,

@@ -17,7 +17,7 @@ import type { HeroSlide } from "@/types/storefront.types";
 import dynamic from "next/dynamic";
 
 const PromoBannerStrip = dynamic(() => import("@/components/PromoBannerStrip"));
-const FlipkartProductRow = dynamic(() => import("@/components/FlipkartProductRow"));
+const HomeProductRow = dynamic(() => import("@/components/HomeProductRow"));
 const CategoriesSection = dynamic(() => import("@/components/CategoriesSection"));
 const NewsletterSection = dynamic(() => import("@/components/NewsletterSection"));
 
@@ -125,7 +125,7 @@ export default function StoreHomePage() {
         <LazyMount minHeight="360px">
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
-              <FlipkartProductRow
+              <HomeProductRow
                 title="Best Sellers"
                 subtitle="Top-rated products by Skynet customers"
                 products={bestSellerProducts}
@@ -154,7 +154,7 @@ export default function StoreHomePage() {
         <LazyMount minHeight="360px">
           <div className="mb-2 bg-white">
             <Suspense fallback={null}>
-              <FlipkartProductRow
+              <HomeProductRow
                 title="New Arrivals"
                 subtitle="Latest products just added"
                 products={newArrivalProducts}

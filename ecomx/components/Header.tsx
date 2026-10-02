@@ -8,9 +8,12 @@ import * as Icons from "./Icons";
 import type { CartItem, WishlistItem, StoreUser } from "@/lib/types";
 import Avatar from "./Avatar";
 import BrandLogo from "./BrandLogo";
+import StoreAccountMenu from "@/components/store/StoreAccountMenu";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
+import { ADMIN_ROUTES, isAdminRole } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
+import { useAuthStore } from "@/store/auth.store";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
@@ -51,6 +54,8 @@ export default function Header({
   onCategorySelect,
 }: HeaderProps) {
   const router = useRouter();
+  const authRole = useAuthStore((s) => s.user?.role);
+  const showAdminPanel = isAdminRole(authRole);
   const { client } = useClientTheme();
   const { data } = useCategories(STORE_CATEGORY_QUERY);
   const categories = data?.categories ?? [];
@@ -326,68 +331,16 @@ export default function Header({
               </span>
             </motion.button>
 
+            <StoreAccountMenu
+              user={user}
+              wishlistCount={wishlist.length}
+              onLoginOpen={onLoginOpen}
+              onLogout={onLogout}
+              onWishlistOpen={onWishlistOpen}
+            />
+
             {/* Desktop Actions */}
             <div className="flex shrink-0 items-center gap-1">
-              {user ? (
-                <motion.button
-                  type="button"
-                  onClick={() => goTo(ROUTES.orders)}
-                  className="hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 md:flex hover:bg-gray-50 transition-all"
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <Icons.Package />
-                  <span>Orders</span>
-                </motion.button>
-              ) : null}
-
-              <motion.button
-                type="button"
-                onClick={onLoginOpen}
-                className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all"
-                whileTap={{ scale: 0.97 }}
-                aria-label={user ? "Account" : "Login or Register"}
-              >
-                {user ? (
-                  <Avatar
-                    name={user.name}
-                    size={18}
-                    imageUrl={user.avatarUrl}
-                    className="border-0 shadow-none"
-                  />
-                ) : (
-                  <Icons.User />
-                )}
-                <span className="hidden min-[480px]:inline md:hidden">
-                  Login / Signup
-                </span>
-                <span className="hidden md:inline">
-                  {user ? user.name.split(" ")[0] : "Login / Signup"}
-                </span>
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={onWishlistOpen}
-                className="relative hidden items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all md:flex"
-                whileTap={{ scale: 0.97 }}
-                aria-label="Wishlist"
-              >
-                <Icons.Heart filled={wishlist.length > 0} />
-                <span className="hidden lg:inline">Wishlist</span>
-                <AnimatePresence>
-                  {wishlist.length > 0 && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 md:h-4 md:w-4 items-center justify-center rounded-full bg-red-500 text-[10px] md:text-[9px] font-black text-white"
-                    >
-                      {wishlist.length > 9 ? "9+" : wishlist.length}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-
               <motion.button
                 type="button"
                 onClick={onCartOpen}
@@ -579,26 +532,14 @@ export default function Header({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2 border-b border-gray-100 p-4 md:hidden">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onWishlistOpen();
-                    setMobileOpen(false);
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-800"
-                >
-                  <Icons.Heart filled={wishlist.length > 0} />
-                  Wishlist
-                  {wishlist.length > 0 ? ` (${wishlist.length})` : ""}
-                </button>
+              <div className="border-b border-gray-100 p-4 md:hidden">
                 <button
                   type="button"
                   onClick={() => {
                     onCartOpen();
                     setMobileOpen(false);
                   }}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-800"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-800"
                 >
                   <Icons.Bag />
                   Cart
@@ -635,32 +576,85 @@ export default function Header({
 
               <div className="border-t border-gray-100 p-4 pb-8">
                 {user ? (
-                  <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-3">
-                    <Avatar
-                      name={user.name}
-                      size={40}
-                      imageUrl={user.avatarUrl}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-label text-[13px] font-bold text-gray-900">
-                        {user.name}
-                      </div>
-                      <div className="truncate font-label text-[12px] md:text-[10.5px] text-gray-500">
-                        {user.email}
+                  <>
+                    <div className="mb-3 flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#f0f5ff] p-3">
+                      <Avatar
+                        name={user.name}
+                        size={40}
+                        imageUrl={user.avatarUrl}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-label text-[13px] font-bold text-gray-900">
+                          {user.name}
+                        </div>
+                        <div className="truncate font-label text-[12px] md:text-[10.5px] text-gray-500">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onWishlistOpen();
+                        setMobileOpen(false);
+                      }}
+                      className="mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold text-gray-800 hover:bg-gray-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icons.Heart filled={wishlist.length > 0} />
+                        My Wishlist
+                        {wishlist.length > 0 ? (
+                          <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                            {wishlist.length > 9 ? "9+" : wishlist.length}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="text-gray-400">›</span>
+                    </button>
+                    {[
+                      { label: "My Profile", href: ROUTES.account },
+                      { label: "My Orders", href: ROUTES.orders },
+                      { label: "My Addresses", href: `${ROUTES.account}?section=addresses` },
+                    ].map((item) => (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={() => {
+                          goTo(item.href);
+                          setMobileOpen(false);
+                        }}
+                        className="mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold text-gray-800 hover:bg-gray-50"
+                      >
+                        {item.label}
+                        <span className="text-gray-400">›</span>
+                      </button>
+                    ))}
+                    {showAdminPanel ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          goTo(ADMIN_ROUTES.dashboard);
+                          setMobileOpen(false);
+                        }}
+                        className="mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold hover:bg-gray-50"
+                        style={{ color: Colors.base_color }}
+                      >
+                        Go to Admin Panel
+                        <span className="text-gray-400">›</span>
+                      </button>
+                    ) : null}
                     <motion.button
                       type="button"
                       onClick={() => {
                         onLogout?.();
                         setMobileOpen(false);
                       }}
-                      className="shrink-0 rounded-xl border border-gray-300 px-3 py-2 font-label text-[13px] md:text-[11px] font-bold text-gray-700"
-                      whileTap={{ scale: 0.95 }}
+                      className="mt-2 w-full rounded-xl border border-red-200 py-2.5 font-label text-[13px] font-bold text-red-600"
+                      whileTap={{ scale: 0.98 }}
                     >
-                      Sign Out
+                      Logout
                     </motion.button>
-                  </div>
+                  </>
                 ) : (
                   <motion.button
                     type="button"

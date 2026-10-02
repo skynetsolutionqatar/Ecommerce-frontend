@@ -5,10 +5,14 @@ interface AvatarProps {
   name: string;
   size?: number;
   imageUrl?: string;
+  /** Stable color seed — defaults to name; use email for account avatars. */
+  colorSeed?: string;
   className?: string;
 }
 
 const SIZE_CLASS: Record<number, string> = {
+  18: "h-[18px] w-[18px] text-[9px]",
+  20: "h-5 w-5 text-[10px]",
   36: "h-9 w-9 text-[13px]",
   40: "h-10 w-10 text-sm",
   64: "h-16 w-16 text-[23px]",
@@ -16,8 +20,14 @@ const SIZE_CLASS: Record<number, string> = {
   80: "h-20 w-20 text-[29px]",
 };
 
-export default function Avatar({ name, size = 36, imageUrl, className = "" }: AvatarProps) {
-  const bgClass = getAvatarBgClass(name);
+export default function Avatar({
+  name,
+  size = 36,
+  imageUrl,
+  colorSeed,
+  className = "",
+}: AvatarProps) {
+  const bgClass = getAvatarBgClass(colorSeed ?? name);
   const fontSize = Math.max(10, Math.round(size * 0.36));
   const sizeClass = SIZE_CLASS[size] ?? `h-[${size}px] w-[${size}px] text-[${fontSize}px]`;
   const baseClass = `shrink-0 rounded-full border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.12)] ${className}`;

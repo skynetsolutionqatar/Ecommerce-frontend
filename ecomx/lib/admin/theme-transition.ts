@@ -14,9 +14,8 @@ export function disableAdminThemeTransition() {
   getShell()?.classList.remove("admin-theme-transition");
 }
 
-/** Admin dark mode lives on `.admin-shell` only — never set `html.dark` (breaks store typography). */
-export function applyAdminThemeOnDocument(_isDark: boolean) {
-  document.documentElement.classList.remove("dark");
+export function applyAdminThemeOnDocument(isDark: boolean) {
+  document.documentElement.classList.toggle("dark", isDark);
 }
 
 /**

@@ -16,6 +16,7 @@ import type {
   ResetPasswordPayload,
 } from "@/types/auth.types";
 import { authUserToStoreUser } from "@/lib/auth-utils";
+import { linkGuestActivityToCustomer } from "@/lib/store/guest-activity-link";
 
 function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
   return {
@@ -45,6 +46,7 @@ export function useAuth() {
         const { customer, accessToken, refreshToken } = res.data;
         const normalized = normalizeAuthUser(customer as unknown as Record<string, unknown>);
         setAuth(normalized, accessToken, refreshToken);
+        void linkGuestActivityToCustomer("login_linked");
 
         const destination = getPostAuthRedirect(normalized.role, redirectTo);
         if (destination) {
@@ -71,6 +73,7 @@ export function useAuth() {
         const { customer, accessToken, refreshToken } = res.data;
         const normalized = normalizeAuthUser(customer as unknown as Record<string, unknown>);
         setAuth(normalized, accessToken, refreshToken);
+        void linkGuestActivityToCustomer("register_linked");
 
         const destination = getPostAuthRedirect(normalized.role, redirectTo);
         if (destination) {

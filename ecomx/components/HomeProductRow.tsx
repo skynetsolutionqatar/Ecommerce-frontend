@@ -9,7 +9,7 @@ import { tw } from "@/lib/theme";
 import type { ApiProduct } from "@/types/product.types";
 import type { WishlistItem } from "@/lib/types";
 
-interface FlipkartProductRowProps {
+interface HomeProductRowProps {
   title: string;
   subtitle?: string;
   products: ApiProduct[];
@@ -21,7 +21,7 @@ interface FlipkartProductRowProps {
   bgColor?: string;
 }
 
-export default function FlipkartProductRow({
+export default function HomeProductRow({
   title,
   subtitle,
   products,
@@ -31,7 +31,7 @@ export default function FlipkartProductRow({
   onWishlistToggle,
   isWishlisted,
   bgColor = "#ffffff",
-}: FlipkartProductRowProps) {
+}: HomeProductRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: "left" | "right") => {

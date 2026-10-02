@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
 import ProductPage from "@/components/ProductPage";
 import { useProductBySlug } from "@/hooks/useProducts";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
@@ -27,6 +29,15 @@ export default function ProductRouteView({
   const router = useRouter();
   const { data, isLoading, isError } = useProductBySlug(slug);
   const product = data ? apiProductToStoreProduct(data) : null;
+
+  useEffect(() => {
+    if (!product) return;
+    trackGuestActivityIfAnonymous({
+      eventType: "product_view",
+      productId: product.id,
+      metadata: { productName: product.name },
+    });
+  }, [product?.id, product?.name]);
 
   if (isLoading) {
     return (

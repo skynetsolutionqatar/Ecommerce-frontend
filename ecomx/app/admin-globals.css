@@ -82,7 +82,7 @@
   --chart-track: #e2e8f0;
 }
 
-html:has(.admin-shell.dark) {
+.dark {
   --background: oklch(0.14 0.015 260);
   --foreground: oklch(0.96 0 0);
   --card: oklch(0.18 0.015 260);

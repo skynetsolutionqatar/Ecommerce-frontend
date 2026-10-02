@@ -7,6 +7,7 @@ import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { TOKEN_KEYS } from "@/lib/config";
 import { ROLE, sanitizeRedirectPath } from "@/lib/Constant";
 import { useAuthStore } from "@/store/auth.store";
+import { linkGuestActivityToCustomer } from "@/lib/store/guest-activity-link";
 import type { AuthUser } from "@/types/auth.types";
 
 function normalizeAuthUser(raw: Record<string, unknown>): AuthUser {
@@ -70,6 +71,7 @@ export default function GoogleOAuthCallbackPage() {
           res.data.customer as unknown as Record<string, unknown>
         );
         setAuth(user, accessToken, refreshToken);
+        void linkGuestActivityToCustomer("login_linked");
         router.replace(returnTo);
       } catch (err) {
         if (cancelled) return;

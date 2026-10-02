@@ -16,6 +16,7 @@ import {
 import { clearGuestCart, saveGuestCart } from "@/lib/store/guest-cart";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { CartItem, Product } from "@/lib/types";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
 
 export function useCart() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -98,6 +99,15 @@ export function useCart() {
 
       if (!isLoggedIn) {
         persistGuestCart(optimisticItems);
+        trackGuestActivityIfAnonymous(
+          {
+            eventType: "add_to_cart",
+            productId: product.id,
+            quantity: qtyToAdd,
+            metadata: { productName: product.name },
+          },
+          optimisticItems
+        );
         return true;
       }
 
@@ -122,6 +132,15 @@ export function useCart() {
 
       if (!isLoggedIn) {
         persistGuestCart(optimisticItems);
+        const removed = previousItems.find((item) => item.id === id);
+        trackGuestActivityIfAnonymous(
+          {
+            eventType: "remove_from_cart",
+            productId: removed?.productId,
+            metadata: { productName: removed?.name },
+          },
+          optimisticItems
+        );
         return true;
       }
 

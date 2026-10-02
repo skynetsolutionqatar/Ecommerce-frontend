@@ -176,7 +176,7 @@ export default function OrderDetailClient({ id }: { id: string }) {
               </div>
               {order.shippingCharge != null ? (
                 <div className="flex justify-between text-sm py-1">
-                  <span className="font-medium text-gray-700">Shipping</span>
+                  <span className="font-medium text-gray-700">Delivery charge</span>
                   <span className="text-gray-900">{formatPrice(order.shippingCharge)}</span>
                 </div>
               ) : null}

@@ -161,7 +161,7 @@ export default function CartDrawer({
               {(
                 [
                   ["Subtotal", fmt(sub)],
-                  ["Shipping", "FREE"],
+                  ["Delivery charge", "FREE"],
                   ["Total", fmt(total)],
                 ] as [string, string][]
               ).map(([label, val], i) => (

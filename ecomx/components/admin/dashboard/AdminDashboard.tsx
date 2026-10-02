@@ -148,6 +148,39 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
+        {/* {data.guestActivityInsights ? (
+          <section className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className={adminType.sectionTitle}>Guest & visitor activity</h2>
+                <p className={adminType.pageDescription}>
+                  Anonymous storefront activity for the last 30 days.
+                </p>
+              </div>
+              <Link
+                href={ADMIN_ROUTES.guestActivity}
+                className={`${adminType.badge} inline-flex w-fit items-center font-semibold ${colors.link}`}
+              >
+                View guest activity →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {data.guestActivityInsights.stats.map((stat) => (
+                <StatCard key={stat.id} stat={stat} />
+              ))}
+            </div>
+            <Suspense fallback={<ChartFallback />}>
+              <CategoryBarChart
+                title={data.guestActivityInsights.topViewedProducts.title}
+                description={data.guestActivityInsights.topViewedProducts.description}
+                points={data.guestActivityInsights.topViewedProducts.points}
+                valueLabel="Views"
+                formatValue={(value) => value.toLocaleString()}
+              />
+            </Suspense>
+          </section>
+        ) : null} */}
+
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>

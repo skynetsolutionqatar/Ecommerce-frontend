@@ -25,6 +25,7 @@ export const ADMIN_ROUTES = {
   orders: `${ROUTE_PREFIX.ADMIN}/orders`,
   order: (id: string) => `${ROUTE_PREFIX.ADMIN}/orders/${id}`,
   customers: `${ROUTE_PREFIX.ADMIN}/customers`,
+  guestActivity: `${ROUTE_PREFIX.ADMIN}/guest-activity`,
   categories: `${ROUTE_PREFIX.ADMIN}/categories`,
   category: (id: string) => `${ROUTE_PREFIX.ADMIN}/categories/${id}`,
   inventory: `${ROUTE_PREFIX.ADMIN}/inventory`,

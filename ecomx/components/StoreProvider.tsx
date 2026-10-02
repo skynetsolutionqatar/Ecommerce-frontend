@@ -4,10 +4,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
 import { useRouter } from "next/navigation";
 import { fetchProduct } from "@/lib/api/product.api";
 import { showError } from "@/lib/toast";
@@ -82,6 +84,11 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     useAuthStore.getState().clearAuth();
   }, []);
+
+  useEffect(() => {
+    if (!cartOpen) return;
+    trackGuestActivityIfAnonymous({ eventType: "cart_viewed" }, cart);
+  }, [cartOpen, cart]);
 
   const openProduct = useCallback(
     (product: Product) => {

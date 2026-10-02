@@ -21,7 +21,7 @@ import { ORDER_STATUS } from "@/lib/Constant";
 const TABS = [
   { key: "summary", label: "Summary" },
   { key: "items", label: "Items" },
-  { key: "shipping", label: "Shipping" },
+  { key: "shipping", label: "Delivery address" },
   { key: "attribution", label: "Attribution" },
 ];
 
@@ -111,7 +111,7 @@ export default function AdminOrderDetailPage({
             />
             <ViewField label="Subtotal" value={formatPrice(order.subtotal)} />
             <ViewField
-              label="Shipping"
+              label="Delivery charge"
               value={formatPrice(order.shippingCharge ?? 0)}
             />
             <ViewField

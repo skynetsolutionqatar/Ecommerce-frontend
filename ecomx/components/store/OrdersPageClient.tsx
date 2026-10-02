@@ -3,7 +3,6 @@
 import OrdersPage from "@/components/Orders";
 import { useStore } from "@/components/StoreProvider";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "@/lib/routes";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 
 export default function OrdersPageClient() {
@@ -14,7 +13,7 @@ export default function OrdersPageClient() {
 
   return (
     <OrdersPage
-      onBack={() => router.push(ROUTES.shop)}
+      onBack={() => router.back()}
       isLoggedIn={isLoggedIn}
       isHydrated={isHydrated}
       onLoginOpen={() => setLoginOpen(true)}

@@ -22,6 +22,7 @@ import { resolveCategoryId } from "@/lib/store/category-utils";
 import { apiProductToWishlistItem } from "@/lib/store/wishlist-helpers";
 import type { FilterState, SortOption, WishlistItem, Product } from "@/lib/types";
 import type { ApiProduct } from "@/types/product.types";
+import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helpers";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -123,6 +124,15 @@ export default function ShopPage({
   const totalPages = pagination?.totalPages ?? 1;
   const total = pagination?.total ?? products.length;
   const selectedCategoryId = appliedFilters.categories[0];
+
+  useEffect(() => {
+    const q = debouncedSearch.trim();
+    if (!q) return;
+    trackGuestActivityIfAnonymous({
+      eventType: "product_search",
+      metadata: { searchQuery: q },
+    });
+  }, [debouncedSearch]);
 
   useEffect(() => {
     const syncMax = (f: FilterState) => {

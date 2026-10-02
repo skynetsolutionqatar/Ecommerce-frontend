@@ -150,6 +150,8 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: "skynet_refresh_token",
   GUEST_WISHLIST: "skynet_guest_wishlist",
   GUEST_CART: "skynet_guest_cart",
+  GUEST_ID: "skynet_guest_id",
+  GUEST_SESSION: "skynet_guest_session",
   CHECKOUT_ADDRESS: "skynet_checkout_address",
 } as const;
 

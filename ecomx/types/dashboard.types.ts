@@ -112,6 +112,10 @@ export interface DashboardData {
   lowStock: DashboardTableSection<DashboardLowStockItem>;
   utmSourceReport: { title: string; description: string; items: CategoryChartItem[] };
   utmCampaignReport: { title: string; description: string; points: ChartPoint[] };
+  guestActivityInsights: {
+    stats: DashboardStat[];
+    topViewedProducts: { title: string; description: string; points: ChartPoint[] };
+  };
 }
 
 export interface DashboardQueryParams {

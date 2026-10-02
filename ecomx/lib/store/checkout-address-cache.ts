@@ -30,6 +30,7 @@ type CheckoutStoragePayload = CheckoutFormData & {
   checkoutStep?: number;
   locationQuery?: string;
   deliveryStatus?: PersistedDeliveryStatus | null;
+  savedAddressId?: string | null;
 };
 
 function readPayload(): CheckoutStoragePayload | null {
@@ -55,6 +56,7 @@ function readPayload(): CheckoutStoragePayload | null {
       checkoutStep: parsed.checkoutStep,
       locationQuery: parsed.locationQuery ?? "",
       deliveryStatus: parsed.deliveryStatus ?? null,
+      savedAddressId: parsed.savedAddressId ?? null,
     };
   } catch {
     return null;
@@ -94,6 +96,7 @@ export function loadCheckoutProgress(): {
   step: number;
   locationQuery: string;
   deliveryStatus: PersistedDeliveryStatus | null;
+  savedAddressId: string | null;
 } | null {
   const payload = readPayload();
   if (!payload) return null;
@@ -103,6 +106,7 @@ export function loadCheckoutProgress(): {
     step: typeof step === "number" && step >= 1 && step <= 3 ? step : 1,
     locationQuery: payload.locationQuery ?? "",
     deliveryStatus: payload.deliveryStatus ?? null,
+    savedAddressId: payload.savedAddressId ?? null,
   };
 }
 
@@ -122,12 +126,14 @@ export function saveCheckoutProgress(input: {
   step: number;
   locationQuery: string;
   deliveryStatus: PersistedDeliveryStatus | null;
+  savedAddressId?: string | null;
 }): void {
   writePayload({
     ...input.form,
     checkoutStep: input.step,
     locationQuery: input.locationQuery,
     deliveryStatus: input.deliveryStatus,
+    savedAddressId: input.savedAddressId ?? null,
   });
 }
 
