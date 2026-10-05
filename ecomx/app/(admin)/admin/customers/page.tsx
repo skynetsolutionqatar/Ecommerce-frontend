@@ -13,7 +13,7 @@ import { useCustomers, useCustomerMutations } from "@/hooks/useCustomers";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
-import type { ApiCustomer } from "@/types/customer.types";
+import type { ApiCustomer, CustomerAuthProvider } from "@/types/customer.types";
 
 const PAGE_SIZE = 10;
 
@@ -22,16 +22,43 @@ const STATUS_OPTIONS = [
   { label: "Inactive", value: "false" },
 ];
 
+const LOGIN_METHOD_OPTIONS = [
+  { label: "Email", value: "email" },
+  // { label: "Phone", value: "phone" },
+  { label: "Google", value: "google" },
+];
+
+function loginMethodLabel(provider?: CustomerAuthProvider): string {
+  switch (provider) {
+    // case "phone":
+    //   return "Phone";
+    case "google":
+      return "Google";
+    default:
+      return "Email";
+  }
+}
+
 export default function AdminCustomersPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
+  const [loginMethodFilter, setLoginMethodFilter] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
   const { data, isLoading, isError } = useCustomers({
     search: debouncedSearch || undefined,
-    ...(activeFilter === "true" ? { isActive: true } : activeFilter === "false" ? { isActive: false } : {}),
+    ...(activeFilter === "true"
+      ? { isActive: true }
+      : activeFilter === "false"
+      ? { isActive: false }
+      : {}),
+    ...(loginMethodFilter === "email" ||
+    // loginMethodFilter === "phone" ||
+    loginMethodFilter === "google"
+      ? { authProvider: loginMethodFilter }
+      : {}),
     page,
     limit: PAGE_SIZE,
   });
@@ -50,6 +77,10 @@ export default function AdminCustomersPage() {
       },
       onActive: (value: string) => {
         setActiveFilter(value);
+        setPage(1);
+      },
+      onLoginMethod: (value: string) => {
+        setLoginMethodFilter(value);
         setPage(1);
       },
     }),
@@ -77,6 +108,13 @@ export default function AdminCustomersPage() {
             options: STATUS_OPTIONS,
             onChange: handlers.onActive,
           },
+          {
+            key: "loginMethod",
+            value: loginMethodFilter,
+            placeholder: "Login methods",
+            options: LOGIN_METHOD_OPTIONS,
+            onChange: handlers.onLoginMethod,
+          },
         ]}
       />
 
@@ -100,6 +138,7 @@ export default function AdminCustomersPage() {
               <th className="px-5 py-3 text-left">Email</th>
               <th className="px-5 py-3 text-left">Phone</th>
               <th className="px-5 py-3 text-left">Role</th>
+              <th className="px-5 py-3 text-left">Login</th>
               <th className="px-5 py-3 text-left">Status</th>
               <th className="px-5 py-3 text-left">Joined</th>
               <th className="px-5 py-3 text-left">Action</th>
@@ -111,37 +150,57 @@ export default function AdminCustomersPage() {
                 <tr key={customer._id} className="border-t hover:bg-gray-50">
                   <td
                     className="cursor-pointer px-5 py-4 text-gray-400"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {(page - 1) * PAGE_SIZE + index + 1}
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4 font-medium"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {customer.name}
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {customer.email}
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4 text-gray-500"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {customer.phone || "—"}
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4 capitalize"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {customer.role}
                   </td>
                   <td
+                    className="cursor-pointer px-5 py-4 text-gray-600"
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
+                  >
+                    {loginMethodLabel(customer.authProvider)}
+                  </td>
+                  <td
                     className="cursor-pointer px-5 py-4"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -155,14 +214,18 @@ export default function AdminCustomersPage() {
                   </td>
                   <td
                     className="cursor-pointer px-5 py-4 text-gray-500"
-                    onClick={() => router.push(ADMIN_ROUTES.customer(customer._id))}
+                    onClick={() =>
+                      router.push(ADMIN_ROUTES.customer(customer._id))
+                    }
                   >
                     {customer.createdAt ? formatDate(customer.createdAt) : "—"}
                   </td>
                   <td className="px-5 py-4">
                     <button
                       type="button"
-                      onClick={() => void toggleStatus.mutateAsync(customer._id)}
+                      onClick={() =>
+                        void toggleStatus.mutateAsync(customer._id)
+                      }
                       className="rounded-md border px-3 py-1 text-xs font-semibold hover:bg-gray-50"
                     >
                       {customer.isActive ? "Deactivate" : "Activate"}
@@ -172,7 +235,7 @@ export default function AdminCustomersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-gray-400">
+                <td colSpan={9} className="py-10 text-center text-gray-400">
                   No customers found
                 </td>
               </tr>

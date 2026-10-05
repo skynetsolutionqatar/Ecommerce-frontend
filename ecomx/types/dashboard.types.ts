@@ -116,6 +116,9 @@ export interface DashboardData {
     stats: DashboardStat[];
     topViewedProducts: { title: string; description: string; points: ChartPoint[] };
   };
+  customerLoginStats: {
+    stats: DashboardStat[];
+  };
 }
 
 export interface DashboardQueryParams {

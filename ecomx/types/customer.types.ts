@@ -15,6 +15,9 @@ export interface CustomerAddress {
   isDefault?: boolean;
 }
 
+// export type CustomerAuthProvider = "email" | "phone" | "google";
+export type CustomerAuthProvider = "email" | "google";
+
 export interface ApiCustomer {
   _id: string;
   tenantId: string;
@@ -22,6 +25,7 @@ export interface ApiCustomer {
   email: string;
   phone?: string;
   avatar?: string;
+  authProvider?: CustomerAuthProvider;
   role: UserRole;
   isActive: boolean;
   isEmailVerified?: boolean;
@@ -34,6 +38,7 @@ export interface CustomerQueryParams extends PaginationParams {
   role?: UserRole;
   isActive?: boolean;
   isEmailVerified?: boolean;
+  authProvider?: CustomerAuthProvider;
   sortBy?: "name" | "email" | "createdAt";
 }
 

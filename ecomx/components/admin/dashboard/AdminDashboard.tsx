@@ -148,7 +148,7 @@ function AdminDashboard() {
           </Suspense>
         </section>
 
-        {/* {data.guestActivityInsights ? (
+        {data.guestActivityInsights ? (
           <section className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -179,7 +179,7 @@ function AdminDashboard() {
               />
             </Suspense>
           </section>
-        ) : null} */}
+        ) : null}
 
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
