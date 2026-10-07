@@ -42,6 +42,9 @@ const MOBILE_NAV_LINKS = [
   { label: "Orders", href: ROUTES.orders },
 ];
 
+const mobileCategoryChipClass =
+  "flex w-full min-w-0 flex-col items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-1 py-1.5 text-center text-[10px] font-medium leading-tight text-gray-700";
+
 export default function Header({
   cart,
   wishlist,
@@ -388,7 +391,7 @@ export default function Header({
         >
           <div className={tw.storeContainer}>
             <div
-              className={`flex items-center overflow-x-auto scroll-smooth ${tw.scrollbarHide} justify-between p-1`}
+              className={`flex items-center justify-start gap-1 overflow-x-auto scroll-smooth p-1 ${tw.scrollbarHide}`}
             >
               {categoriesLoading ? (
                 <span className="px-3 py-2 text-[11px] text-gray-400">
@@ -495,24 +498,24 @@ export default function Header({
               </div>
 
               {categories.length > 0 && (
-                <div className="border-b border-gray-100 p-4">
+                <div className="border-b border-gray-100 p-3">
                   <p
-                    className={`mb-2 px-1 ${type.eyebrow} text-[11px] text-gray-400`}
+                    className={`mb-1.5 px-0.5 ${type.eyebrow} text-[10px] text-gray-400`}
                   >
                     CATEGORIES
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {categories.map((cat) => (
                       <button
                         key={cat._id}
                         type="button"
                         onClick={() => handleCategoryClick(cat)}
-                        className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-[13px] font-medium text-gray-700"
+                        className={mobileCategoryChipClass}
                       >
-                        <span className="flex h-5 w-5 items-center justify-center text-gray-500">
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-500 [&_svg]:h-3.5 [&_svg]:w-3.5">
                           {resolveCategoryIcon(cat.name)}
                         </span>
-                        {cat.name}
+                        <span className="line-clamp-2 w-full min-w-0">{cat.name}</span>
                       </button>
                     ))}
                     <button
@@ -521,12 +524,12 @@ export default function Header({
                         goTo(ROUTES.shop);
                         setMobileOpen(false);
                       }}
-                      className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-[13px] font-medium text-gray-700"
+                      className="col-span-3 flex w-full min-w-0 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-[10px] font-medium text-gray-700"
                     >
-                      <span className="flex h-5 w-5 items-center justify-center text-gray-500">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-500 [&_svg]:h-3.5 [&_svg]:w-3.5">
                         {CategoryIcons.More}
                       </span>
-                      More Categories
+                      <span className="truncate">More Categories</span>
                     </button>
                   </div>
                 </div>
