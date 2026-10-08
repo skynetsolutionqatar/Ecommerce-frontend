@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { AUTH_ROUTES, sanitizeRedirectPath } from "@/lib/config";
+import { ADMIN_ROUTES, AUTH_ROUTES, canAccessAdminPanel, sanitizeRedirectPath } from "@/lib/config";
+import { useAuthStore, selectIsAuthenticated } from "@/store/auth.store";
 import { getSessionExpiredMessage, isAuthSessionReason } from "@/lib/api/auth-errors";
 import { ROUTE_PREFIX } from "@/lib/Constant";
 import AuthFormError from "@/components/auth/AuthFormError";
@@ -23,6 +24,9 @@ export default function LoginForm() {
   const rawRedirect = searchParams.get("redirect");
   const redirectParam = rawRedirect ? sanitizeRedirectPath(rawRedirect) : null;
   const { login, loading, setError, clearError } = useAuth();
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+  const role = useAuthStore((s) => s.user?.role);
+  const showDashboardLink = isAuthenticated && canAccessAdminPanel(role);
   const [form, setForm] = useState({ email: "", password: "" });
 
   useEffect(() => {
@@ -47,6 +51,14 @@ export default function LoginForm() {
 
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to access your admin dashboard and manage your store.">
+      {showDashboardLink ? (
+        <Link
+          href={redirectParam ?? ADMIN_ROUTES.dashboard}
+          className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#0a255d]/25 bg-[#0a255d]/5 px-5 py-3 text-sm font-bold text-[#0a255d] transition-colors hover:bg-[#0a255d]/10"
+        >
+          Go to Dashboard
+        </Link>
+      ) : null}
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
         <AuthFormError />
 

@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
   AUTH_PATH,
-  isAdminRole,
   ROUTE_PREFIX,
   sanitizeRedirectPath,
   STORAGE_KEYS,
 } from "@/lib/Constant";
+import { canAccessAdminPanel } from "@/lib/config";
 
 interface TokenPayload {
   role?: string;
@@ -58,7 +58,7 @@ export function proxy(request: NextRequest) {
   const token = accessToken || tokenFromAuthCookie;
   const payload = token ? decodeTokenPayload(token) : null;
   const isAuthenticated = !!payload?.exp && payload.exp * 1000 > Date.now();
-  const isAdmin = isAdminRole(payload?.role);
+  const isAdmin = canAccessAdminPanel(payload?.role);
 
   if (isAdminRoute) {
     return NextResponse.next();

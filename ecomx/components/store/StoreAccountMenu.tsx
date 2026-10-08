@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Heart, LogOut, MapPin, Package, User } from "lucide-react";
 import * as Icons from "@/components/Icons";
 import Avatar from "@/components/Avatar";
-import { ADMIN_ROUTES, isAdminRole } from "@/lib/config";
+import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
 import type { StoreUser } from "@/lib/types";
 import { useAuthStore } from "@/store/auth.store";
@@ -37,7 +37,7 @@ export default function StoreAccountMenu({
 }: StoreAccountMenuProps) {
   const router = useRouter();
   const authRole = useAuthStore((s) => s.user?.role);
-  const showAdminPanel = isAdminRole(authRole);
+  const showAdminPanel = canAccessAdminPanel(authRole);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -220,7 +220,7 @@ export default function StoreAccountMenu({
                       className="w-full rounded-sm border border-gray-300 py-2 text-[13px] font-semibold transition hover:bg-gray-50"
                       style={{ color: Colors.base_color }}
                     >
-                      Go to Admin Panel
+                      Go to Dashboard
                     </button>
                   ) : null}
                   <button

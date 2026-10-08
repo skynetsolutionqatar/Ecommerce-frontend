@@ -8,14 +8,37 @@ export const ROLE = {
   CUSTOMER: "customer",
   ADMIN: "admin",
   SUPERADMIN: "superadmin",
+  DEVELOPER: "developer",
+  OWNER: "owner",
 } as const;
 
 export type UserRole = (typeof ROLE)[keyof typeof ROLE];
 
 export const ADMIN_ROLES = [ROLE.ADMIN, ROLE.SUPERADMIN] as const;
 
+export const PLATFORM_ROLES = [ROLE.SUPERADMIN, ROLE.DEVELOPER, ROLE.OWNER] as const;
+
+/** Store admin panel on a client storefront (not the developer hub). */
 export function isAdminRole(role?: string): boolean {
   return role === ROLE.ADMIN || role === ROLE.SUPERADMIN;
+}
+
+export function isDeveloperRole(role?: string): boolean {
+  return role === ROLE.DEVELOPER;
+}
+
+export function isOwnerRole(role?: string): boolean {
+  return role === ROLE.OWNER;
+}
+
+export function isPlatformHubRole(role?: string): boolean {
+  return isDeveloperRole(role) || isOwnerRole(role);
+}
+
+export function isPlatformRole(role?: string): boolean {
+  return (
+    role === ROLE.SUPERADMIN || role === ROLE.DEVELOPER || role === ROLE.OWNER
+  );
 }
 
 /** Role display labels */

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth.api";
 import { ROLE } from "@/lib/Constant";
-import { AUTH_ROUTES, getPostAuthRedirect, isAdminRole } from "@/lib/config";
+import { AUTH_ROUTES, canAccessAdminPanel, getPostAuthRedirect } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
 import type {
@@ -92,7 +92,7 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
-    const wasAdmin = isAdminRole(useAuthStore.getState().user?.role);
+    const wasAdmin = canAccessAdminPanel(useAuthStore.getState().user?.role);
     try {
       await authApi.logout();
     } catch {
@@ -173,7 +173,7 @@ export function useAuth() {
   return {
     user,
     isAuthenticated: !!user && !!useAuthStore.getState().accessToken,
-    isAdmin: isAdminRole(user?.role),
+    isAdmin: canAccessAdminPanel(user?.role),
     isHydrated,
     loading,
     error: authError,

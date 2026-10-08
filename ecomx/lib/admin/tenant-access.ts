@@ -1,6 +1,10 @@
-import { isAdminRole } from "@/lib/Constant";
+import { isDeveloperRole, isOwnerRole, isPlatformRole } from "@/lib/Constant";
 
-/** Matches backend authorize(["admin", "superadmin"]) on tenant routes. */
+/** Platform-only: create stores and copy tenant IDs for client frontends. */
 export function canManageTenants(role?: string): boolean {
-  return isAdminRole(role);
+  return isDeveloperRole(role) || isOwnerRole(role) || role === "superadmin";
+}
+
+export function isPlatformAdmin(role?: string): boolean {
+  return isPlatformRole(role);
 }

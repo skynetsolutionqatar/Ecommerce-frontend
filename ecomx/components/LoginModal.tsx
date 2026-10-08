@@ -5,7 +5,7 @@ import Avatar from "./Avatar";
 import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
-import { isAdminRole } from "@/lib/config";
+import { canAccessAdminPanel } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
@@ -62,7 +62,7 @@ export default function LoginModal({
   const { login, register, forgotPassword, resetPassword, loading, clearError, setError } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
-  const showAdminPanel = isAdminRole(authUser?.role);
+  const showAdminPanel = canAccessAdminPanel(authUser?.role);
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
@@ -390,7 +390,7 @@ export default function LoginModal({
                 </button>
                 {showAdminPanel && (
                   <button type="button" className={primaryBtnClass} onClick={onAdminPanelClick}>
-                    Go to Admin Panel
+                    Go to Dashboard
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 )}

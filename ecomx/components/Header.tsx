@@ -11,7 +11,7 @@ import BrandLogo from "./BrandLogo";
 import StoreAccountMenu from "@/components/store/StoreAccountMenu";
 import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
-import { ADMIN_ROUTES, isAdminRole } from "@/lib/config";
+import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
 import { useAuthStore } from "@/store/auth.store";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
@@ -58,7 +58,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const authRole = useAuthStore((s) => s.user?.role);
-  const showAdminPanel = isAdminRole(authRole);
+  const showAdminPanel = canAccessAdminPanel(authRole);
   const { client } = useClientTheme();
   const { data } = useCategories(STORE_CATEGORY_QUERY);
   const categories = data?.categories ?? [];
@@ -642,7 +642,7 @@ export default function Header({
                         className="mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold hover:bg-gray-50"
                         style={{ color: Colors.base_color }}
                       >
-                        Go to Admin Panel
+                        Go to Dashboard
                         <span className="text-gray-400">›</span>
                       </button>
                     ) : null}

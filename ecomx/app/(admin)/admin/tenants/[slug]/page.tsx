@@ -7,6 +7,7 @@ import BackPanel from "@/components/admin/utils/BackPanel";
 import ViewSection from "@/components/admin/utils/ViewSection";
 import ViewField from "@/components/admin/utils/ViewField";
 import TenantAdminGuard from "@/components/admin/tenants/TenantAdminGuard";
+import TenantIdCopyPanel from "@/components/admin/tenants/TenantIdCopyPanel";
 import { useTenantBySlug, useTenantMutations } from "@/hooks/useTenants";
 import { useTenantAccess } from "@/hooks/useTenantAccess";
 import { adminType } from "@/lib/admin/typography";
@@ -53,6 +54,8 @@ export default function AdminTenantDetailPage({
           deleting={remove.isPending}
         >
           <div className="space-y-6">
+            <TenantIdCopyPanel tenantId={tenant._id} tenantName={tenant.name} />
+
             <ViewSection id="identity" title="Identity">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <ViewField label="Name" value={tenant.name} />

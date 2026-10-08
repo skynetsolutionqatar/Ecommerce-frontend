@@ -570,10 +570,12 @@ import { X, Menu, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { adminSections, type AdminMenuItem } from "../utils/SideSection";
+import { Building2 } from "lucide-react";
+import { adminSections, type AdminMenuItem, type AdminMenuSection } from "../utils/SideSection";
 import { adminType } from "@/lib/admin/typography";
 import { colors } from "../utils/Colors";
 import { ADMIN_ROUTES } from "@/lib/config";
+import { useAuthStore, selectCanManageTenants } from "@/store/auth.store";
 
 export const skynetClient = {
   id: "skynet",
@@ -610,6 +612,24 @@ export default function Sidebar({
   );
 
   const pathname = usePathname();
+  const canManageTenants = useAuthStore(selectCanManageTenants);
+
+  const sections = useMemo((): AdminMenuSection[] => {
+    if (!canManageTenants) return adminSections;
+    return [
+      ...adminSections,
+      {
+        title: "PLATFORM",
+        items: [
+          {
+            name: "Stores (Tenants)",
+            path: ADMIN_ROUTES.tenants,
+            icon: <Building2 size={18} />,
+          },
+        ],
+      },
+    ];
+  }, [canManageTenants]);
 
   const isExpanded = mobile || !collapsed || hovered;
 
@@ -627,7 +647,7 @@ export default function Sidebar({
   };
 
   const routeOpenMenu = useMemo(() => {
-    for (const section of adminSections) {
+    for (const section of sections) {
       for (const item of section.items) {
         if (
           item.subMenu?.some(
@@ -639,7 +659,7 @@ export default function Sidebar({
       }
     }
     return null;
-  }, [pathname]);
+  }, [pathname, sections]);
 
   const openMenu =
     menuToggle?.path === pathname ? menuToggle.menu : routeOpenMenu;
@@ -714,7 +734,7 @@ export default function Sidebar({
         onMouseLeave={() => !mobile && setHovered(false)}
       >
         <nav className="h-full overflow-y-auto px-2 py-4 space-y-4">
-          {adminSections.map((section, sIdx) => (
+          {sections.map((section, sIdx) => (
             <div key={sIdx}>
               {/* Section heading */}
               <div className="px-2 mb-1">

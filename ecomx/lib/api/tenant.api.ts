@@ -9,7 +9,8 @@ import type {
 
 export const tenantApi = {
   /** GET /tenants/:slug — requires admin or superadmin */
-  getBySlug: (slug: string) => apiGet<{ tenant: ApiTenant }>(`/tenants/${slug}`),
+  getBySlug: (slug: string) =>
+    apiGet<{ tenant: ApiTenant }>(`/tenants/slug/${encodeURIComponent(slug)}`),
 
   /** GET /tenants — list (no auth on backend; admin UI only) */
   getAll: (params?: TenantQueryParams) =>

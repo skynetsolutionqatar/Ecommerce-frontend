@@ -1,12 +1,15 @@
 import {
   AUTH_PATH,
   isAdminRole,
+  isDeveloperRole,
+  isOwnerRole,
+  isPlatformHubRole,
   ROUTE_PREFIX,
   sanitizeRedirectPath,
   STORAGE_KEYS,
 } from "@/lib/Constant";
 
-export { isAdminRole, sanitizeRedirectPath };
+export { isAdminRole, isDeveloperRole, isOwnerRole, sanitizeRedirectPath };
 
 export const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://api-skynet-ecommerce-store.onrender.com/api/v1",
@@ -14,7 +17,16 @@ export const API_CONFIG = {
   tenantId: process.env.NEXT_PUBLIC_TENANT_ID ?? "6a363c2f05587300d65b2720",
   tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG ?? "skynet",
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
+  /** When true, /admin is restricted to platform hub roles (developer / owner). */
+  developerPortal: process.env.NEXT_PUBLIC_DEVELOPER_PORTAL === "true",
 } as const;
+
+/** Who may open the admin panel in this frontend deployment. */
+export function canAccessAdminPanel(role?: string): boolean {
+  if (!role) return false;
+  if (API_CONFIG.developerPortal) return isPlatformHubRole(role);
+  return isAdminRole(role) || isPlatformHubRole(role);
+}
 
 export const ADMIN_ROUTES = {
   dashboard: `${ROUTE_PREFIX.ADMIN}/dashboard`,
@@ -66,7 +78,7 @@ export function getPostAuthRedirect(
 ): string | null {
   if (redirectTo === null) return null;
 
-  const fallback = isAdminRole(role) ? ADMIN_ROUTES.dashboard : "/";
+  const fallback = canAccessAdminPanel(role) ? ADMIN_ROUTES.dashboard : "/";
   if (redirectTo) return sanitizeRedirectPath(redirectTo, fallback);
   return fallback;
 }

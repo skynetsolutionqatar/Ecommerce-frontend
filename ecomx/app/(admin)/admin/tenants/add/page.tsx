@@ -27,9 +27,9 @@ export default function AdminTenantAddPage() {
           isPending={create.isPending}
           onSubmit={async (payload) => {
             try {
-              await create.mutateAsync(payload as CreateTenantPayload);
-              toast.success("Store created");
-              router.push(ADMIN_ROUTES.tenants);
+              const res = await create.mutateAsync(payload as CreateTenantPayload);
+              toast.success("Store created — copy the tenant ID from the store page");
+              router.push(ADMIN_ROUTES.tenant(res.data.tenant.slug));
             } catch (err) {
               toast.error(getErrorMessage(err, "Failed to create store"));
             }
