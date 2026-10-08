@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Copy, Check } from "lucide-react";
 import { adminType } from "@/lib/admin/typography";
@@ -10,20 +10,45 @@ interface TenantIdCopyPanelProps {
   tenantName?: string;
 }
 
+type CopyField = "id" | "env";
+
 export default function TenantIdCopyPanel({ tenantId, tenantName }: TenantIdCopyPanelProps) {
-  const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState<CopyField | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const envBlock = `NEXT_PUBLIC_TENANT_ID=${tenantId}`;
 
-  const handleCopy = async (text: string, label: string) => {
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
+
+  const handleCopy = async (field: CopyField, text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      setCopiedField(field);
       toast.success(`${label} copied`);
-      window.setTimeout(() => setCopied(false), 2000);
+      resetTimerRef.current = setTimeout(() => setCopiedField(null), 2000);
     } catch {
       toast.error("Could not copy to clipboard");
     }
+  };
+
+  const copyButton = (field: CopyField, label: string, onCopy: () => void) => {
+    const copied = copiedField === field;
+    return (
+      <button
+        type="button"
+        onClick={onCopy}
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-muted"
+        aria-label={copied ? `${label} copied` : label}
+      >
+        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+        {copied ? "Copied" : label}
+      </button>
+    );
   };
 
   return (
@@ -45,14 +70,7 @@ export default function TenantIdCopyPanel({ tenantId, tenantName }: TenantIdCopy
             <code className="min-w-0 flex-1 break-all rounded-md border border-border bg-card px-3 py-2 text-sm font-mono">
               {tenantId}
             </code>
-            <button
-              type="button"
-              onClick={() => void handleCopy(tenantId, "Tenant ID")}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-muted"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              Copy ID
-            </button>
+            {copyButton("id", "Copy ID", () => void handleCopy("id", tenantId, "Tenant ID"))}
           </div>
         </div>
 
@@ -64,14 +82,7 @@ export default function TenantIdCopyPanel({ tenantId, tenantName }: TenantIdCopy
             <code className="min-w-0 flex-1 break-all rounded-md border border-border bg-card px-3 py-2 text-sm font-mono">
               {envBlock}
             </code>
-            <button
-              type="button"
-              onClick={() => void handleCopy(envBlock, "Env line")}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-muted"
-            >
-              <Copy className="h-4 w-4" />
-              Copy env
-            </button>
+            {copyButton("env", "Copy env", () => void handleCopy("env", envBlock, "Env line"))}
           </div>
         </div>
       </div>
