@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Icons from "@/components/Icons";
@@ -123,44 +124,82 @@ export default function OrderDetailClient({ id }: { id: string }) {
             <div className="rounded-2xl border border-border bg-white p-5">
               <h2 className="mb-4 text-base font-bold text-gray-900 sm:text-sm">Items</h2>
               <div className="flex flex-col gap-4">
-                {order.items.map((item, i) => (
-                  <div key={`${item.productId}-${i}`} className="flex gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg ${productImageSurfaceClass}`}>
+                {order.items.map((item, i) => {
+                  const productHref = item.slug?.trim()
+                    ? ROUTES.product(item.slug.trim())
+                    : null;
+
+                  const imageBlock = (
+                    <div
+                      className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg ${productImageSurfaceClass}`}
+                    >
                       <StoreImage
                         src={item.thumbnail ?? item.image ?? "/images/products/placeholder.png"}
                         alt={item.name}
                         className="h-full w-full object-contain"
                       />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900">{item.name}</p>
-                      <p className="text-sm md:text-xs text-muted">Qty: {item.quantity}</p>
-                      {isDelivered ? (
-                        reviewedIds.has(item.productId) ? (
-                          <p className="mt-1 text-[13px] md:text-[11px] font-semibold text-green-600">
-                            Review submitted
-                          </p>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setReviewTarget({
-                                productId: item.productId,
-                                productName: item.name,
-                              })
-                            }
-                            className="mt-2 cursor-pointer rounded-lg border border-blue-600 px-3 py-1.5 md:py-1 text-[13px] md:text-[11px] font-bold text-blue-600 hover:bg-blue-50"
-                          >
-                            Write Review
-                          </button>
-                        )
-                      ) : null}
-                    </div>
-                    <p className="text-sm font-bold text-accent">
-                      {formatPrice((item.subtotal ?? item.price * item.quantity))}
+                  );
+
+                  const titleBlock = (
+                    <p
+                      className={`text-sm font-semibold text-gray-900 ${
+                        productHref ? "transition-colors group-hover:text-blue-700" : ""
+                      }`}
+                    >
+                      {item.name}
                     </p>
-                  </div>
-                ))}
+                  );
+
+                  return (
+                    <div
+                      key={`${item.productId}-${i}`}
+                      className="flex gap-3 border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                    >
+                      {productHref ? (
+                        <Link href={productHref} className="group shrink-0">
+                          {imageBlock}
+                        </Link>
+                      ) : (
+                        imageBlock
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        {productHref ? (
+                          <Link href={productHref} className="group block">
+                            {titleBlock}
+                          </Link>
+                        ) : (
+                          titleBlock
+                        )}
+                        <p className="text-sm text-muted md:text-xs">Qty: {item.quantity}</p>
+                        {isDelivered ? (
+                          reviewedIds.has(item.productId) ? (
+                            <p className="mt-1 text-[13px] font-semibold text-green-600 md:text-[11px]">
+                              Review submitted
+                            </p>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReviewTarget({
+                                  productId: item.productId,
+                                  productName: item.name,
+                                })
+                              }
+                              className="mt-2 cursor-pointer rounded-lg border border-blue-600 px-3 py-1.5 text-[13px] font-bold text-blue-600 hover:bg-blue-50 md:py-1 md:text-[11px]"
+                            >
+                              Write Review
+                            </button>
+                          )
+                        ) : null}
+                      </div>
+                      <p className="shrink-0 text-sm font-bold text-accent">
+                        {formatPrice(item.subtotal ?? item.price * item.quantity)}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
