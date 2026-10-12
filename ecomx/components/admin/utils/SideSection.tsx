@@ -1,3 +1,6 @@
+"use client";
+
+import type { ReactNode } from "react";
 import {
   LayoutDashboard,
   Layers,
@@ -25,14 +28,31 @@ import { REPORT_MENU } from "@/lib/admin/reports.config";
 export interface AdminMenuItem {
   name: string;
   path?: string;
-  icon: React.ReactNode;
-  subMenu?: { name: string; path: string; icon?: React.ReactNode }[];
+  icon: ReactNode;
+  subMenu?: { name: string; path: string; icon?: ReactNode }[];
 }
 
 export interface AdminMenuSection {
   title: string;
   items: AdminMenuItem[];
 }
+
+export const platformAdminSection: AdminMenuSection = {
+  title: "PLATFORM",
+  items: [
+    {
+      name: "Stores",
+      icon: <Building2 size={18} />,
+      subMenu: [
+        {
+          name: "Tenants",
+          path: ADMIN_ROUTES.tenants,
+          icon: <Building2 size={16} />,
+        },
+      ],
+    },
+  ],
+};
 
 export const adminSections: AdminMenuSection[] = [
   {

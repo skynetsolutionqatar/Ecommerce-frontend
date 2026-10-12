@@ -37,6 +37,33 @@ export function useAuth() {
     useAuthStore();
   const [loading, setLoading] = useState(false);
 
+  const loginWithGoogle = useCallback(
+    async (credential: string, redirectTo?: string | null) => {
+      setLoading(true);
+      clearAuthError();
+      try {
+        const res = await authApi.googleLogin({ credential });
+        const { customer, accessToken, refreshToken } = res.data;
+        const normalized = normalizeAuthUser(customer as unknown as Record<string, unknown>);
+        setAuth(normalized, accessToken, refreshToken);
+        void linkGuestActivityToCustomer("login_linked");
+
+        const destination = getPostAuthRedirect(normalized.role, redirectTo);
+        if (destination) {
+          router.replace(destination);
+        }
+
+        return { user: normalized, storeUser: authUserToStoreUser(normalized) };
+      } catch (err) {
+        setAuthError(getAuthErrorMessage(err, "googleLogin"));
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router, setAuth, setAuthError, clearAuthError]
+  );
+
   const login = useCallback(
     async (payload: LoginPayload, redirectTo?: string | null) => {
       setLoading(true);
@@ -180,6 +207,7 @@ export function useAuth() {
     setError: setAuthError,
     clearError: clearAuthError,
     login,
+    loginWithGoogle,
     register,
     logout,
     changePassword,

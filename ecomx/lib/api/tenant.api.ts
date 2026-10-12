@@ -8,9 +8,12 @@ import type {
 } from "@/types/tenant.types";
 
 export const tenantApi = {
-  /** GET /tenants/:slug — requires admin or superadmin */
+  getCurrent: () => apiGet<{ tenant: ApiTenant }>("/tenants/current"),
+
   getBySlug: (slug: string) =>
     apiGet<{ tenant: ApiTenant }>(`/tenants/slug/${encodeURIComponent(slug)}`),
+
+  getById: (id: string) => apiGet<{ tenant: ApiTenant }>(`/tenants/${id}`),
 
   /** GET /tenants — list (no auth on backend; admin UI only) */
   getAll: (params?: TenantQueryParams) =>
@@ -40,5 +43,27 @@ export async function fetchTenants(params?: TenantQueryParams): Promise<TenantsR
 
 export async function fetchTenantBySlug(slug: string): Promise<ApiTenant> {
   const res = await tenantApi.getBySlug(slug);
+  return res.data.tenant;
+}
+
+/** Preferred storefront bootstrap — uses x-tenant-id from the deployment env. */
+export async function fetchCurrentTenant(): Promise<ApiTenant> {
+  const res = await tenantApi.getCurrent();
+  return res.data.tenant;
+}
+
+export async function fetchStoreTenant(slug: string, tenantId?: string): Promise<ApiTenant> {
+  if (tenantId) {
+    try {
+      return await fetchCurrentTenant();
+    } catch {
+      /* fall through to slug */
+    }
+  }
+  return fetchTenantBySlug(slug);
+}
+
+export async function fetchTenantById(id: string): Promise<ApiTenant> {
+  const res = await tenantApi.getById(id);
   return res.data.tenant;
 }

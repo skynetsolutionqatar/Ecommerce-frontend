@@ -1,7 +1,12 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchTenantBySlug, fetchTenants, tenantApi } from "@/lib/api/tenant.api";
+import {
+  fetchTenantById,
+  fetchTenantBySlug,
+  fetchTenants,
+  tenantApi,
+} from "@/lib/api/tenant.api";
 import type {
   CreateTenantPayload,
   TenantQueryParams,
@@ -28,6 +33,16 @@ export function useTenantBySlug(slug: string, enabled = true) {
     queryFn: () => fetchTenantBySlug(slug),
     enabled: enabled && !!slug,
     staleTime: 300_000,
+    retry: false,
+  });
+}
+
+export function useTenantById(id: string, enabled = true) {
+  return useQuery({
+    queryKey: [TENANT_KEY, "id", id],
+    queryFn: () => fetchTenantById(id),
+    enabled: enabled && !!id,
+    staleTime: 60_000,
     retry: false,
   });
 }

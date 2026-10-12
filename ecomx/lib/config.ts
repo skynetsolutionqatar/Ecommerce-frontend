@@ -15,7 +15,12 @@ export const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://api-skynet-ecommerce-store.onrender.com/api/v1",
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5050/api/v1",
   tenantId: process.env.NEXT_PUBLIC_TENANT_ID ?? "6a363c2f05587300d65b2720",
-  tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG ?? "skynet",
+  tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG ?? "skynet-qa",
+  /** This deployment's public site URL (optional; API tenant clientUrl overrides when loaded). */
+  clientUrl:
+    process.env.NEXT_PUBLIC_CLIENT_URL?.replace(/\/$/, "") ??
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "",
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
   /** When true, /admin is restricted to platform hub roles (developer / owner). */
   developerPortal: process.env.NEXT_PUBLIC_DEVELOPER_PORTAL === "true",

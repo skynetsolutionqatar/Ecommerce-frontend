@@ -6,7 +6,7 @@ import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import CommandSearch from "@/components/admin/utils/CommandSearch";
 import ChangePasswordDialog from "@/components/admin/main/ChangePasswordDialog";
 import LiveClock from "@/components/admin/main/LiveClock";
-import { adminSections } from "@/components/admin/utils/SideSection";
+import { useAdminMenuSections } from "@/hooks/useAdminMenuSections";
 import { colors } from "@/components/admin/utils/Colors";
 import { adminType } from "@/lib/admin/typography";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
+  const adminSections = useAdminMenuSections();
   const [open, setOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);

@@ -36,7 +36,7 @@ export default function AdminCompanyPage() {
         onSubmit={async (payload) => {
           try {
             await update.mutateAsync(payload);
-            toast.success("Company profile updated");
+            toast.success("Company profile and store configs updated");
           } catch (err) {
             toast.error(getErrorMessage(err, "Failed to update company profile"));
           }

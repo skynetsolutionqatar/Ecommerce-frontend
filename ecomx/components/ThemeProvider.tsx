@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo } from "react";
+import { useStoreTenantOptional } from "@/components/StoreTenantProvider";
 import { getClientConfig, getPageThemeOverride } from "@/config/clients";
 import type { ClientConfig, ClientTheme } from "@/config/clients/types";
 
@@ -40,7 +41,11 @@ interface ThemeProviderProps {
 }
 
 export default function ThemeProvider({ children, clientId, pageId }: ThemeProviderProps) {
-  const client = useMemo(() => getClientConfig(clientId), [clientId]);
+  const storeTenantCtx = useStoreTenantOptional();
+  const client = useMemo(
+    () => storeTenantCtx?.mergedClient ?? getClientConfig(clientId),
+    [storeTenantCtx?.mergedClient, clientId]
+  );
   const theme = useMemo(() => {
     const override = pageId ? getPageThemeOverride(pageId) : null;
     return { ...client.theme, ...override };

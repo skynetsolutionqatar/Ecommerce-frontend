@@ -33,4 +33,7 @@ export const authApi = {
 
   resetPassword: (payload: ResetPasswordPayload) =>
     apiPost<{ message: string }>("/auth/reset-password", payload),
+
+  googleLogin: (payload: { credential?: string; idToken?: string }) =>
+    apiPost<AuthResponse>("/auth/google/login", payload),
 };

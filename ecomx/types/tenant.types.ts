@@ -35,6 +35,25 @@ export interface TenantSettings {
   [key: string]: unknown;
 }
 
+export interface TenantEmailConfig {
+  provider?: "resend";
+  fromName?: string;
+  fromEmail?: string;
+  /** Masked as ******** in admin API responses */
+  apiKey?: string;
+}
+
+export interface TenantGoogleConfig {
+  enabled?: boolean;
+  clientId?: string;
+  /** Masked as ******** in admin API responses */
+  clientSecret?: string;
+}
+
+export interface TenantCloudinaryConfig {
+  folder?: string;
+}
+
 export interface ApiTenant {
   _id: string;
   name: string;
@@ -46,6 +65,11 @@ export interface ApiTenant {
   logo?: string;
   theme?: TenantTheme;
   settings?: TenantSettings;
+  clientUrl?: string;
+  domains?: string[];
+  emailConfig?: TenantEmailConfig;
+  googleConfig?: TenantGoogleConfig;
+  cloudinaryConfig?: TenantCloudinaryConfig;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -68,7 +92,14 @@ export interface CreateTenantPayload {
   logo?: string;
   theme?: TenantTheme;
   settings?: TenantSettings;
+  clientUrl?: string;
+  domains?: string[];
+  emailConfig?: TenantEmailConfig;
+  googleConfig?: TenantGoogleConfig;
+  cloudinaryConfig?: TenantCloudinaryConfig;
   isActive?: boolean;
 }
 
 export type UpdateTenantPayload = Partial<CreateTenantPayload>;
+
+export const TENANT_SECRET_MASK = "********" as const;

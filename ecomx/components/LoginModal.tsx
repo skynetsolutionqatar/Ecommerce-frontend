@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,10 +10,15 @@ import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import AuthFormError from "@/components/auth/AuthFormError";
-import { getGoogleOAuthStartUrl, isGoogleOAuthConfigured } from "@/lib/google-oauth";
+import { useStoreTenantOptional } from "@/components/StoreTenantProvider";
+import {
+  initializeGoogleSignIn,
+  isGoogleOAuthConfigured,
+  loadGoogleIdentityScript,
+  promptGoogleSignIn,
+} from "@/lib/google-oauth";
 import * as Icons from "./Icons";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { sanitizeRedirectPath } from "@/lib/Constant";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 
 interface LoginModalProps {
@@ -52,17 +57,21 @@ export default function LoginModal({
   resetToken = "",
 }: LoginModalProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const googleReturnTo = useMemo(() => {
-    const qs = searchParams.toString();
-    const path = qs ? `${pathname}?${qs}` : pathname;
-    return sanitizeRedirectPath(path);
-  }, [pathname, searchParams]);
-  const { login, register, forgotPassword, resetPassword, loading, clearError, setError } = useAuth();
+  const {
+    login,
+    loginWithGoogle,
+    register,
+    forgotPassword,
+    resetPassword,
+    loading,
+    clearError,
+    setError,
+  } = useAuth();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = canAccessAdminPanel(authUser?.role);
+  const storeTenant = useStoreTenantOptional();
+  const googleClientId = storeTenant?.googleClientId ?? "";
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
@@ -73,6 +82,7 @@ export default function LoginModal({
   const [resetForm, setResetForm] = useState({ newPassword: "", confirmPassword: "" });
   const [resetFieldErrors, setResetFieldErrors] = useState<Partial<Record<ResetField, string>>>({});
   const [googleLoading, setGoogleLoading] = useState(false);
+  const googleCredentialHandlerRef = useRef<(credential: string) => void>(() => {});
 
   const clearFieldError = (field: RegisterField) => {
     setFieldErrors((prev) => {
@@ -89,6 +99,69 @@ export default function LoginModal({
     setSuccess(false);
     setMode(next);
   };
+
+  const handleGoogleCredential = useCallback(
+    async (credential: string) => {
+      try {
+        setGoogleLoading(true);
+        clearError();
+        const result = await loginWithGoogle(credential, null);
+        const storeUser = {
+          ...result.storeUser,
+          avatarUrl: avatarPreview ?? result.storeUser.avatarUrl,
+        };
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          onSuccess?.(storeUser);
+          onClose();
+          setForm({ name: "", email: "", phone: "", password: "" });
+          setAvatarPreview(undefined);
+          switchMode("login");
+        }, 1400);
+      } catch {
+        // useAuth sets auth error
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    [
+      avatarPreview,
+      clearError,
+      loginWithGoogle,
+      onClose,
+      onSuccess,
+    ]
+  );
+
+  useEffect(() => {
+    googleCredentialHandlerRef.current = (credential) => {
+      void handleGoogleCredential(credential);
+    };
+  }, [handleGoogleCredential]);
+
+  useEffect(() => {
+    if (!open || !googleClientId || !isGoogleOAuthConfigured(googleClientId)) return;
+    if (mode !== "login" && mode !== "register") return;
+
+    let cancelled = false;
+
+    void loadGoogleIdentityScript()
+      .then(() => {
+        if (cancelled) return;
+        initializeGoogleSignIn(googleClientId, (token) => {
+          void googleCredentialHandlerRef.current(token);
+        });
+      })
+      .catch(() => {
+        /* handled on button click */
+      });
+
+    return () => {
+      cancelled = true;
+      window.google?.accounts?.id?.cancel();
+    };
+  }, [open, googleClientId, mode]);
 
   useEffect(() => {
     if (open && initialMode) {
@@ -230,14 +303,29 @@ export default function LoginModal({
     }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     clearError();
-    if (!isGoogleOAuthConfigured()) {
-      setError("Google sign-in is not configured. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env.local.");
+    if (!isGoogleOAuthConfigured(googleClientId)) {
+      setError(
+        "Google sign-in is not configured for this store. Add Google settings in the developer portal or set NEXT_PUBLIC_GOOGLE_CLIENT_ID."
+      );
       return;
     }
     setGoogleLoading(true);
-    window.location.href = getGoogleOAuthStartUrl(googleReturnTo);
+    try {
+      await loadGoogleIdentityScript();
+      initializeGoogleSignIn(googleClientId, (token) => {
+        void googleCredentialHandlerRef.current(token);
+      });
+      promptGoogleSignIn((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          setGoogleLoading(false);
+        }
+      });
+    } catch {
+      setError("Could not load Google sign-in. Please try again.");
+      setGoogleLoading(false);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {

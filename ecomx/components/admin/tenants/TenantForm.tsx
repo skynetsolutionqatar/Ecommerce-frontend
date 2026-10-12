@@ -26,6 +26,7 @@ import type { ApiTenant, CreateTenantPayload } from "@/types/tenant.types";
 export const TENANT_FORM_TABS = [
   { key: "identity", label: "Identity" },
   { key: "config", label: "Configuration" },
+  { key: "integrations", label: "Integrations" },
   { key: "branding", label: "Branding" },
   { key: "settings", label: "Settings" },
 ] as const;
@@ -150,6 +151,100 @@ function TenantForm({
               options={TENANT_PAYMENT_GATEWAYS}
               error={errors.paymentGateway}
               touched={touched.paymentGateway}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection id="integrations" title="Integrations">
+          <div className={formGridClass}>
+            <FormInput
+              label="Client URL"
+              name="clientUrl"
+              value={values.clientUrl}
+              placeholder="https://store.example.com"
+              error={errors.clientUrl}
+              touched={touched.clientUrl}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Domains"
+              name="domainsText"
+              value={values.domainsText}
+              placeholder="store.example.com, www.example.com"
+              error={errors.domainsText}
+              touched={touched.domainsText}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Email from name"
+              name="emailFromName"
+              value={values.emailFromName}
+              placeholder="Store name"
+              error={errors.emailFromName}
+              touched={touched.emailFromName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Email from address"
+              name="emailFromEmail"
+              value={values.emailFromEmail}
+              placeholder="Store Name <noreply@notifications.example.com>"
+              error={errors.emailFromEmail}
+              touched={touched.emailFromEmail}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Resend API key"
+              name="resendApiKey"
+              type="password"
+              value={values.resendApiKey}
+              placeholder={isEdit ? "Leave blank to keep current" : "re_..."}
+              error={errors.resendApiKey}
+              touched={touched.resendApiKey}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormCheckbox
+              label="Google sign-in enabled"
+              name="googleEnabled"
+              checked={values.googleEnabled}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Google client ID"
+              name="googleClientId"
+              value={values.googleClientId}
+              placeholder="....apps.googleusercontent.com"
+              error={errors.googleClientId}
+              touched={touched.googleClientId}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Google client secret"
+              name="googleClientSecret"
+              type="password"
+              value={values.googleClientSecret}
+              placeholder={isEdit ? "Leave blank to keep current" : ""}
+              error={errors.googleClientSecret}
+              touched={touched.googleClientSecret}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Cloudinary folder"
+              name="cloudinaryFolder"
+              value={values.cloudinaryFolder}
+              placeholder="client-slug (defaults to store slug)"
+              error={errors.cloudinaryFolder}
+              touched={touched.cloudinaryFolder}
               onChange={handleChange}
               onBlur={handleBlur}
             />

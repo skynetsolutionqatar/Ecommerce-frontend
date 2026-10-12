@@ -2,11 +2,17 @@
 
 import React from "react";
 import { useFormik } from "formik";
-import { FormInput, FormSection, FormTextarea } from "@/components/admin/form";
+import {
+  FormCheckbox,
+  FormInput,
+  FormSection,
+  FormTextarea,
+} from "@/components/admin/form";
 import PageHeader from "@/components/admin/utils/PageHeader";
 import {
   companyValidationSchema,
   defaultCompanyFormValues,
+  normalizeCompanyFormValues,
   toCompanyFormValues,
   toUpdateCompanyPayload,
 } from "@/lib/admin/company-form";
@@ -17,6 +23,8 @@ export const COMPANY_FORM_TABS = [
   { key: "name", label: "Company Name" },
   { key: "details", label: "Details" },
   { key: "contact", label: "Contact" },
+  { key: "branding", label: "Branding" },
+  { key: "integrations", label: "Integrations" },
 ] as const;
 
 const formGridClass =
@@ -34,9 +42,9 @@ function CompanyForm({
   onSubmit,
 }: CompanyFormProps) {
   const formik = useFormik({
-    initialValues: initialCompany
-      ? toCompanyFormValues(initialCompany)
-      : defaultCompanyFormValues,
+    initialValues: normalizeCompanyFormValues(
+      initialCompany ? toCompanyFormValues(initialCompany) : defaultCompanyFormValues
+    ),
     validationSchema: companyValidationSchema,
     enableReinitialize: true,
     validateOnChange: true,
@@ -52,7 +60,7 @@ function CompanyForm({
     <div className="mx-auto w-full">
       <PageHeader
         title="Company Profile"
-        description="Manage company name, details, and contact information"
+        description="Manage this store’s company details and client configs (saved per tenant on the shared backend)"
       />
 
       <form id={COMPANY_FORM_ID} onSubmit={handleSubmit} className="space-y-8">
@@ -62,7 +70,7 @@ function CompanyForm({
               label="Name (English)"
               name="nameEn"
               value={values.nameEn}
-              placeholder="Skynet Solution Qatar"
+              placeholder="Enter company name"
               required
               error={errors.nameEn}
               touched={touched.nameEn}
@@ -73,7 +81,7 @@ function CompanyForm({
               label="Name (Arabic)"
               name="nameAr"
               value={values.nameAr}
-              placeholder="سكاي نت سوليوشن قطر"
+              placeholder="Enter company name in Arabic"
               error={errors.nameAr}
               touched={touched.nameAr}
               onChange={handleChange}
@@ -88,7 +96,7 @@ function CompanyForm({
               label="Tagline (English)"
               name="taglineEn"
               value={values.taglineEn}
-              placeholder="POS Systems · ERP Software · IT Hardware"
+              placeholder="Enter tagline"
               error={errors.taglineEn}
               touched={touched.taglineEn}
               onChange={handleChange}
@@ -98,7 +106,7 @@ function CompanyForm({
               label="Tagline (Arabic)"
               name="taglineAr"
               value={values.taglineAr}
-              placeholder="أنظمة نقاط البيع · برامج تخطيط الموارد"
+              placeholder="Enter tagline in Arabic"
               error={errors.taglineAr}
               touched={touched.taglineAr}
               onChange={handleChange}
@@ -108,7 +116,7 @@ function CompanyForm({
               label="Address (English)"
               name="addressEn"
               value={values.addressEn}
-              placeholder="Doha, State of Qatar"
+              placeholder="Enter business address"
               rows={3}
               error={errors.addressEn}
               touched={touched.addressEn}
@@ -119,7 +127,7 @@ function CompanyForm({
               label="Address (Arabic)"
               name="addressAr"
               value={values.addressAr}
-              placeholder="الدوحة، دولة قطر"
+              placeholder="Enter business address in Arabic"
               rows={3}
               error={errors.addressAr}
               touched={touched.addressAr}
@@ -135,7 +143,7 @@ function CompanyForm({
               label="Phone"
               name="phone"
               value={values.phone}
-              placeholder="+974 4431 1525"
+              placeholder="Enter phone number"
               error={errors.phone}
               touched={touched.phone}
               onChange={handleChange}
@@ -145,7 +153,7 @@ function CompanyForm({
               label="WhatsApp"
               name="whatsapp"
               value={values.whatsapp}
-              placeholder="+974 4431 1525"
+              placeholder="Enter WhatsApp number"
               error={errors.whatsapp}
               touched={touched.whatsapp}
               onChange={handleChange}
@@ -156,7 +164,7 @@ function CompanyForm({
               name="email"
               type="email"
               value={values.email}
-              placeholder="info@skynetqatar.com"
+              placeholder="contact@example.com"
               error={errors.email}
               touched={touched.email}
               onChange={handleChange}
@@ -166,9 +174,120 @@ function CompanyForm({
               label="Website"
               name="website"
               value={values.website}
-              placeholder="www.skynetqatar.com"
+              placeholder="www.example.com"
               error={errors.website}
               touched={touched.website}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection id="branding" title="Branding">
+          <div className={formGridClass}>
+            <FormInput
+              label="Logo URL"
+              name="logo"
+              value={values.logo}
+              placeholder="https://example.com/logo.png"
+              error={errors.logo}
+              touched={touched.logo}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Primary Color"
+              name="primaryColor"
+              value={values.primaryColor}
+              placeholder="#000000"
+              error={errors.primaryColor}
+              touched={touched.primaryColor}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection id="integrations" title="Integrations">
+          <div className={formGridClass}>
+            <FormInput
+              label="Client URL"
+              name="clientUrl"
+              value={values.clientUrl}
+              placeholder="https://store.example.com"
+              error={errors.clientUrl}
+              touched={touched.clientUrl}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Domains"
+              name="domainsText"
+              value={values.domainsText}
+              placeholder="store.example.com"
+              error={errors.domainsText}
+              touched={touched.domainsText}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Email from name"
+              name="emailFromName"
+              value={values.emailFromName}
+              placeholder="Your store name"
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Email from address"
+              name="emailFromEmail"
+              value={values.emailFromEmail}
+              placeholder="Store Name <noreply@example.com>"
+              error={errors.emailFromEmail}
+              touched={touched.emailFromEmail}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Resend API key"
+              name="resendApiKey"
+              type="password"
+              value={values.resendApiKey}
+              placeholder="Leave blank to keep current"
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormCheckbox
+              label="Google sign-in enabled"
+              name="googleEnabled"
+              checked={values.googleEnabled}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Google client ID"
+              name="googleClientId"
+              value={values.googleClientId}
+              placeholder="xxxxxxxxxx.apps.googleusercontent.com"
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Google client secret"
+              name="googleClientSecret"
+              type="password"
+              value={values.googleClientSecret}
+              placeholder="Leave blank to keep current"
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormInput
+              label="Cloudinary folder"
+              name="cloudinaryFolder"
+              value={values.cloudinaryFolder}
+              placeholder="your-store-folder"
+              error={errors.cloudinaryFolder}
+              touched={touched.cloudinaryFolder}
               onChange={handleChange}
               onBlur={handleBlur}
             />

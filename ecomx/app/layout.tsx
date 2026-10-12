@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ThemeProvider from "@/components/ThemeProvider";
 import QueryProvider from "@/components/QueryProvider";
+import StoreTenantProvider from "@/components/StoreTenantProvider";
 import AuthInitializer from "@/components/AuthInitializer";
 import UTMTracker from "@/components/UTMTracker";
 import { getClientConfig } from "@/config/clients";
@@ -38,12 +39,14 @@ export default function RootLayout({
         style={{ background: "#f1f3f6" }}
       >
         <QueryProvider>
-          <AuthInitializer>
-            <ThemeProvider clientId={client.id}>
-              <UTMTracker />
-              {children}
-            </ThemeProvider>
-          </AuthInitializer>
+          <StoreTenantProvider>
+            <AuthInitializer>
+              <ThemeProvider clientId={client.id}>
+                <UTMTracker />
+                {children}
+              </ThemeProvider>
+            </AuthInitializer>
+          </StoreTenantProvider>
         </QueryProvider>
       </body>
     </html>

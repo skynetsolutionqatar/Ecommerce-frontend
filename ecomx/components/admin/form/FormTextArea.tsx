@@ -45,7 +45,7 @@ function FormTextarea({
       <div className="flex-1">
         <textarea
           name={name}
-          value={value}
+          value={value ?? ""}
           rows={rows}
           dir={dir}
           placeholder={placeholder}

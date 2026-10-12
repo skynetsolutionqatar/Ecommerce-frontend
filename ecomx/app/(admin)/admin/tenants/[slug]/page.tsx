@@ -54,7 +54,7 @@ export default function AdminTenantDetailPage({
           deleting={remove.isPending}
         >
           <div className="space-y-6">
-            <TenantIdCopyPanel tenantId={tenant._id} tenantName={tenant.name} />
+            <TenantIdCopyPanel tenant={tenant} />
 
             <ViewSection id="identity" title="Identity">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -76,6 +76,33 @@ export default function AdminTenantDetailPage({
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <ViewField label="Logo" value={tenant.logo} />
                 <ViewField label="Primary Color" value={tenant.theme?.primaryColor} />
+              </div>
+            </ViewSection>
+
+            <ViewSection id="integrations" title="Integrations">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <ViewField label="Client URL" value={tenant.clientUrl} />
+                <ViewField
+                  label="Domains"
+                  value={tenant.domains?.length ? tenant.domains.join(", ") : "—"}
+                />
+                <ViewField label="Email from" value={tenant.emailConfig?.fromEmail} />
+                <ViewField
+                  label="Google sign-in"
+                  value={
+                    tenant.googleConfig?.enabled
+                      ? tenant.googleConfig.clientId
+                        ? "Enabled"
+                        : "Enabled (missing client ID)"
+                      : "Off"
+                  }
+                  badge
+                  badgeColor={tenant.googleConfig?.enabled ? "green" : "gray"}
+                />
+                <ViewField
+                  label="Cloudinary folder"
+                  value={tenant.cloudinaryConfig?.folder || tenant.slug}
+                />
               </div>
             </ViewSection>
 
