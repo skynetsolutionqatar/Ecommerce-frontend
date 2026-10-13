@@ -66,6 +66,7 @@ export interface ApiTenant {
   theme?: TenantTheme;
   settings?: TenantSettings;
   clientUrl?: string;
+  orderCode?: string;
   domains?: string[];
   emailConfig?: TenantEmailConfig;
   googleConfig?: TenantGoogleConfig;
@@ -93,6 +94,7 @@ export interface CreateTenantPayload {
   theme?: TenantTheme;
   settings?: TenantSettings;
   clientUrl?: string;
+  orderCode?: string;
   domains?: string[];
   emailConfig?: TenantEmailConfig;
   googleConfig?: TenantGoogleConfig;

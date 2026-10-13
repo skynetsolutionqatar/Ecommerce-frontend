@@ -52,6 +52,24 @@ declare global {
 
 let gsiScriptPromise: Promise<void> | null = null;
 
+function waitForGoogleIdentityReady(timeoutMs = 8000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    const tick = () => {
+      if (window.google?.accounts?.id) {
+        resolve();
+        return;
+      }
+      if (Date.now() - started >= timeoutMs) {
+        reject(new Error("Google sign-in is not ready yet."));
+        return;
+      }
+      window.setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
 /** Load Google Identity Services once (store origin — masks API host on consent UI). */
 export function loadGoogleIdentityScript(): Promise<void> {
   if (typeof window === "undefined") {
@@ -65,14 +83,28 @@ export function loadGoogleIdentityScript(): Promise<void> {
   }
 
   gsiScriptPromise = new Promise((resolve, reject) => {
+    const finish = () => {
+      waitForGoogleIdentityReady().then(resolve).catch(reject);
+    };
+
     const existing = document.querySelector<HTMLScriptElement>(
       `script[src="${GOOGLE_GSI_SCRIPT_URL}"]`
     );
     if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error("Failed to load Google sign-in")), {
-        once: true,
-      });
+      if (existing.dataset.gsiError === "1") {
+        reject(new Error("Failed to load Google sign-in"));
+        return;
+      }
+      if (window.google?.accounts?.id || existing.dataset.gsiLoaded === "1") {
+        finish();
+        return;
+      }
+      existing.addEventListener("load", finish, { once: true });
+      existing.addEventListener(
+        "error",
+        () => reject(new Error("Failed to load Google sign-in")),
+        { once: true }
+      );
       return;
     }
 
@@ -80,8 +112,14 @@ export function loadGoogleIdentityScript(): Promise<void> {
     script.src = GOOGLE_GSI_SCRIPT_URL;
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Google sign-in"));
+    script.onload = () => {
+      script.dataset.gsiLoaded = "1";
+      finish();
+    };
+    script.onerror = () => {
+      script.dataset.gsiError = "1";
+      reject(new Error("Failed to load Google sign-in"));
+    };
     document.head.appendChild(script);
   });
 

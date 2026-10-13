@@ -87,6 +87,17 @@ function CompanyForm({
               onChange={handleChange}
               onBlur={handleBlur}
             />
+            <FormInput
+              label="Code name"
+              name="orderCode"
+              value={values.orderCode}
+              placeholder="Enter code name (e.g. SKY)"
+              maxLength={12}
+              error={errors.orderCode}
+              touched={touched.orderCode}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
           </div>
         </FormSection>
 

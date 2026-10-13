@@ -11,6 +11,8 @@ export interface ApiCompany extends InvoiceCompany {
   logo?: string;
   primaryColor?: string;
   clientUrl?: string;
+  /** Order number prefix, e.g. SKY → SKY-2026-00001 */
+  orderCode?: string;
   domains?: string[];
   emailConfig?: TenantEmailConfig;
   googleConfig?: TenantGoogleConfig;
@@ -22,6 +24,7 @@ export type UpdateCompanyPayload = Partial<
     logo?: string;
     primaryColor?: string;
     clientUrl?: string;
+    orderCode?: string;
     domains?: string[];
     emailConfig?: TenantEmailConfig;
     googleConfig?: TenantGoogleConfig;

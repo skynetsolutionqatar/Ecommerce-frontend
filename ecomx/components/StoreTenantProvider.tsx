@@ -28,7 +28,7 @@ export function useStoreTenant() {
 }
 
 /** Optional hook for components that may render outside the store tree (e.g. login page). */
-export function useStoreTenantOptional() {
+export function useStoreTenantOptional(): StoreTenantContextValue | null {
   return useContext(StoreTenantContext);
 }
 

@@ -17,6 +17,7 @@ export type CompanyFormValues = {
   logo: string;
   primaryColor: string;
   clientUrl: string;
+  orderCode: string;
   domainsText: string;
   emailFromName: string;
   emailFromEmail: string;
@@ -48,6 +49,7 @@ export function normalizeCompanyFormValues(
     logo: asFormString(values.logo),
     primaryColor: asFormString(values.primaryColor) || "#111827",
     clientUrl: asFormString(values.clientUrl),
+    orderCode: asFormString(values.orderCode),
     domainsText: asFormString(values.domainsText),
     emailFromName: asFormString(values.emailFromName),
     emailFromEmail: asFormString(values.emailFromEmail),
@@ -73,6 +75,7 @@ export const defaultCompanyFormValues: CompanyFormValues = normalizeCompanyFormV
   logo: "",
   primaryColor: "#111827",
   clientUrl: "",
+  orderCode: "",
   domainsText: "",
   emailFromName: "",
   emailFromEmail: "",
@@ -115,6 +118,12 @@ export const companyValidationSchema = Yup.object({
     .max(80)
     .nullable()
     .transform((value, original) => (original === "" ? undefined : value)),
+  orderCode: Yup.string()
+    .trim()
+    .max(12, "Order code must be at most 12 characters")
+    .matches(/^[A-Za-z0-9-]*$/, "Letters, numbers, and hyphens only")
+    .nullable()
+    .transform((value, original) => (original === "" ? undefined : value)),
 });
 
 function parseDomains(text: string): string[] | undefined {
@@ -149,6 +158,7 @@ export function toCompanyFormValues(company?: ApiCompany): CompanyFormValues {
     logo: company.logo,
     primaryColor: company.primaryColor,
     clientUrl: company.clientUrl,
+    orderCode: company.orderCode,
     domainsText: (company.domains ?? []).join(", "),
     emailFromName: company.emailConfig?.fromName,
     emailFromEmail: company.emailConfig?.fromEmail,
@@ -156,7 +166,9 @@ export function toCompanyFormValues(company?: ApiCompany): CompanyFormValues {
       company.emailConfig?.apiKey === SECRET_MASK
         ? SECRET_MASK
         : company.emailConfig?.apiKey,
-    googleEnabled: company.googleConfig?.enabled,
+    googleEnabled:
+      company.googleConfig?.enabled ??
+      Boolean(company.googleConfig?.clientId?.trim()),
     googleClientId: company.googleConfig?.clientId,
     googleClientSecret:
       company.googleConfig?.clientSecret === SECRET_MASK
@@ -192,7 +204,8 @@ export function toUpdateCompanyPayload(values: CompanyFormValues): UpdateCompany
     values.googleClientId.trim() ||
     googleClientSecret
       ? {
-          enabled: values.googleEnabled,
+          enabled:
+            values.googleEnabled || Boolean(values.googleClientId.trim()),
           ...(values.googleClientId.trim()
             ? { clientId: values.googleClientId.trim() }
             : {}),
@@ -216,6 +229,7 @@ export function toUpdateCompanyPayload(values: CompanyFormValues): UpdateCompany
     logo: values.logo.trim() || undefined,
     primaryColor: values.primaryColor.trim() || undefined,
     clientUrl: values.clientUrl.trim() || undefined,
+    orderCode: values.orderCode.trim(),
     domains,
     emailConfig,
     googleConfig,

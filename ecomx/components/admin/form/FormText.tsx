@@ -17,6 +17,7 @@ interface FormInputProps {
   touched?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
+  maxLength?: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
@@ -34,6 +35,7 @@ function FormInput({
   onBlur,
   disabled = false,
   readOnly = false,
+  maxLength,
 }: FormInputProps) {
   const hasError = Boolean(touched && error);
 
@@ -52,6 +54,7 @@ function FormInput({
           onBlur={onBlur}
           disabled={disabled}
           readOnly={readOnly}
+          maxLength={maxLength}
           className={adminFormInputClass({ hasError, readOnly, disabled })}
         />
         {hasError && <p className="mt-1 text-xs text-red-500">{error}</p>}

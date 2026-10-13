@@ -47,6 +47,7 @@ export type TenantFormValues = {
   supportEmail: string;
   isActive: boolean;
   clientUrl: string;
+  orderCode: string;
   domainsText: string;
   emailFromName: string;
   emailFromEmail: string;
@@ -71,6 +72,7 @@ export const defaultTenantFormValues: TenantFormValues = {
   supportEmail: "",
   isActive: true,
   clientUrl: "",
+  orderCode: "",
   domainsText: "",
   emailFromName: "",
   emailFromEmail: "",
@@ -130,6 +132,12 @@ export const tenantValidationSchema = Yup.object({
     .max(80)
     .nullable()
     .transform((value, original) => (original === "" ? undefined : value)),
+  orderCode: Yup.string()
+    .trim()
+    .max(12, "Order code must be at most 12 characters")
+    .matches(/^[A-Za-z0-9-]*$/, "Letters, numbers, and hyphens only")
+    .nullable()
+    .transform((value, original) => (original === "" ? undefined : value)),
 });
 
 function toOptionalNumber(value: number | ""): number | undefined {
@@ -153,6 +161,7 @@ export function toTenantFormValues(tenant?: ApiTenant): TenantFormValues {
     supportEmail: tenant.settings?.supportEmail ?? "",
     isActive: tenant.isActive ?? true,
     clientUrl: tenant.clientUrl ?? "",
+    orderCode: tenant.orderCode ?? "",
     domainsText: (tenant.domains ?? []).join(", "),
     emailFromName: tenant.emailConfig?.fromName ?? "",
     emailFromEmail: tenant.emailConfig?.fromEmail ?? "",
@@ -218,7 +227,8 @@ export function toCreateTenantPayload(values: TenantFormValues): CreateTenantPay
     values.googleClientId.trim() ||
     googleClientSecret
       ? {
-          enabled: values.googleEnabled,
+          enabled:
+            values.googleEnabled || Boolean(values.googleClientId.trim()),
           ...(values.googleClientId.trim()
             ? { clientId: values.googleClientId.trim() }
             : {}),
@@ -242,6 +252,7 @@ export function toCreateTenantPayload(values: TenantFormValues): CreateTenantPay
     settings: Object.keys(settings).length ? settings : undefined,
     isActive: values.isActive,
     clientUrl: values.clientUrl.trim() || undefined,
+    orderCode: values.orderCode.trim(),
     domains,
     emailConfig,
     googleConfig,

@@ -101,6 +101,17 @@ function TenantForm({
               onChange={handleChange}
               onBlur={handleBlur}
             />
+            <FormInput
+              label="Code name"
+              name="orderCode"
+              value={values.orderCode}
+              placeholder="Enter code name (e.g. ACME)"
+              maxLength={12}
+              error={errors.orderCode}
+              touched={touched.orderCode}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
           </div>
         </FormSection>
 

@@ -71,7 +71,8 @@ export default function LoginModal({
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = canAccessAdminPanel(authUser?.role);
   const storeTenant = useStoreTenantOptional();
-  const googleClientId = storeTenant?.googleClientId ?? "";
+  const googleClientId = storeTenant?.googleClientId?.trim() ?? "";
+  const storeTenantLoading = storeTenant?.isLoading ?? false;
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
@@ -305,9 +306,13 @@ export default function LoginModal({
 
   const handleGoogleSignIn = async () => {
     clearError();
+    if (storeTenantLoading) {
+      setError("Loading store settings. Please try again in a moment.");
+      return;
+    }
     if (!isGoogleOAuthConfigured(googleClientId)) {
       setError(
-        "Google sign-in is not configured for this store. Add Google settings in the developer portal or set NEXT_PUBLIC_GOOGLE_CLIENT_ID."
+        "Google sign-in is not configured for this store. In Admin → Company → Integrations, enable Google sign-in and save your Google client ID (same as in tenant settings)."
       );
       return;
     }
@@ -322,8 +327,14 @@ export default function LoginModal({
           setGoogleLoading(false);
         }
       });
-    } catch {
-      setError("Could not load Google sign-in. Please try again.");
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.message.includes("not ready")
+          ? "Google sign-in is still loading. Check your network or ad blocker, then try again."
+          : err instanceof Error && err.message.includes("Failed to load")
+            ? "Could not load Google sign-in (blocked or offline). Allow accounts.google.com and try again."
+            : "Could not load Google sign-in. Please try again.";
+      setError(msg);
       setGoogleLoading(false);
     }
   };
