@@ -389,12 +389,12 @@ export default function Header({
           }}
           transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
         >
-          <div className={`${tw.storeContainer} w-full`}>
+          <div className={`${tw.storeContainer} w-full min-w-0`}>
             <div
-              className={`flex w-full items-center gap-2 overflow-x-auto scroll-smooth px-0 py-1.5 sm:gap-3 md:gap-4 md:overflow-x-visible ${tw.scrollbarHide}`}
+              className={`grid w-full min-w-0 auto-cols-[minmax(4.5rem,1fr)] grid-flow-col items-stretch gap-2 overflow-x-auto scroll-smooth py-1.5 sm:gap-3 md:gap-4 lg:gap-5 md:overflow-x-visible ${tw.scrollbarHide}`}
             >
               {categoriesLoading ? (
-                <span className="px-3 py-2 text-[11px] text-gray-400">
+                <span className="col-span-full px-3 py-2 text-[11px] text-gray-400">
                   Loading categories...
                 </span>
               ) : categories.length > 0 ? (
@@ -404,12 +404,12 @@ export default function Header({
                       key={cat._id}
                       type="button"
                       onClick={() => handleCategoryClick(cat)}
-                      className="group flex min-w-[4.25rem] flex-1 flex-col items-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95 md:min-w-0"
+                      className="group flex min-w-0 w-full flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95"
                     >
-                      <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                      <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                         {resolveCategoryIcon(cat.name)}
                       </span>
-                      <span className="w-full truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
+                      <span className="w-full min-w-0 truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
                         {cat.name}
                       </span>
                     </button>
@@ -417,12 +417,12 @@ export default function Header({
                   <button
                     type="button"
                     onClick={() => goTo(ROUTES.shop)}
-                    className="group flex min-w-[4.25rem] flex-1 flex-col items-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95 md:min-w-0"
+                    className="group flex min-w-0 w-full flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95"
                   >
-                    <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                    <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
                       {CategoryIcons.More}
                     </span>
-                    <span className="w-full truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
+                    <span className="w-full min-w-0 truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
                       More Categories
                     </span>
                   </button>
@@ -431,7 +431,7 @@ export default function Header({
                 <button
                   type="button"
                   onClick={() => goTo(ROUTES.shop)}
-                  className="group flex w-full flex-col items-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer"
+                  className="group col-span-full flex w-full flex-col items-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer"
                 >
                   <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600">
                     {CategoryIcons.More}

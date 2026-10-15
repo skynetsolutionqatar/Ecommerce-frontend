@@ -79,7 +79,7 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
         <p className="mb-4 text-sm font-medium text-muted md:text-xs">This order has been refunded.</p>
       ) : null}
 
-      {/* Mobile: vertical timeline with centered connector */}
+      {/* Mobile: vertical timeline — rail + dots aligned on one axis */}
       <ol className="sm:hidden">
         {FLOW.map((step, i) => {
           const state = states[i];
@@ -88,21 +88,19 @@ export default function OrderStatusTracker({ order }: { order: ApiOrder }) {
           const connectorActive = state === "done";
 
           return (
-            <li key={step} className="relative flex gap-3">
-              <div className="flex w-9 shrink-0 flex-col items-center">
+            <li key={step} className={`relative pl-11 ${isLast ? "pb-0" : "pb-7"}`}>
+              {!isLast ? (
                 <span
-                  className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${dotClass(state)}`}
-                >
-                  {state === "done" ? "✓" : i + 1}
-                </span>
-                {!isLast ? (
-                  <span
-                    className={`mt-1 w-0.5 flex-1 min-h-[1.75rem] rounded-full ${connectorClass(connectorActive)}`}
-                    aria-hidden
-                  />
-                ) : null}
-              </div>
-              <div className={`min-w-0 flex-1 ${isLast ? "pb-0" : "pb-5"}`}>
+                  className={`absolute left-4 top-8 bottom-0 w-0.5 -translate-x-1/2 rounded-full ${connectorClass(connectorActive)}`}
+                  aria-hidden
+                />
+              ) : null}
+              <span
+                className={`absolute left-4 top-0 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full text-sm font-bold shadow-sm ${dotClass(state)}`}
+              >
+                {state === "done" ? "✓" : i + 1}
+              </span>
+              <div className="min-w-0 pt-0.5">
                 <p
                   className={`text-sm font-semibold leading-snug ${
                     state === "upcoming" ? "text-gray-600" : "text-gray-900"
