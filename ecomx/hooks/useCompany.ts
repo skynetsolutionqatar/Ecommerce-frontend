@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { companyApi, fetchCompany } from "@/lib/api/company.api";
 import { defaultCompanyFormValues } from "@/lib/admin/company-form";
-import { STORE_TENANT_KEY } from "@/hooks/useStoreTenant";
 import type { ApiCompany, UpdateCompanyPayload } from "@/types/company.types";
 
 export const COMPANY_KEY = "company";
@@ -51,7 +50,6 @@ export function useCompanyMutations() {
     mutationFn: (payload: UpdateCompanyPayload) => companyApi.update(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [COMPANY_KEY] });
-      void queryClient.invalidateQueries({ queryKey: [STORE_TENANT_KEY] });
     },
   });
 

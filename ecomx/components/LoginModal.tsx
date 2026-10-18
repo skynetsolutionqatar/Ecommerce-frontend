@@ -10,13 +10,13 @@ import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import AuthFormError from "@/components/auth/AuthFormError";
-import { useStoreTenantOptional } from "@/components/StoreTenantProvider";
 import {
   initializeGoogleSignIn,
   isGoogleOAuthConfigured,
   loadGoogleIdentityScript,
   promptGoogleSignIn,
 } from "@/lib/google-oauth";
+import { API_CONFIG } from "@/lib/config";
 import * as Icons from "./Icons";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, X } from "lucide-react";
@@ -70,9 +70,7 @@ export default function LoginModal({
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = canAccessAdminPanel(authUser?.role);
-  const storeTenant = useStoreTenantOptional();
-  const googleClientId = storeTenant?.googleClientId?.trim() ?? "";
-  const storeTenantLoading = storeTenant?.isLoading ?? false;
+  const googleClientId = API_CONFIG.googleClientId.trim();
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPass, setShowPass] = useState(false);
@@ -306,13 +304,9 @@ export default function LoginModal({
 
   const handleGoogleSignIn = async () => {
     clearError();
-    if (storeTenantLoading) {
-      setError("Loading store settings. Please try again in a moment.");
-      return;
-    }
     if (!isGoogleOAuthConfigured(googleClientId)) {
       setError(
-        "Google sign-in is not configured for this store. In Admin → Company → Integrations, enable Google sign-in and save your Google client ID (same as in tenant settings)."
+        "Google sign-in is not configured. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID for this storefront deployment."
       );
       return;
     }
