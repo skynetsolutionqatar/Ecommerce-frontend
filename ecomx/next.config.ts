@@ -15,21 +15,24 @@ const apiOrigin = (() => {
 
 const socketOrigin = apiOrigin.replace(/^http/, "ws");
 
+/** Google Identity Services (Sign in with Google popup / One Tap). */
+const googleIdentitySrc = "https://accounts.google.com";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js inlines its bootstrap/hydration scripts; dev also needs eval for HMR.
   // @react-pdf/renderer (invoice PDF) compiles WebAssembly in the browser — wasm-unsafe-eval in prod.
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${googleIdentitySrc}${isDev ? " 'unsafe-eval'" : ""}`,
   // Tailwind/framer-motion/react-pdf all emit inline style attributes.
-  "style-src 'self' 'unsafe-inline'",
+  `style-src 'self' 'unsafe-inline' ${googleIdentitySrc}`,
   // Remote product images (Cloudinary/Unsplash) and OpenStreetMap tiles.
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin} ${socketOrigin}${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self' ${apiOrigin} ${socketOrigin} ${googleIdentitySrc} https://oauth2.googleapis.com${isDev ? " ws: wss:" : ""}`,
   "worker-src 'self' blob:",
   "media-src 'self' data: blob:",
   "manifest-src 'self'",
-  "frame-src 'none'",
+  `frame-src 'self' ${googleIdentitySrc}`,
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

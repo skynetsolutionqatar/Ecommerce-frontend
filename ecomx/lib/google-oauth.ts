@@ -92,7 +92,9 @@ export function loadGoogleIdentityScript(): Promise<void> {
     );
     if (existing) {
       if (existing.dataset.gsiError === "1") {
-        reject(new Error("Failed to load Google sign-in"));
+        existing.remove();
+        gsiScriptPromise = null;
+        loadGoogleIdentityScript().then(resolve).catch(reject);
         return;
       }
       if (window.google?.accounts?.id || existing.dataset.gsiLoaded === "1") {
@@ -118,9 +120,14 @@ export function loadGoogleIdentityScript(): Promise<void> {
     };
     script.onerror = () => {
       script.dataset.gsiError = "1";
+      gsiScriptPromise = null;
       reject(new Error("Failed to load Google sign-in"));
     };
     document.head.appendChild(script);
+  });
+
+  gsiScriptPromise.catch(() => {
+    gsiScriptPromise = null;
   });
 
   return gsiScriptPromise;
