@@ -100,7 +100,7 @@ export default function RegisterForm() {
 
   return (
     <AuthShell title="Create account" subtitle="Register with your email and Qatar mobile number.">
-      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 sm:space-y-5">
         <AuthFormError />
 
         <AuthFormField label="Full Name" icon={<Icons.User />} error={fieldErrors.name}>

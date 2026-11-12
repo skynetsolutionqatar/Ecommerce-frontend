@@ -15,6 +15,7 @@ const SIZE_CLASS: Record<number, string> = {
   20: "h-5 w-5 text-[10px]",
   36: "h-9 w-9 text-[13px]",
   40: "h-10 w-10 text-sm",
+  48: "h-12 w-12 text-[17px]",
   64: "h-16 w-16 text-[23px]",
   72: "h-[72px] w-[72px] text-[26px]",
   80: "h-20 w-20 text-[29px]",

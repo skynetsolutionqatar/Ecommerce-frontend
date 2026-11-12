@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { fmt } from "@/lib/data";
 import { ROUTES } from "@/lib/routes";
 import { Colors, tw } from "@/lib/theme";
@@ -15,6 +15,8 @@ interface CartDrawerProps {
   onClose: () => void;
   onUpdate: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
+  /** When set, used instead of `router.push(/shop)` for Continue Shopping / Browse Shop */
+  onGoToShop?: () => void;
 }
 
 const closeBtnClass =
@@ -32,10 +34,28 @@ export default function CartDrawer({
   onClose,
   onUpdate,
   onRemove,
+  onGoToShop,
 }: CartDrawerProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const total = sub;
+
+  const isOnShopPage =
+    pathname === ROUTES.shop ||
+    pathname.startsWith(`${ROUTES.shop}/`) ||
+    pathname.startsWith(`${ROUTES.shop}?`);
+
+  const continueShopping = () => {
+    if (!isOnShopPage) {
+      if (onGoToShop) {
+        onGoToShop();
+      } else {
+        router.push(ROUTES.shop);
+      }
+    }
+    onClose();
+  };
 
   if (!open) return null;
 
@@ -77,7 +97,7 @@ export default function CartDrawer({
                 type="button"
                 className={primaryBtnClass}
                 style={{ background: Colors.base_color, width: "auto" }}
-                onClick={onClose}
+                onClick={continueShopping}
               >
                 Browse Shop
               </button>
@@ -201,7 +221,7 @@ export default function CartDrawer({
             >
               Checkout · {fmt(total)} <Icons.ArrowRight />
             </button>
-            <button type="button" className={outlineBtnClass} onClick={onClose}>
+            <button type="button" className={outlineBtnClass} onClick={continueShopping}>
               Continue Shopping
             </button>
           </div>

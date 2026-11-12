@@ -163,6 +163,15 @@ export default function CheckoutPage({
     trackGuestActivityIfAnonymous({ eventType: "checkout_started" }, cart);
   }, [cart, isLoggedIn]);
 
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    setSubmitError((prev) => {
+      if (!prev) return prev;
+      if (prev === "Please sign in to place an order.") return "";
+      return prev;
+    });
+  }, [isLoggedIn]);
+
   const { data: savedAddresses = [] } = useCustomerAddresses();
 
   const selectedSavedAddress = useMemo(() => {

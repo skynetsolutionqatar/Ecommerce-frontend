@@ -13,13 +13,15 @@ interface AuthShellProps {
 
 export function AuthShell({ title, subtitle, children }: AuthShellProps) {
   return (
-    <div className="animate-fade-up">
-      <div className="mb-8">
-        <p className="mb-2 font-label text-sm font-bold tracking-wide text-[#0a255d]">Skynet™</p>
-        <h1 className="font-display text-[28px] font-bold tracking-tight text-primary sm:text-[32px]">
+    <div className="animate-fade-up w-full min-w-0">
+      <div className="mb-5 sm:mb-8">
+        <p className="mb-1.5 font-label text-xs font-bold tracking-wide text-[#0a255d] sm:mb-2 sm:text-sm">
+          Skynet™
+        </p>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-primary sm:text-[28px] lg:text-[32px]">
           {title}
         </h1>
-        <p className="mt-2 text-[15px] leading-relaxed text-muted">{subtitle}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted sm:mt-2 sm:text-[15px]">{subtitle}</p>
       </div>
       {children}
     </div>
@@ -27,7 +29,7 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
 }
 
 export const authInputClass =
-  "w-full rounded-xl border border-border/80 bg-white px-4 py-3.5 text-sm text-primary shadow-[0_1px_2px_rgba(17,24,39,0.04)] outline-none transition-all placeholder:text-muted/50 focus:border-[#0a255d] focus:shadow-[0_0_0_3px_rgba(10,37,93,0.1)]";
+  "min-w-0 w-full rounded-xl border border-border/80 bg-white px-4 py-3 text-sm text-primary shadow-[0_1px_2px_rgba(17,24,39,0.04)] outline-none transition-all placeholder:text-muted/50 focus:border-[#0a255d] focus:shadow-[0_0_0_3px_rgba(10,37,93,0.1)] sm:py-3.5";
 
 export function AuthFieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -174,7 +176,7 @@ export function AuthSubmitButton({
     <button
       type="submit"
       disabled={loading}
-      className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0a255d] to-[#1e40af] px-6 py-3.5 font-label text-sm font-bold text-white shadow-[0_4px_16px_rgba(10,37,93,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(10,37,93,0.4)] disabled:translate-y-0 disabled:opacity-60"
+      className="group flex w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0a255d] to-[#1e40af] px-6 py-3 font-label text-sm font-bold text-white shadow-[0_4px_16px_rgba(10,37,93,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(10,37,93,0.4)] disabled:translate-y-0 disabled:opacity-60 sm:py-3.5"
     >
       {loading ? (
         <>
@@ -199,8 +201,8 @@ export function AuthAltActions({
   secondary: { href: string; label: string };
 }) {
   return (
-    <div className="mt-8 rounded-2xl border border-border/60 bg-bg-soft/60 p-5">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="mt-6 rounded-2xl border border-border/60 bg-bg-soft/60 p-4 sm:mt-8 sm:p-5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
         <AuthAltButton href={primary.href} label={primary.label} />
         <AuthAltButton href={secondary.href} label={secondary.label} icon="store" />
       </div>

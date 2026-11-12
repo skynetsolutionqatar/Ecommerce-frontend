@@ -68,15 +68,15 @@ export function AuthBrandPanel() {
       </aside>
 
       {/* Mobile brand strip */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#0f3460] px-6 py-8 text-center lg:hidden">
+      <div className="relative shrink-0 overflow-hidden bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#0f3460] px-5 py-5 text-center sm:px-6 sm:py-7 lg:hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_60%)]" />
         <BrandLogo
-          height={52}
+          height={44}
           variant="footer"
           priority
           alt="Skynet Solution"
-          className="mx-auto"
-          imgClassName="max-w-[240px] object-left"
+          className="mx-auto flex justify-center"
+          imgClassName="max-w-[200px] object-contain sm:max-w-[240px]"
         />
         <p className="relative mt-3 text-xs uppercase tracking-[0.16em] text-white/50">Management Suite</p>
       </div>

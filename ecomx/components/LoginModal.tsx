@@ -368,25 +368,47 @@ export default function LoginModal({
             ? "Choose a new password for your account"
             : "We'll email you a reset link";
 
+  const compactRegisterHeader = mode === "register" && !user && !success;
+
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[500] flex items-center justify-center bg-[#030712]/75 p-4 backdrop-blur-xl animate-fade-in sm:p-6"
+      className="fixed inset-0 z-[500] overflow-y-auto overscroll-y-contain bg-[#030712]/75 backdrop-blur-xl animate-fade-in"
     >
       <div
+        className="flex min-h-[100dvh] min-h-screen items-end justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-6"
+        onClick={onClose}
+      >
+      <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[460px] overflow-hidden rounded-[24px] border border-white/10 bg-white shadow-[0_40px_100px_rgba(0,0,0,0.45)] animate-fade-up"
+        className="relative flex max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem))] w-full max-w-[460px] flex-col overflow-hidden rounded-[20px] border border-white/10 bg-white shadow-[0_40px_100px_rgba(0,0,0,0.45)] animate-fade-up sm:max-h-[min(90dvh,880px)] sm:rounded-[24px]"
       >
         {/* Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#030712] via-[#0a255d] to-[#1e40af] px-6 pb-6 pt-6 text-white sm:px-8">
-          <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-blue-400/20 blur-3xl" />
+        <div
+          className={`relative shrink-0 overflow-hidden bg-gradient-to-br from-[#030712] via-[#0a255d] to-[#1e40af] text-white ${
+            compactRegisterHeader
+              ? "px-4 pb-3 pt-3 sm:px-6 sm:pb-4 sm:pt-4"
+              : "px-5 pb-5 pt-5 sm:px-8 sm:pb-6 sm:pt-6"
+          }`}
+        >
+          <div
+            className={`pointer-events-none absolute -left-16 -top-16 rounded-full bg-white/10 blur-3xl ${
+              compactRegisterHeader ? "h-32 w-32" : "h-48 w-48"
+            }`}
+          />
+          <div
+            className={`pointer-events-none absolute -bottom-10 -right-10 rounded-full bg-blue-400/20 blur-3xl ${
+              compactRegisterHeader ? "h-28 w-28" : "h-40 w-40"
+            }`}
+          />
           <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:32px_32px]" />
 
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+            className={`absolute flex cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 ${
+              compactRegisterHeader ? "right-3 top-3 h-8 w-8" : "right-4 top-4 h-9 w-9"
+            }`}
             title="Close"
           >
             <X className="h-4 w-4" />
@@ -403,19 +425,29 @@ export default function LoginModal({
             </button>
           )}
 
-          <div className="relative flex flex-col items-center gap-4 pt-2 text-center">
+          <div
+            className={`relative flex flex-col items-center text-center ${
+              compactRegisterHeader ? "gap-2 pt-0 sm:gap-2.5" : "gap-3 pt-1 sm:gap-4 sm:pt-2"
+            }`}
+          >
             <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-white/40 to-blue-300/30 blur-sm" />
+              {!compactRegisterHeader ? (
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-white/40 to-blue-300/30 blur-sm" />
+              ) : null}
               <Avatar
                 name={displayName}
-                size={76}
+                size={compactRegisterHeader ? 48 : mode === "register" ? 64 : 72}
                 imageUrl={avatarPreview || user?.avatarUrl}
-                className="relative border-[3px] border-white/30 shadow-[0_12px_32px_rgba(0,0,0,0.35)]"
+                className={`relative border-white/30 shadow-[0_12px_32px_rgba(0,0,0,0.35)] ${
+                  compactRegisterHeader ? "border-2" : "border-[3px]"
+                }`}
               />
               {mode === "register" && !user && (
                 <label
                   htmlFor="avatar-upload"
-                  className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-[#0a255d] bg-white text-[#0a255d] shadow-lg"
+                  className={`absolute -bottom-0.5 -right-0.5 flex cursor-pointer items-center justify-center rounded-full border-2 border-[#0a255d] bg-white text-[#0a255d] shadow-lg ${
+                    compactRegisterHeader ? "h-7 w-7" : "h-8 w-8"
+                  }`}
                   title="Upload photo"
                 >
                   <Icons.Plus />
@@ -431,17 +463,33 @@ export default function LoginModal({
             </div>
 
             <div>
-              <div className="mb-1 flex items-center justify-center gap-2 font-display text-[26px] font-bold tracking-tight">
+              <div
+                className={`mb-0.5 flex items-center justify-center gap-1.5 font-display font-bold tracking-tight ${
+                  compactRegisterHeader
+                    ? "text-lg sm:text-xl"
+                    : "text-[22px] sm:text-[26px]"
+                }`}
+              >
                 {headerTitle}
-                {!user && mode !== "forgot" && mode !== "reset" && (
+                {!user && mode === "login" && (
                   <Sparkles className="h-5 w-5 text-amber-300" strokeWidth={2.25} />
                 )}
               </div>
-              <p className="text-[13px] font-medium text-blue-100/80">{headerSubtitle}</p>
+              <p
+                className={`font-medium text-blue-100/80 ${
+                  compactRegisterHeader ? "text-[11px] sm:text-xs" : "text-[13px]"
+                }`}
+              >
+                {headerSubtitle}
+              </p>
             </div>
 
             {!user && !success && mode !== "forgot" && mode !== "reset" && (
-              <div className="flex w-full max-w-[280px] rounded-xl border border-white/20 bg-black/20 p-1 backdrop-blur-sm">
+              <div
+                className={`flex w-full rounded-xl border border-white/20 bg-black/20 p-0.5 backdrop-blur-sm sm:p-1 ${
+                  compactRegisterHeader ? "max-w-[260px]" : "max-w-[280px]"
+                }`}
+              >
                 {(["login", "register"] as const).map((tab) => (
                   <button
                     key={tab}
@@ -450,7 +498,9 @@ export default function LoginModal({
                       switchMode(tab);
                       setError(null);
                     }}
-                    className={`flex-1 rounded-lg py-2 text-xs font-bold uppercase tracking-wide transition-all ${
+                    className={`flex-1 rounded-lg font-bold uppercase tracking-wide transition-all ${
+                      compactRegisterHeader ? "py-1.5 text-[10px] sm:text-xs" : "py-2 text-xs"
+                    } ${
                       mode === tab
                         ? "bg-white text-[#0a255d] shadow-md"
                         : "text-white/70 hover:text-white"
@@ -465,7 +515,7 @@ export default function LoginModal({
         </div>
 
         {/* Body */}
-        <div className="bg-gradient-to-b from-gray-50 to-white px-6 pb-7 pt-6 sm:px-8">
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-gradient-to-b from-gray-50 to-white px-5 pb-6 pt-5 sm:px-8 sm:pb-7 sm:pt-6">
           {user && !success ? (
             <div className="text-center">
               <Avatar
@@ -536,8 +586,8 @@ export default function LoginModal({
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <div className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="min-w-0">
+              <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
                 <AuthFormError />
 
                 {mode === "register" && (
@@ -774,6 +824,7 @@ export default function LoginModal({
             </form>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
