@@ -89,6 +89,7 @@ export default function StoreShell({ children }: { children: ReactNode }) {
             cart={cart}
             open={cartOpen}
             onClose={() => setCartOpen(false)}
+            onGoToShop={() => goToShop()}
             onUpdate={updateCart}
             onRemove={removeFromCart}
           />

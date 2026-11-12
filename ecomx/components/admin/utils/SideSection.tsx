@@ -21,6 +21,7 @@ import {
   Ban,
   Truck,
   Footprints,
+  Images,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/lib/config";
 import { REPORT_MENU } from "@/lib/admin/reports.config";
@@ -166,6 +167,11 @@ export const adminSections: AdminMenuSection[] = [
             name: "Company",
             path: ADMIN_ROUTES.company,
             icon: <Building2 size={16} />,
+          },
+          {
+            name: "Hero slider",
+            path: ADMIN_ROUTES.heroSliders,
+            icon: <Images size={16} />,
           },
           {
             name: "Delivery zones",

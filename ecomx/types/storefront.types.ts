@@ -10,6 +10,9 @@ export interface HeroSlide {
   note: string;
   cta: string;
   img: string;
+  posterImg?: string;
+  posterImgMobile?: string;
+  isPoster?: boolean;
   price?: number;
   compareAtPrice?: number;
   discount?: number;
@@ -18,7 +21,12 @@ export interface HeroSlide {
   categorySlug?: string;
   isNew?: boolean;
   isBestSeller?: boolean;
+  offerLabel?: string;
+  /** @deprecated product-derived fallback slides only */
   slideKind?: "pos" | "thermal" | "barcode" | "printer";
+  surfaceColor?: string;
+  accentColor?: string;
+  accentNeon?: string;
 }
 
 export interface StorefrontConfig {

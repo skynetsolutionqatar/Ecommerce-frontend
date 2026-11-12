@@ -62,6 +62,8 @@ export const ADMIN_ROUTES = {
   faq: `${ROUTE_PREFIX.ADMIN}/faq`,
   terms: `${ROUTE_PREFIX.ADMIN}/terms-and-conditions`,
   cancellationPolicy: `${ROUTE_PREFIX.ADMIN}/cancellation-policy`,
+  heroSliders: `${ROUTE_PREFIX.ADMIN}/hero-sliders`,
+  heroSlider: (id: string) => `${ROUTE_PREFIX.ADMIN}/hero-sliders/${id}`,
 } as const;
 
 export const AUTH_ROUTES = {

@@ -4,14 +4,20 @@ import { useState, useMemo } from "react";
 import { IMAGE_FALLBACK } from "@/lib/images";
 import { withProductImageBlend } from "@/lib/store/product-image-utils";
 
-function optimizeImageUrl(url: string, targetWidth = 400): string {
+function optimizeImageUrl(
+  url: string,
+  targetWidth = 400,
+  fit: "limit" | "cover" = "limit"
+): string {
   if (!url || typeof url !== "string") return url;
   if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
     if (!url.includes("f_auto") && !url.includes("q_auto")) {
-      return url.replace(
-        "/upload/",
-        `/upload/f_auto,q_auto,w_${Math.min(Math.max(targetWidth, 200), 800)},c_limit/`
-      );
+      const w = Math.min(Math.max(targetWidth, 200), 1920);
+      const transform =
+        fit === "cover"
+          ? `f_auto,q_auto,w_${w},c_fill,g_auto`
+          : `f_auto,q_auto,w_${w},c_limit`;
+      return url.replace("/upload/", `/upload/${transform}/`);
     }
   }
   return url;
@@ -29,6 +35,8 @@ interface StoreImageProps {
   "aria-hidden"?: boolean;
   /** Set true for above-the-fold hero images */
   priority?: boolean;
+  /** `cover` fills the frame (posters); default `limit` preserves product shots */
+  fit?: "limit" | "cover";
   /**
    * Knocks out white JPG backgrounds via `mix-blend-multiply`.
    * Pair with {@link productImageSurfaceClass} on the parent frame.
@@ -49,6 +57,7 @@ export default function StoreImage({
   "aria-hidden": ariaHidden,
   priority = false,
   blend = true,
+  fit = "limit",
 }: StoreImageProps) {
   const [hasError, setHasError] = useState(false);
   const [prevSrc, setPrevSrc] = useState(src);
@@ -58,12 +67,14 @@ export default function StoreImage({
     setHasError(false);
   }
 
-  const optimizedSrc = useMemo(
-    () => optimizeImageUrl(src, width ? width * 2 : 400),
-    [src, width]
-  );
+  const trimmedSrc = src?.trim() ?? "";
 
-  const displaySrc = hasError ? fallback : optimizedSrc;
+  const optimizedSrc = useMemo(() => {
+    if (!trimmedSrc) return fallback;
+    return optimizeImageUrl(trimmedSrc, width ? width * 2 : 400, fit);
+  }, [trimmedSrc, width, fit, fallback]);
+
+  const displaySrc = hasError || !trimmedSrc ? fallback : optimizedSrc;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element

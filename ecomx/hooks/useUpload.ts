@@ -86,7 +86,7 @@ export function useUpload(options: UseUploadOptions = {}) {
 
   const uploadSingleImage = useCallback(async (
     file: File,
-    type: 'category' | 'avatar' | 'banner'
+    type: 'category' | 'avatar' | 'banner' | 'slider' | 'sliderPoster' | 'sliderPosterMobile'
   ) => {
     const error = validateFiles([file]);
     if (error) {
@@ -104,6 +104,9 @@ export function useUpload(options: UseUploadOptions = {}) {
       let result: UploadedImage;
       if (type === 'category') result = await uploadApi.categoryImage(file);
       else if (type === 'avatar') result = await uploadApi.avatar(file);
+      else if (type === 'slider') result = await uploadApi.sliderImage(file);
+      else if (type === 'sliderPoster') result = await uploadApi.sliderPosterImage(file);
+      else if (type === 'sliderPosterMobile') result = await uploadApi.sliderPosterMobileImage(file);
       else result = await uploadApi.banner(file);
 
       setProgress(100);

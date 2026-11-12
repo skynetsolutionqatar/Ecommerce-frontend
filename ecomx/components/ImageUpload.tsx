@@ -6,9 +6,24 @@ import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { useUpload } from '@/hooks/useUpload';
 import { UploadedImage } from '@/lib/api/upload.api';
 import { sameImageUrl } from '@/lib/admin/product-form';
+import {
+  HERO_POSTER_DESKTOP_SIZE,
+  HERO_POSTER_MOBILE_SIZE,
+  validateHeroPosterDesktopFile,
+  validateHeroPosterMobileFile,
+} from '@/lib/admin/hero-poster-upload';
+import { showError } from '@/lib/toast';
 
 interface ImageUploadProps {
-  type: 'product' | 'category' | 'avatar' | 'banner' | 'review';
+  type:
+    | 'product'
+    | 'category'
+    | 'avatar'
+    | 'banner'
+    | 'review'
+    | 'slider'
+    | 'sliderPoster'
+    | 'sliderPosterMobile';
   onUpload: (images: UploadedImage[]) => void;
   existingImages?: string[];
   onRemoveExisting?: (url: string) => void;
@@ -19,12 +34,37 @@ interface ImageUploadProps {
 }
 
 const TYPE_CONFIG = {
-  product:  { max: 5,  label: 'Product Images',   hint: 'Up to 5 images • JPG, PNG, WebP • Max 5MB each' },
-  category: { max: 1,  label: 'Category Image',   hint: '1 image • JPG, PNG, WebP • Max 2MB' },
-  avatar:   { max: 1,  label: 'Profile Photo',    hint: '1 image • JPG, PNG, WebP • Max 2MB' },
-  banner:   { max: 1,  label: 'Banner Image',     hint: '1 image • JPG, PNG, WebP • Max 10MB • Recommended: 1920×600px' },
-  review:   { max: 3,  label: 'Review Photos',    hint: 'Up to 3 images • JPG, PNG, WebP • Max 5MB each' },
+  product: { max: 5, label: 'Product Images', hint: 'Up to 5 images • JPG, PNG, WebP • Max 5MB each' },
+  category: { max: 1, label: 'Category Image', hint: '1 image • JPG, PNG, WebP • Max 2MB' },
+  avatar: { max: 1, label: 'Profile Photo', hint: '1 image • JPG, PNG, WebP • Max 2MB' },
+  banner: {
+    max: 1,
+    label: 'Banner Image',
+    hint: '1 image • JPG, PNG, WebP • Max 10MB • Recommended: 1920×600px',
+  },
+  review: { max: 3, label: 'Review Photos', hint: 'Up to 3 images • JPG, PNG, WebP • Max 5MB each' },
+  slider: { max: 1, label: 'Hero slide image', hint: '1 image • JPG, PNG, WebP • Max 10MB • Cloudinary sliders/' },
+  sliderPoster: {
+    max: 1,
+    label: 'Desktop poster',
+    hint: `1 wide banner • ${HERO_POSTER_DESKTOP_SIZE} • Required for poster slides`,
+  },
+  sliderPosterMobile: {
+    max: 1,
+    label: 'Mobile poster',
+    hint: `1 portrait banner • ${HERO_POSTER_MOBILE_SIZE} • Required for poster slides`,
+  },
 };
+
+function posterThumbClass(type: ImageUploadProps['type']): string {
+  if (type === 'sliderPosterMobile') return 'h-32 w-24';
+  if (type === 'sliderPoster') return 'h-24 w-48';
+  return 'h-24 w-24';
+}
+
+function isPosterType(type: ImageUploadProps['type']): boolean {
+  return type === 'sliderPoster' || type === 'sliderPosterMobile';
+}
 
 export default function ImageUpload({
   type,
@@ -39,6 +79,7 @@ export default function ImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [pendingImages, setPendingImages] = useState<UploadedImage[]>([]);
+  const thumbClass = posterThumbClass(type);
 
   // Drop pending previews once the parent form owns those URLs.
   useEffect(() => {
@@ -60,12 +101,30 @@ export default function ImageUpload({
     async (files: File[]) => {
       if (!files.length) return;
 
+      if (type === 'sliderPoster') {
+        const err = await validateHeroPosterDesktopFile(files[0]);
+        if (err) {
+          showError(err);
+          return;
+        }
+      }
+      if (type === 'sliderPosterMobile') {
+        const err = await validateHeroPosterMobileFile(files[0]);
+        if (err) {
+          showError(err);
+          return;
+        }
+      }
+
       if (type === 'product') {
         await uploadProductImages(files);
       } else if (type === 'review') {
         await uploadReviewImages(files);
       } else {
-        const result = await uploadSingleImage(files[0], type as 'category' | 'avatar' | 'banner');
+        const result = await uploadSingleImage(
+          files[0],
+          type as 'category' | 'avatar' | 'banner' | 'slider' | 'sliderPoster' | 'sliderPosterMobile'
+        );
         if (result) {
           setPendingImages([result]);
           onUpload([result]);
@@ -100,6 +159,7 @@ export default function ImageUpload({
   const maxAllowed = maxFiles || config.max;
   const totalImages = existingImages.length + pendingImages.length;
   const canUploadMore = totalImages < maxAllowed;
+  const objectFitClass = isPosterType(type) ? 'object-contain bg-slate-100' : 'object-cover';
 
   return (
     <div className="space-y-3">
@@ -108,8 +168,18 @@ export default function ImageUpload({
       {existingImages.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {existingImages.map((url, i) => (
-            <div key={`${url}-${i}`} className="relative h-24 w-24 overflow-hidden rounded-lg border border-gray-200 group">
-              <Image src={url} alt={`Image ${i + 1}`} fill className="object-cover" sizes="96px" unoptimized />
+            <div
+              key={`${url}-${i}`}
+              className={`relative overflow-hidden rounded-lg border border-gray-200 group ${thumbClass}`}
+            >
+              <Image
+                src={url}
+                alt={`Image ${i + 1}`}
+                fill
+                className={objectFitClass}
+                sizes={isPosterType(type) ? '192px' : '96px'}
+                unoptimized
+              />
               {onRemoveExisting && (
                 <button
                   type="button"
@@ -127,8 +197,18 @@ export default function ImageUpload({
       {pendingImages.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {pendingImages.map((img) => (
-            <div key={img.publicId} className="relative h-24 w-24 overflow-hidden rounded-lg border border-green-200 group">
-              <Image src={img.url} alt="Uploaded" fill className="object-cover" sizes="96px" unoptimized />
+            <div
+              key={img.publicId}
+              className={`relative overflow-hidden rounded-lg border border-green-200 group ${thumbClass}`}
+            >
+              <Image
+                src={img.url}
+                alt="Uploaded"
+                fill
+                className={objectFitClass}
+                sizes={isPosterType(type) ? '192px' : '96px'}
+                unoptimized
+              />
               <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-green-500" />
               <button
                 type="button"
@@ -159,13 +239,20 @@ export default function ImageUpload({
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               <p className="text-sm font-medium text-gray-600">Uploading...</p>
               <div className="h-1.5 w-full max-w-xs rounded-full bg-gray-200">
-                <div className="h-1.5 rounded-full bg-blue-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div
+                  className="h-1.5 rounded-full bg-blue-500 transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </>
           ) : (
             <>
               <div className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm">
-                {isDragging ? <ImageIcon className="h-6 w-6 text-blue-500" /> : <Upload className="h-6 w-6 text-gray-400" />}
+                {isDragging ? (
+                  <ImageIcon className="h-6 w-6 text-blue-500" />
+                ) : (
+                  <Upload className="h-6 w-6 text-gray-400" />
+                )}
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-700">

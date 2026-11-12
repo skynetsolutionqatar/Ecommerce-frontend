@@ -52,6 +52,30 @@ export const uploadApi = {
     return data.image;
   },
 
+  /** Hero slide image — Cloudinary folder `sliders/` */
+  sliderImage: async (file: File): Promise<UploadedImage> => {
+    const form = new FormData();
+    form.append("image", file);
+    const data = await uploadForm<{ image: UploadedImage }>("/upload/slider", form);
+    return data.image;
+  },
+
+  /** Full-bleed poster — Cloudinary folder `sliders/posters/` */
+  sliderPosterImage: async (file: File): Promise<UploadedImage> => {
+    const form = new FormData();
+    form.append("image", file);
+    const data = await uploadForm<{ image: UploadedImage }>("/upload/slider/poster", form);
+    return data.image;
+  },
+
+  /** Mobile hero poster — Cloudinary folder `sliders/posters/mobile/` */
+  sliderPosterMobileImage: async (file: File): Promise<UploadedImage> => {
+    const form = new FormData();
+    form.append("image", file);
+    const data = await uploadForm<{ image: UploadedImage }>("/upload/slider/poster/mobile", form);
+    return data.image;
+  },
+
   /** Delete image from Cloudinary */
   delete: async (publicId: string): Promise<void> => {
     await apiClient.delete("/upload", { data: { publicId } });

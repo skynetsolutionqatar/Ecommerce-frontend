@@ -9,6 +9,7 @@ export const COMPANY_FORM_ID = "company-form";
 export const CHANGE_PASSWORD_FORM_ID = "change-password-form";
 export const CUSTOMER_FORM_ID = "customer-form";
 export const CONTENT_PAGE_FORM_ID = "content-page-form";
+export const HERO_SLIDER_FORM_ID = "hero-slider-form";
 
 const primaryBtn = `rounded-lg px-6 py-2 ${colors.mainColor} text-white hover:opacity-90`;
 const cancelBtn = "rounded-lg px-6 py-2";

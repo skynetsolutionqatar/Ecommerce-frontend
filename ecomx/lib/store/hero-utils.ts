@@ -91,16 +91,32 @@ export function getEyebrowBadgeStyle(eyebrow: string, fallback: HeroAccent): Eye
   return { bg: `${fallback.color}18`, color: fallback.dark, border: `${fallback.color}55`, dot: fallback.neon };
 }
 
-export function getSlideAccent(slideIndex: number, slideKind?: HeroSlide["slideKind"]): HeroAccent {
+export function getSlideAccent(
+  slideIndex: number,
+  slideKind?: HeroSlide["slideKind"],
+  slide?: Pick<HeroSlide, "accentColor" | "accentNeon">
+): HeroAccent {
   const kindIndex =
     slideKind === "pos" ? 0 : slideKind === "thermal" ? 1 : slideKind === "barcode" ? 2 : slideKind === "printer" ? 3 : slideIndex;
-  return HERO_ACCENTS[kindIndex % HERO_ACCENTS.length];
+  const accent = HERO_ACCENTS[kindIndex % HERO_ACCENTS.length];
+  const color = slide?.accentColor?.trim();
+  if (!color) return accent;
+  const neon = slide?.accentNeon?.trim() || color;
+  return {
+    ...accent,
+    color,
+    neon,
+    dark: color,
+    glow: `${color}59`,
+    gradient: `linear-gradient(135deg, ${color} 0%, ${neon} 100%)`,
+    gradientBold: `linear-gradient(135deg, ${color} 0%, ${neon} 100%)`,
+  };
 }
 
 /** Base surface tint — layered under animated mesh orbs in HeroSection. */
-export function getHeroSurfaceStyle(accent: HeroAccent) {
+export function getHeroSurfaceStyle(accent: HeroAccent, surfaceColor?: string) {
   return {
-    backgroundColor: "#f8fafc",
+    backgroundColor: surfaceColor?.trim() || "#f8fafc",
     backgroundImage: [
       `radial-gradient(ellipse 80% 60% at 20% 20%, ${accent.mesh1} 0%, transparent 55%)`,
       `radial-gradient(ellipse 70% 50% at 85% 75%, ${accent.mesh2} 0%, transparent 50%)`,
@@ -261,7 +277,59 @@ function pickApiSlide(apiSlides: HeroSlide[], kind: HeroSlide["slideKind"], inde
   return apiSlides[index] ?? null;
 }
 
+function managedSlideUsesPoster(s: HeroSlide): boolean {
+  return Boolean(s.isPoster && s.posterImg?.trim());
+}
+
+export function heroPosterHasDualAssets(slide: HeroSlide): boolean {
+  return Boolean(slide.posterImg?.trim() && slide.posterImgMobile?.trim());
+}
+
+export function heroSlideThumbSrc(s: HeroSlide): string {
+  if (managedSlideUsesPoster(s) && s.posterImg?.trim()) return s.posterImg.trim();
+  return resolveHeroContentImage(s, Math.max(0, (s.id ?? 1) - 1));
+}
+
+/** Never render an empty hero product frame — fallback to demo cutout */
+export function resolveHeroContentImage(slide: HeroSlide, index: number): string {
+  const trimmed = slide.img?.trim();
+  if (trimmed) return trimmed;
+  return getHeroBannerImage(slide.slideKind, index);
+}
+
+export function resolveHeroPosterDesktopImage(slide: HeroSlide): string {
+  return slide.posterImg?.trim() || "";
+}
+
+export function resolveHeroPosterMobileImage(slide: HeroSlide): string {
+  return slide.posterImgMobile?.trim() || slide.posterImg?.trim() || "";
+}
+
+/** @deprecated use resolveHeroPosterDesktopImage / resolveHeroPosterMobileImage */
+export function resolveHeroPosterImage(slide: HeroSlide): string {
+  return resolveHeroPosterDesktopImage(slide);
+}
+
 export function buildHeroSlides(apiSlides: HeroSlide[]): HeroSlide[] {
+  // Admin hero rows only (archived/unpublished already stripped by API)
+  const managed = apiSlides.filter((s) => !s.productId);
+  if (managed.length > 0) {
+    return managed.map((s, i) => {
+      const posterLive = managedSlideUsesPoster(s);
+      const title = s.title?.trim() || s.offerLabel?.trim() || (posterLive ? "Offer" : "Featured");
+      return {
+        ...s,
+        id: i + 1,
+        title,
+        isPoster: posterLive,
+        img: resolveHeroContentImage(s, i),
+        posterImg: s.posterImg?.trim() || undefined,
+        posterImgMobile: s.posterImgMobile?.trim() || undefined,
+        slideKind: undefined,
+      };
+    });
+  }
+
   return HERO_BANNER_KINDS.map((kind, i) => {
     const fallback = HERO_SLIDER_SLIDES[i];
     const api = pickApiSlide(apiSlides, kind, i);

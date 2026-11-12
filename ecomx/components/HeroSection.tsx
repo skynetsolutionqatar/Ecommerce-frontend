@@ -17,6 +17,11 @@ import {
   getHeroAuroraGradient,
   getHeroBeamGradient,
   buildHeroSlides,
+  heroSlideThumbSrc,
+  resolveHeroContentImage,
+  heroPosterHasDualAssets,
+  resolveHeroPosterDesktopImage,
+  resolveHeroPosterMobileImage,
   HERO_TRUST_BADGES,
   HERO_SLIDE_LABELS,
   type HeroAccent,
@@ -38,7 +43,7 @@ import {
 import type { HeroSlide } from "@/types/storefront.types";
 
 const AUTO_MS = 5500;
-const SLIDE_COUNT = 4;
+const DEFAULT_SLIDE_COUNT = 4;
 const SWIPE_THRESHOLD = 48;
 
 const SLIDE_EASE = [0.32, 0.72, 0, 1] as const;
@@ -384,9 +389,68 @@ function HeroSlidePanel({
   onPrimaryAction: (slide: HeroSlide) => void;
   onViewAll?: () => void;
 }) {
-  const ac = getSlideAccent(index, slide.slideKind);
+  const ac = getSlideAccent(index, slide.slideKind, slide);
   const badge = getEyebrowBadgeStyle(slide.eyebrow, ac);
   const animateIn = isActive;
+  const posterLive = Boolean(slide.isPoster && resolveHeroPosterDesktopImage(slide));
+  const posterDesktop = posterLive ? resolveHeroPosterDesktopImage(slide) : "";
+  const posterDual = posterLive && heroPosterHasDualAssets(slide);
+  const posterMobile = posterDual ? resolveHeroPosterMobileImage(slide) : "";
+  const contentImg = resolveHeroContentImage(slide, index);
+
+  if (posterDesktop) {
+    const posterLabel = formatHeroTitle(slide.title).replace("\n", " ").trim() || slide.cta || "Offer";
+    const posterBg = slide.surfaceColor?.trim() || "#f8fafc";
+    return (
+      <button
+        type="button"
+        onClick={() => onPrimaryAction(slide)}
+        className="group relative flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-0 p-0 text-left md:rounded-3xl"
+        style={{ backgroundColor: posterBg }}
+        aria-label={posterLabel}
+      >
+        {posterDual ? (
+          <>
+            <StoreImage
+              src={posterMobile}
+              alt={posterLabel}
+              width={1080}
+              height={1350}
+              priority={isActive}
+              blend={false}
+              fit="limit"
+              className="block h-full w-full object-contain object-center sm:hidden"
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+            />
+            <StoreImage
+              src={posterDesktop}
+              alt={posterLabel}
+              width={1920}
+              height={620}
+              priority={isActive}
+              blend={false}
+              fit="limit"
+              className="hidden h-full w-full object-contain object-center sm:block"
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+            />
+          </>
+        ) : (
+          <StoreImage
+            src={posterDesktop}
+            alt={posterLabel}
+            width={1200}
+            height={387}
+            priority={isActive}
+            blend={false}
+            fit="limit"
+            className="block h-full w-full object-contain object-center"
+            style={{ objectFit: "contain", width: "100%", height: "100%" }}
+          />
+        )}
+        <span className="sr-only">{slide.cta}</span>
+      </button>
+    );
+  }
 
   return (
     <div
@@ -516,11 +580,11 @@ function HeroSlidePanel({
       >
         <div className={`${HERO_IMAGE_INNER} flex items-center justify-center ${HERO_MOBILE_IMAGE_FRAME}`}>
           <StoreImage
-            src={slide.img}
+            src={contentImg}
             alt={formatHeroTitle(slide.title).replace("\n", " ")}
             width={520}
             height={460}
-            priority
+            priority={isActive}
             blend={false}
             className={getHeroImageClass()}
             style={{ background: "transparent", maxHeight: "100%", width: "auto", height: "100%" }}
@@ -571,7 +635,29 @@ export default function HeroSection({
   onViewAll,
 }: HeroSectionProps) {
   const slides = useMemo(() => buildHeroSlides(apiSlides), [apiSlides]);
-  const trackSlides = useMemo(() => [...slides, slides[0]], [slides]);
+  const slideCount = slides.length > 0 ? slides.length : DEFAULT_SLIDE_COUNT;
+
+  useEffect(() => {
+    slides.forEach((s, i) => {
+      const urls: string[] = [];
+      if (s.isPoster && s.posterImg?.trim()) {
+        urls.push(s.posterImg.trim());
+        if (s.posterImgMobile?.trim()) urls.push(s.posterImgMobile.trim());
+      } else {
+        const content = resolveHeroContentImage(s, i);
+        if (content) urls.push(content);
+      }
+      urls.forEach((url) => {
+        const img = new window.Image();
+        img.decoding = "async";
+        img.src = url;
+      });
+    });
+  }, [slides]);
+  const trackSlides = useMemo(
+    () => (slides.length > 0 ? [...slides, slides[0]] : []),
+    [slides]
+  );
 
   const [trackIndex, setTrackIndex] = useState(0);
   const [instant, setInstant] = useState(false);
@@ -585,9 +671,10 @@ export default function HeroSection({
     trackIndexRef.current = trackIndex;
   }, [trackIndex]);
 
-  const displayIndex = trackIndex % SLIDE_COUNT;
-  const accent = getSlideAccent(displayIndex, slides[displayIndex]?.slideKind);
-  const heroSurface = getHeroSurfaceStyle(accent);
+  const displayIndex = trackIndex % slideCount;
+  const activeSlide = slides[displayIndex];
+  const accent = getSlideAccent(displayIndex, activeSlide?.slideKind, activeSlide);
+  const heroSurface = getHeroSurfaceStyle(accent, activeSlide?.surfaceColor);
   const bgPaused = isDragging || instant || isSliding;
 
   const mx = useMotionValue(0);
@@ -608,17 +695,17 @@ export default function HeroSection({
 
   const next = useCallback(() => {
     setInstant(false);
-    setTrackIndex((i) => (i >= SLIDE_COUNT ? SLIDE_COUNT : i + 1));
+    setTrackIndex((i) => (i >= slideCount ? slideCount : i + 1));
   }, []);
 
   const prev = useCallback(() => {
     setInstant(false);
-    setTrackIndex((i) => (i <= 0 ? SLIDE_COUNT - 1 : i - 1));
+    setTrackIndex((i) => (i <= 0 ? slideCount - 1 : i - 1));
   }, []);
 
   const handleTrackComplete = useCallback(() => {
     setIsSliding(false);
-    if (trackIndexRef.current !== SLIDE_COUNT) return;
+    if (trackIndexRef.current !== slideCount) return;
     setInstant(true);
     setTrackIndex(0);
     requestAnimationFrame(() => setInstant(false));
@@ -645,7 +732,7 @@ export default function HeroSection({
   const autoPlayActive = !isHovering && !isDragging;
 
   useEffect(() => {
-    if (trackIndex !== SLIDE_COUNT) return;
+    if (trackIndex !== slideCount) return;
     const id = window.setTimeout(handleTrackComplete, SLIDE_MOVE_DURATION * 1000 + 40);
     return () => window.clearTimeout(id);
   }, [trackIndex, handleTrackComplete]);
@@ -801,20 +888,23 @@ export default function HeroSection({
                 onAnimationStart={() => setIsSliding(true)}
                 onAnimationComplete={handleTrackComplete}
               >
-                {trackSlides.map((s, i) => (
+                {trackSlides.map((s, i) => {
+                  const panelIndex = i < slideCount ? i : 0;
+                  return (
                   <div
-                    key={`track-${i}`}
+                    key={`track-${s.id}-${i}`}
                     className="flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full"
                   >
                     <HeroSlidePanel
                       slide={s}
-                      index={i < SLIDE_COUNT ? i : 0}
+                      index={panelIndex}
                       isActive={trackIndex === i}
                       onPrimaryAction={handlePrimaryAction}
                       onViewAll={onViewAll}
                     />
                   </div>
-                ))}
+                  );
+                })}
               </motion.div>
             </div>
 
@@ -823,7 +913,10 @@ export default function HeroSection({
                 {slides.map((sl, i) => {
                   const ta = getSlideAccent(i, sl.slideKind);
                   const active = i === displayIndex;
-                  const label = HERO_SLIDE_LABELS[i] ?? `Slide ${i + 1}`;
+                  const label =
+                    sl.offerLabel?.trim() ||
+                    HERO_SLIDE_LABELS[i] ||
+                    `Slide ${i + 1}`;
                   return (
                     <motion.button
                       key={`thumb-${i}`}
@@ -847,11 +940,12 @@ export default function HeroSection({
                         transition={SPRING_SNAPPY}
                       >
                         <StoreImage
-                          src={sl.img}
+                          src={heroSlideThumbSrc(sl) || sl.img}
                           alt=""
                           width={44}
                           height={28}
                           blend={false}
+                          fit="limit"
                           className="h-full w-full object-contain p-0.5"
                         />
                         {active ? (
@@ -877,7 +971,7 @@ export default function HeroSection({
 
               <HeroSlideTimer
                 displayIndex={displayIndex}
-                slideCount={SLIDE_COUNT}
+                slideCount={slideCount}
                 progress={progress}
                 accent={accent}
                 onSeek={goTo}
