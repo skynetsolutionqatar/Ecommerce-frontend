@@ -252,8 +252,10 @@ export default function DeliverySettingsForm({
               touched={formik.touched.freeDeliveryMinOrderAmount}
             />
             <p className="text-xs text-muted-foreground">
-              Promos waive the band charge — keep distance bands from 0 km. Example: 5 km free
-              nearby + 100 QAR minimum subtotal for free delivery anywhere within your radius.
+              Promos waive the band charge — keep distance bands from 0 km. If you set both, free
+              delivery applies only when the customer is within the free distance AND the order
+              subtotal meets the minimum (e.g. within 5 km and ≥ 100 QAR). If you set only one,
+              that rule applies on its own.
             </p>
           </div>
         </FormSection>

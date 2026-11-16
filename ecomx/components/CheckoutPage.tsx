@@ -180,7 +180,9 @@ export default function CheckoutPage({
   }, [savedAddresses, selectedSavedAddressId]);
 
   const deliveryCharge =
-    deliveryStatus?.deliverable === true ? (deliveryStatus.deliveryCharge ?? 0) : 0;
+    deliveryStatus?.deliverable === true && typeof deliveryStatus.deliveryCharge === "number"
+      ? deliveryStatus.deliveryCharge
+      : 0;
   const orderTotal = sub + deliveryCharge;
 
   const { data: countries = [] } = useCountries();
@@ -222,7 +224,8 @@ export default function CheckoutPage({
       },
       coords?: { lat: number | null; lng: number | null }
     ) => {
-      if (result.deliverable && result.area && result.district) {
+      const chargeKnown = typeof result.deliveryCharge === "number";
+      if (result.deliverable && result.area && result.district && chargeKnown) {
         const { area, district } = result;
         const label = formatLocationLabel(area.name, district.name);
         setLocationQuery(label);
@@ -267,7 +270,10 @@ export default function CheckoutPage({
           districtName: "",
           areaName: "",
         }));
-        const reason = result.message || QATAR_ONLY_LOCATION_ERROR;
+        const reason =
+          result.deliverable && !chargeKnown
+            ? "We couldn't calculate the delivery charge for this location. Please pick your exact location on the map."
+            : result.message || QATAR_ONLY_LOCATION_ERROR;
         setDeliveryStatus({
           deliverable: false,
           message: reason,
