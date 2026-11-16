@@ -14,6 +14,8 @@ import { Colors, type, tw } from "@/lib/theme";
 import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
 import { useAuthStore } from "@/store/auth.store";
+import { usePublicDeliverySettings } from "@/hooks/useDeliverySettings";
+import { getDeliveryPromoText } from "@/lib/store/delivery-promo";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
 import type { ApiCategory } from "@/types/category.types";
@@ -60,6 +62,8 @@ export default function Header({
   const authRole = useAuthStore((s) => s.user?.role);
   const showAdminPanel = canAccessAdminPanel(authRole);
   const { client } = useClientTheme();
+  const { data: deliverySettings } = usePublicDeliverySettings();
+  const deliveryPromoText = getDeliveryPromoText(deliverySettings);
   const { data } = useCategories(STORE_CATEGORY_QUERY);
   const categories = data?.categories ?? [];
 
@@ -183,7 +187,7 @@ export default function Header({
             <div className="flex items-center gap-5 text-[12px] md:text-[11px] text-white/85">
               <span className="flex items-center gap-1.5">
                 <Truck className="h-3.5 w-3.5 shrink-0" />
-                Free Delivery on orders over QAR 299
+                {deliveryPromoText}
               </span>
               <span className="hidden sm:flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5 shrink-0" />

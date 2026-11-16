@@ -11,14 +11,15 @@ export interface PublicDeliverySettings {
   maxRadiusKm: number;
   /** Cart subtotal (QAR) at or above → free delivery; 0 = disabled */
   freeDeliveryMinOrderAmount: number;
+  /** Free delivery for every order inside the radius */
+  fullFreeDelivery: boolean;
+  /** Free delivery within this many km of the store; 0 = disabled */
+  freeDeliveryWithinKm: number;
   enabled: boolean;
 }
 
 export interface AdminDeliverySettings extends PublicDeliverySettings {
   _id?: string;
-  fullFreeDelivery: boolean;
-  freeDeliveryWithinKm: number;
-  freeDeliveryMinOrderAmount: number;
   distanceBands: DeliveryDistanceBand[];
   updatedAt?: string;
 }
