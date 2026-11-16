@@ -7,6 +7,7 @@ import { ROLE } from "@/lib/Constant";
 import { AUTH_ROUTES, canAccessAdminPanel, getPostAuthRedirect } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { useAuthStore } from "@/store/auth.store";
+import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
 import type {
   AuthUser,
   ChangePasswordPayload,
@@ -126,6 +127,7 @@ export function useAuth() {
       // ignore — clear local state regardless
     } finally {
       clearAuth();
+      clearCheckoutAddress();
       if (wasAdmin) {
         router.push(AUTH_ROUTES.login);
       } else {

@@ -5,6 +5,7 @@ import Avatar from "./Avatar";
 import type { StoreUser } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
+import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
 import { canAccessAdminPanel } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
@@ -542,6 +543,7 @@ export default function LoginModal({
                   className={outlineBtnClass}
                   onClick={() => {
                     clearAuth();
+                    clearCheckoutAddress();
                     onLogout?.();
                   }}
                 >

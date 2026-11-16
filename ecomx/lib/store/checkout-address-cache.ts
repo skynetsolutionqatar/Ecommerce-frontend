@@ -192,3 +192,13 @@ export function hasVerifiedDeliverySelection(
     (!!cached.districtId && !!cached.areaId)
   );
 }
+
+/** Remove all cached checkout/address data (call on logout). */
+export function clearCheckoutAddress(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEYS.CHECKOUT_ADDRESS);
+  } catch {
+    // ignore storage errors
+  }
+}
