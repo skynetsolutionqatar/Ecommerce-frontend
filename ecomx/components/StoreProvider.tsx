@@ -13,6 +13,7 @@ import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helper
 import { useRouter } from "next/navigation";
 import { fetchProduct } from "@/lib/api/product.api";
 import { showError } from "@/lib/toast";
+import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
 import { authUserToStoreUser } from "@/lib/auth-utils";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
 import { ROUTES, shopUrl } from "@/lib/routes";
@@ -83,6 +84,7 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     useAuthStore.getState().clearAuth();
+    clearCheckoutAddress();
   }, []);
 
   useEffect(() => {
