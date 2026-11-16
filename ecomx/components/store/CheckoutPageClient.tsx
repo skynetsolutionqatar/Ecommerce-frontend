@@ -12,7 +12,7 @@ import type { PlaceOrderPayload } from "@/types/order.types";
 
 export default function CheckoutPageClient() {
   const router = useRouter();
-  const { cart, setLoginOpen, refreshCart } = useStore();
+  const { cart, setLoginOpen, refreshCart, updateCart, removeFromCart } = useStore();
   const { place } = useMyOrderMutations();
   const isLoggedIn = useAuthStore(selectIsAuthenticated);
   const user = useAuthStore((s) => s.user);
@@ -41,6 +41,8 @@ export default function CheckoutPageClient() {
       isLoggedIn={isLoggedIn}
       onLoginOpen={() => setLoginOpen(true)}
       onPlaceOrder={handlePlaceOrder}
+      onUpdateQty={updateCart}
+      onRemoveItem={removeFromCart}
       initialContact={initialContact}
     />
   );

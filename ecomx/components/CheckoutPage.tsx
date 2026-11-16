@@ -98,6 +98,8 @@ interface CheckoutPageProps {
   isLoggedIn: boolean;
   onLoginOpen: () => void;
   onPlaceOrder: (payload: PlaceOrderPayload) => Promise<string>;
+  onUpdateQty: (id: string, qty: number) => void;
+  onRemoveItem: (id: string) => void;
   initialContact?: Pick<CheckoutFormData, "fullName" | "email" | "phone">;
 }
 
@@ -134,6 +136,8 @@ export default function CheckoutPage({
   isLoggedIn,
   onLoginOpen,
   onPlaceOrder,
+  onUpdateQty,
+  onRemoveItem,
   initialContact,
 }: CheckoutPageProps) {
   const router = useRouter();
@@ -1084,20 +1088,58 @@ export default function CheckoutPage({
             <div className="mb-4 text-base font-bold text-gray-900 sm:text-sm">
               Order Summary ({cart.length} item{cart.length !== 1 ? "s" : ""})
             </div>
-            {cart.slice(0, 3).map((item) => (
-              <div key={item.id} className="mb-3 flex gap-2.5 border-b border-bg-soft pb-3">
-                <div className={`h-12 w-12 shrink-0 overflow-hidden rounded-[10px] ${productImageSurfaceClass}`}>
-                  <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain" />
+            {cart.map((item) => {
+              const atMaxStock = item.stock != null && item.qty >= item.stock;
+              return (
+                <div key={item.id} className="mb-3 flex gap-2.5 border-b border-bg-soft pb-3">
+                  <div className={`h-12 w-12 shrink-0 overflow-hidden rounded-[10px] ${productImageSurfaceClass}`}>
+                    <StoreImage src={item.img} alt={item.name} className="h-full w-full object-contain" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm md:text-xs font-semibold leading-snug text-primary">{item.name}</div>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <div className="flex items-center overflow-hidden rounded-lg border border-gray-200">
+                        <button
+                          type="button"
+                          onClick={() => onUpdateQty(item.id, item.qty - 1)}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center border-0 bg-white text-gray-500 hover:text-[#0a255d]"
+                          aria-label="Decrease quantity"
+                        >
+                          <Icons.Minus />
+                        </button>
+                        <span className="w-7 text-center text-sm font-semibold text-gray-900">{item.qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => onUpdateQty(item.id, item.qty + 1)}
+                          disabled={atMaxStock}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center border-0 bg-white hover:text-[#0a255d] disabled:cursor-not-allowed disabled:opacity-40"
+                          style={{ color: atMaxStock ? undefined : Colors.base_color }}
+                          aria-label={atMaxStock ? "Maximum stock reached" : "Increase quantity"}
+                        >
+                          <Icons.Plus />
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onRemoveItem(item.id)}
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 transition hover:border-red-200 hover:text-red-500"
+                        aria-label="Remove item"
+                      >
+                        <Icons.Trash />
+                      </button>
+                    </div>
+                    {atMaxStock ? (
+                      <p className="mt-1 text-[12px] md:text-[11px] font-medium text-orange-600">
+                        Only {item.stock} available in stock
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="text-[13px] font-bold text-primary">
+                    QAR {(item.price * item.qty).toLocaleString()}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm md:text-xs font-semibold leading-snug text-primary">{item.name}</div>
-                  <div className="text-[13px] md:text-[11px] text-muted">Qty: {item.qty}</div>
-                </div>
-                <div className="text-[13px] font-bold text-primary">
-                  QAR {(item.price * item.qty).toLocaleString()}
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <div className="flex flex-col gap-2 border-t border-border pt-3">
               {[
                 ["Subtotal", `QAR ${sub.toLocaleString()}`],
