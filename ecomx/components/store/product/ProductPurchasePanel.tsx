@@ -181,7 +181,7 @@ export default function ProductPurchasePanel({
         {product.stock !== undefined ? (
           <span className="text-[13px] md:text-[11.5px] font-medium text-green-600">
             {product.stock > 0
-              ? `→ In Stock (${product.stock})`
+              ? "→ In Stock"
               : "Out of Stock"}
           </span>
         ) : null}
