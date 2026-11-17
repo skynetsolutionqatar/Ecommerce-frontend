@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Heart, LogOut, MapPin, Package, User } from "lucide-react";
+import { ChevronDown, Heart, KeyRound, LogOut, MapPin, Package, User } from "lucide-react";
 import * as Icons from "@/components/Icons";
 import Avatar from "@/components/Avatar";
 import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
@@ -102,6 +102,12 @@ export default function StoreAccountMenu({
       label: "Addresses",
       icon: <MapPin className="h-5 w-5" strokeWidth={1.75} />,
       onClick: () => go(`${ROUTES.account}?section=addresses`),
+    },
+    {
+      key: "password",
+      label: "Change Password",
+      icon: <KeyRound className="h-5 w-5" strokeWidth={1.75} />,
+      onClick: () => go(`${ROUTES.account}?section=password`),
     },
     {
       key: "profile",

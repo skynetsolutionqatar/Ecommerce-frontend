@@ -2,12 +2,12 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ChevronRight, MapPin, Package, User } from "lucide-react";
+import { ChevronRight, KeyRound, MapPin, Package, User } from "lucide-react";
 import Avatar from "@/components/Avatar";
 import { Colors } from "@/lib/theme";
 import { ROUTES } from "@/lib/routes";
 
-export type StoreAccountNavActive = "profile" | "addresses" | "orders";
+export type StoreAccountNavActive = "profile" | "addresses" | "password" | "orders";
 
 interface StoreAccountLayoutProps {
   active: StoreAccountNavActive;
@@ -55,6 +55,13 @@ export default function StoreAccountLayout({
           style={active === "addresses" ? { background: Colors.base_color } : undefined}
         >
           Addresses
+        </Link>
+        <Link
+          href={`${ROUTES.account}?section=password`}
+          className={mobileTabClass(active === "password")}
+          style={active === "password" ? { background: Colors.base_color } : undefined}
+        >
+          Password
         </Link>
         <Link
           href={ROUTES.orders}
@@ -119,6 +126,16 @@ export default function StoreAccountLayout({
               <span className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
                 Manage Addresses
+              </span>
+            </Link>
+            <Link
+              href={`${ROUTES.account}?section=password`}
+              className={`${navItemClass(active === "password")} mx-1`}
+              style={active === "password" ? activeStyle : undefined}
+            >
+              <span className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4" />
+                Change Password
               </span>
             </Link>
           </nav>

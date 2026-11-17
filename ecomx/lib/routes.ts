@@ -7,6 +7,7 @@ export const ROUTES = {
   checkout: "/checkout",
   account: "/account",
   accountAddresses: "/account/addresses",
+  accountPassword: "/account/password",
   product: (slug: string) => `/product/${slug}`,
   productReviews: (slug: string) => `/product/${slug}/reviews`,
   page: (slug: string) => `/pages/${slug}`,

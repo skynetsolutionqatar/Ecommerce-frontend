@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import * as Icons from "@/components/Icons";
+import AccountChangePasswordSection from "@/components/store/AccountChangePasswordSection";
 import CustomerAddressForm from "@/components/store/CustomerAddressForm";
 import StoreAccountLayout from "@/components/store/StoreAccountNav";
 import { useStore } from "@/components/StoreProvider";
@@ -26,7 +27,13 @@ import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
 import type { CustomerAddress } from "@/types/customer.types";
 import type { AuthUser } from "@/types/auth.types";
 
-type AccountSection = "profile" | "addresses";
+type AccountSection = "profile" | "addresses" | "password";
+
+function resolveAccountSection(sectionParam: string | null): AccountSection {
+  if (sectionParam === "addresses") return "addresses";
+  if (sectionParam === "password") return "password";
+  return "profile";
+}
 
 export default function AccountPageClient() {
   const router = useRouter();
@@ -38,9 +45,7 @@ export default function AccountPageClient() {
   const setUser = useAuthStore((s) => s.setUser);
   const authUser = useAuthStore((s) => s.user);
 
-  const sectionParam = searchParams.get("section");
-  const activeSection: AccountSection =
-    sectionParam === "addresses" ? "addresses" : "profile";
+  const activeSection = resolveAccountSection(searchParams.get("section"));
 
   const { data: customer, isLoading: profileLoading } = useQuery({
     queryKey: CUSTOMER_PROFILE_KEY,
@@ -245,6 +250,13 @@ export default function AccountPageClient() {
                     </section>
                   </div>
                 )}
+              </div>
+            ) : activeSection === "password" ? (
+              <div className="rounded-sm border border-gray-200 bg-white shadow-sm">
+                <div className="border-b border-gray-100 px-4 py-3 sm:px-5 sm:py-4">
+                  <h1 className="text-base font-semibold text-gray-900 sm:text-lg">Change Password</h1>
+                </div>
+                <AccountChangePasswordSection />
               </div>
             ) : (
               <div className="rounded-sm border border-gray-200 bg-white shadow-sm">

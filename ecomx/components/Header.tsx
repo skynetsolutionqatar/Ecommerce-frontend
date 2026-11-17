@@ -622,6 +622,7 @@ export default function Header({
                       { label: "My Profile", href: ROUTES.account },
                       { label: "My Orders", href: ROUTES.orders },
                       { label: "My Addresses", href: `${ROUTES.account}?section=addresses` },
+                      { label: "Change Password", href: `${ROUTES.account}?section=password` },
                     ].map((item) => (
                       <button
                         key={item.href}

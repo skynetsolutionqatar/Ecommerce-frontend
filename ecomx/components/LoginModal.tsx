@@ -9,7 +9,9 @@ import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
 import { canAccessAdminPanel } from "@/lib/config";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
 import { getApiFieldErrors } from "@/lib/api/errors";
+import { getResetPasswordFieldErrors } from "@/lib/auth/password-rules";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import {
   initializeGoogleSignIn,
@@ -230,8 +232,9 @@ export default function LoginModal({
           setError("Invalid or missing reset link. Request a new one.");
           return;
         }
-        if (resetForm.newPassword !== resetForm.confirmPassword) {
-          setResetFieldErrors({ confirmPassword: "Passwords do not match" });
+        const resetErrors = getResetPasswordFieldErrors(resetForm);
+        if (Object.keys(resetErrors).length > 0) {
+          setResetFieldErrors(resetErrors);
           return;
         }
         await resetPassword({
@@ -279,11 +282,17 @@ export default function LoginModal({
           return;
         }
       }
-      if (mode === "reset" && Object.keys(apiFieldErrors).length > 0) {
+      if (mode === "reset") {
         const mappedErrors: Partial<Record<ResetField, string>> = {};
         if (apiFieldErrors.newPassword) mappedErrors.newPassword = apiFieldErrors.newPassword;
         if (apiFieldErrors.confirmPassword) mappedErrors.confirmPassword = apiFieldErrors.confirmPassword;
         if (apiFieldErrors.password) mappedErrors.newPassword = apiFieldErrors.password;
+        if (Object.keys(mappedErrors).length === 0) {
+          const msg = getApiErrorMessage(err, "");
+          if (/different from current password/i.test(msg)) {
+            mappedErrors.newPassword = "New password must be different from current password";
+          }
+        }
         if (Object.keys(mappedErrors).length > 0) {
           setResetFieldErrors(mappedErrors);
           clearError();
@@ -366,7 +375,7 @@ export default function LoginModal({
         : mode === "register"
           ? "Create your account in seconds"
           : mode === "reset"
-            ? "Choose a new password for your account"
+            ? "Choose a new password — it must differ from your current one"
             : "We'll email you a reset link";
 
   const compactRegisterHeader = mode === "register" && !user && !success;
