@@ -183,7 +183,7 @@ export default function DeliveryMapPicker({
     }
 
     const term = query.trim();
-    if (!canSearch || term.length < 2) {
+    if (!canSearch || term.length < 1) {
       setResults([]);
       setSearching(false);
       return;
@@ -228,7 +228,8 @@ export default function DeliveryMapPicker({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (results.length > 0) handleSelectResult(results[0]);
+    // Only accept an explicit single strong match — never auto-pick a vague first hit
+    if (results.length === 1) handleSelectResult(results[0]);
   };
 
   return (

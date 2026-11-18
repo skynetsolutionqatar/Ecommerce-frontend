@@ -126,7 +126,7 @@ export default function CustomerAddressForm({
                 q: q,
                 subtotal: 0,
               });
-        if (result.deliverable && result.area && result.district) {
+        if (result.area && result.district) {
           setDistrictId(result.district._id);
           setAreaId(result.area._id);
           setDistrictName(result.district.name);
@@ -139,9 +139,16 @@ export default function CustomerAddressForm({
           if (result.lat != null && result.lng != null) {
             setMapLat(result.lat);
             setMapLng(result.lng);
+          } else if (lat != null && lng != null) {
+            setMapLat(lat);
+            setMapLng(lng);
           }
-          setDeliverable(true);
-          setDeliveryMessage(`Delivery available in ${labelText}`);
+          setDeliverable(result.deliverable === true);
+          setDeliveryMessage(
+            result.deliverable
+              ? `Delivery available in ${labelText}`
+              : result.message || QATAR_ONLY_LOCATION_ERROR
+          );
         } else {
           setDeliverable(false);
           setDeliveryMessage(result.message || QATAR_ONLY_LOCATION_ERROR);
@@ -317,9 +324,22 @@ export default function CustomerAddressForm({
             setMapLat(null);
             setMapLng(null);
           }}
+          onClear={() => {
+            setLocationQuery("");
+            setDeliverable(null);
+            setDistrictId("");
+            setAreaId("");
+            setDistrictName("");
+            setAreaName("");
+            setMapLat(null);
+            setMapLng(null);
+            setDeliveryMessage("");
+            setErrors((prev) => ({ ...prev, location: "" }));
+          }}
           onSelect={handleAreaSelect}
           onBlur={() => void runDeliveryCheck()}
           showSearchIcon
+          clearable
           className={inputClass(!!errors.location)}
         />
         {locationChecking ? (

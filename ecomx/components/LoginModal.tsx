@@ -386,7 +386,7 @@ export default function LoginModal({
       className="fixed inset-0 z-[500] overflow-y-auto overscroll-y-contain bg-[#030712]/75 backdrop-blur-xl animate-fade-in"
     >
       <div
-        className="flex min-h-[100dvh] min-h-screen items-end justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-6"
+        className="flex min-h-[100dvh] min-h-screen items-center justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-6"
         onClick={onClose}
       >
       <div

@@ -84,8 +84,13 @@ export default function DeliveryCheckPanel() {
         lng,
         countryId: DEFAULT_COUNTRY_ID,
       });
+      // Always sync the check input from the map pin (even if outside delivery radius)
       if (result.area && result.district) {
         setQuery(formatLocationLabel(result));
+        setIsDeliverable(result.deliverable);
+        setMessage(result.message);
+        if (result.deliverable) persistDelivery(result, { lat, lng });
+        else clearDeliverySelection();
       }
     } catch {
       // Keep coords; user can still click Check
@@ -185,8 +190,17 @@ export default function DeliveryCheckPanel() {
             setMapLng(null);
             clearDeliverySelection();
           }}
+          onClear={() => {
+            setQuery("");
+            setMessage(null);
+            setIsDeliverable(null);
+            setMapLat(null);
+            setMapLng(null);
+            clearDeliverySelection();
+          }}
           onSelect={handleAreaSelect}
           showSearchIcon
+          clearable
           wrapperClassName="flex-1"
           className="rounded-lg border border-gray-200 bg-white py-2.5 text-[13px] outline-none focus:border-blue-400 md:py-2 md:text-[12px]"
         />

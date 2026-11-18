@@ -229,10 +229,15 @@ export default function CheckoutPage({
       coords?: { lat: number | null; lng: number | null }
     ) => {
       const chargeKnown = typeof result.deliveryCharge === "number";
-      if (result.deliverable && result.area && result.district && chargeKnown) {
-        const { area, district } = result;
+      const area = result.area;
+      const district = result.district;
+      // Always fill the location input from map/search resolution when we know the area
+      if (area && district) {
+        setLocationQuery(formatLocationLabel(area.name, district.name));
+      }
+
+      if (result.deliverable && area && district && chargeKnown) {
         const label = formatLocationLabel(area.name, district.name);
-        setLocationQuery(label);
         const lat = coords?.lat ?? result.lat ?? formRef.current.mapLat;
         const lng = coords?.lng ?? result.lng ?? formRef.current.mapLng;
         setForm((prev) => ({
@@ -269,10 +274,12 @@ export default function CheckoutPage({
       } else {
         setForm((prev) => ({
           ...prev,
-          districtId: "",
-          areaId: "",
-          districtName: "",
-          areaName: "",
+          districtId: area && district ? district._id : "",
+          areaId: area && district ? area._id : "",
+          districtName: area && district ? district.name : "",
+          areaName: area && district ? area.name : "",
+          mapLat: coords?.lat ?? result.lat ?? prev.mapLat,
+          mapLng: coords?.lng ?? result.lng ?? prev.mapLng,
         }));
         const reason =
           result.deliverable && !chargeKnown
@@ -281,10 +288,10 @@ export default function CheckoutPage({
         setDeliveryStatus({
           deliverable: false,
           message: reason,
-          districtId: "",
-          areaId: "",
-          districtName: "",
-          areaName: "",
+          districtId: area && district ? district._id : "",
+          areaId: area && district ? area._id : "",
+          districtName: area && district ? district.name : "",
+          areaName: area && district ? area.name : "",
         });
         setErrors((prev) => ({ ...prev, areaId: reason }));
       }
@@ -531,17 +538,13 @@ export default function CheckoutPage({
     }`;
   const labelClass = "mb-1.5 block text-sm font-bold text-gray-800";
 
-  const scheduleLocationValidation = () => {
+  const handleLocationQueryChange = (value: string) => {
+    // Do not auto-resolve while typing — mid-query fuzzy match was overwriting
+    // the field (e.g. "Al Markhiya" → "Al Khor"). Validate on select / blur only.
     if (debounceTimerRef.current != null) {
       window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
-    lastValidatedKeyRef.current = null;
-    debounceTimerRef.current = window.setTimeout(() => {
-      void runDeliveryValidation();
-    }, 500);
-  };
-
-  const handleLocationQueryChange = (value: string) => {
     setLocationQuery(value);
     setDeliveryStatus(null);
     lastValidatedKeyRef.current = null;
@@ -558,7 +561,6 @@ export default function CheckoutPage({
     if (errors.areaId) {
       setErrors((prev) => ({ ...prev, areaId: undefined }));
     }
-    scheduleLocationValidation();
   };
 
   const handleAreaSelect = (area: ApiAreaSearchResult) => {
@@ -946,7 +948,9 @@ export default function CheckoutPage({
                     onChange={handleLocationQueryChange}
                     onSelect={handleAreaSelect}
                     onBlur={handleLocationBlur}
+                    onClear={() => handleLocationQueryChange("")}
                     showSearchIcon
+                    clearable
                     className={inputClass("areaId")}
                   />
                   {locationChecking ? (

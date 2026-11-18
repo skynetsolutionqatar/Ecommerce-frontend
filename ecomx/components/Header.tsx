@@ -180,39 +180,43 @@ export default function Header({
       <div ref={headerRef} className="fixed left-0 right-0 top-0 z-[150]">
         {/* ── Top Promo Bar ── */}
         <div
-          className="flex items-center justify-between py-1"
+          className="overflow-hidden py-1"
           style={{ background: `${Colors.base_color}` }}
         >
-          <div className={`${tw.storeContainer} flex items-center justify-between`}>
-            <div className="flex items-center gap-5 text-[12px] md:text-[11px] text-white/85">
-              <span className="flex items-center gap-1.5">
+          <div
+            className={`${tw.storeContainer} flex flex-nowrap items-center justify-between gap-2`}
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-4 text-[11px] text-white/85 md:gap-5 md:text-[11px] sm:text-[12px]">
+              <span className="flex min-w-0 items-center gap-1.5">
                 <Truck className="h-3.5 w-3.5 shrink-0" />
-                {deliveryPromoText}
+                <span className="truncate whitespace-nowrap">{deliveryPromoText}</span>
               </span>
-              <span className="hidden sm:flex items-center gap-1.5">
+              <span className="hidden shrink-0 items-center gap-1.5 sm:flex">
                 <Lock className="h-3.5 w-3.5 shrink-0" />
                 Secure Payments
               </span>
-              <span className="hidden md:flex items-center gap-1.5">
+              <span className="hidden shrink-0 items-center gap-1.5 md:flex">
                 <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
                 Official Warranty
               </span>
-              <span className="hidden lg:flex items-center gap-1.5">
+              <span className="hidden shrink-0 items-center gap-1.5 lg:flex">
                 <Headphones className="h-3.5 w-3.5 shrink-0" />
                 Expert Support
               </span>
             </div>
-            <div className="flex items-center gap-3 text-[12px] md:text-[11px] text-white/85">
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[11px] text-white/85 sm:gap-3 sm:text-[12px] md:text-[11px]">
               <button
                 type="button"
-                className="flex items-center gap-1 hover:text-white transition-colors bg-transparent border-0 cursor-pointer"
+                className="flex items-center gap-1 border-0 bg-transparent cursor-pointer transition-colors hover:text-white"
               >
                 English ▾
               </button>
-              <span className="text-white/85">|</span>
+              <span className="text-white/85" aria-hidden>
+                |
+              </span>
               <button
                 type="button"
-                className="flex items-center gap-1 hover:text-white transition-colors bg-transparent border-0 cursor-pointer"
+                className="flex items-center gap-1 border-0 bg-transparent cursor-pointer transition-colors hover:text-white"
               >
                 QAR ▾
               </button>
