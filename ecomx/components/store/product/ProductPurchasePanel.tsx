@@ -7,6 +7,8 @@ import type { useProductPurchase } from "@/hooks/useProductPurchase";
 import { Colors } from "@/lib/theme";
 import DeliveryCheckPanel from "@/components/store/DeliveryCheckPanel";
 import StarRating from "./StarRating";
+import QuoteRequestModal from "@/components/store/QuoteRequestModal";
+import { useState } from "react";
 
 interface ProductPurchasePanelProps {
   product: Product;
@@ -36,6 +38,7 @@ export default function ProductPurchasePanel({
     addToCart,
     buyNow,
   } = purchase;
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-3 min-w-0">
@@ -87,10 +90,20 @@ export default function ProductPurchasePanel({
 
       {/* Price block */}
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5">
-        <span className="font-mono text-[26px] font-extrabold text-gray-900">
-          {fmt(product.price)}
-        </span>
-        {product.originalPrice ? (
+        {product.quoteOnly ? (
+          product.price > 0 ? (
+            <span className="font-mono text-[22px] font-extrabold text-gray-900">
+              Starting from {fmt(product.price)}
+            </span>
+          ) : (
+            <span className="text-[18px] font-bold text-gray-900">Contact for pricing</span>
+          )
+        ) : (
+          <span className="font-mono text-[26px] font-extrabold text-gray-900">
+            {fmt(product.price)}
+          </span>
+        )}
+        {!product.quoteOnly && product.originalPrice ? (
           <>
             <span className="text-[14px] text-gray-400 line-through">
               {fmt(product.originalPrice)}
@@ -104,6 +117,17 @@ export default function ProductPurchasePanel({
           </>
         ) : null}
       </div>
+
+      {product.quoteOnly && product.details && product.details.length > 0 ? (
+        <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {product.details.map((d) => (
+            <div key={d.label} className="rounded-lg bg-gray-50 px-3 py-2">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{d.label}</dt>
+              <dd className="text-[13px] font-medium text-gray-800">{d.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
 
       {/* Feature tags */}
       {product.tags.length > 0 ? (
@@ -129,7 +153,7 @@ export default function ProductPurchasePanel({
       ) : null}
 
       {/* Variant */}
-      {product.sizes && product.sizes.length > 0 ? (
+      {!product.quoteOnly && product.sizes && product.sizes.length > 0 ? (
         <div>
           <div className="mb-2 text-[14px] md:text-[12.5px] font-semibold text-gray-700">
             Select Variant
@@ -153,6 +177,7 @@ export default function ProductPurchasePanel({
       ) : null}
 
       {/* Quantity + Stock */}
+      {!product.quoteOnly ? (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="text-[14px] md:text-[12.5px] font-semibold text-gray-700">
           Quantity
@@ -190,7 +215,26 @@ export default function ProductPurchasePanel({
         ) : null}
       </div>
 
-      {/* CTA Buttons — match screenshot: blue Add to Cart + dark Buy Now */}
+      ) : null}
+
+      {product.quoteOnly ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setQuoteOpen(true)}
+            className="flex min-h-[44px] w-full items-center justify-center rounded-lg border-0 px-4 py-3.5 text-[15px] font-bold text-white cursor-pointer transition-opacity hover:opacity-90 sm:py-3 sm:text-[14px]"
+            style={{ background: `${Colors.base_color}` }}
+          >
+            Request a Quote
+          </button>
+          <QuoteRequestModal
+            open={quoteOpen}
+            onClose={() => setQuoteOpen(false)}
+            productId={product.id}
+            productName={product.name}
+          />
+        </>
+      ) : (
       <div className="flex flex-col gap-2.5 sm:flex-row">
         <button
           type="button"
@@ -225,11 +269,12 @@ export default function ProductPurchasePanel({
           {buying ? "Processing..." : "⚡ Buy Now"}
         </button>
       </div>
+      )}
       {buyError ? (
         <p className="text-[12px] font-medium text-red-600">{buyError}</p>
       ) : null}
 
-      <DeliveryCheckPanel />
+      {!product.quoteOnly ? <DeliveryCheckPanel /> : null}
 
       {/* Trust badges */}
       {trustBadges.length > 0 ? (

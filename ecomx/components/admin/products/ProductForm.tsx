@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import {
   FormCheckbox,
@@ -99,6 +99,13 @@ function ProductForm({
 
   const { handleChange, handleBlur, values, errors, touched, handleSubmit, setFieldValue } =
     formik;
+
+  // New products in a Software / ERP category default to quote-only (still editable).
+  useEffect(() => {
+    if (isEdit || !values.categoryId) return;
+    const name = categories.find((c) => c._id === values.categoryId)?.name ?? "";
+    if (/software|erp/i.test(name)) void setFieldValue("quoteOnly", true);
+  }, [values.categoryId, categories, isEdit, setFieldValue]);
 
   const imageUrls = useMemo(() => parseImagesField(values.images), [values.images]);
 
@@ -250,6 +257,18 @@ function ProductForm({
               fullWidth
               error={errors.description}
               touched={touched.description}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormTextarea
+              label="Details"
+              name="details"
+              value={values.details}
+              placeholder={"One per line, as Label: Value\nEdition: Enterprise\nModules: HR, Finance"}
+              rows={5}
+              fullWidth
+              error={errors.details}
+              touched={touched.details}
               onChange={handleChange}
               onBlur={handleBlur}
             />
@@ -506,6 +525,13 @@ function ProductForm({
               label="Digital"
               name="isDigital"
               checked={values.isDigital}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            <FormCheckbox
+              label="Quote only (no cart / buy now)"
+              name="quoteOnly"
+              checked={values.quoteOnly}
               onChange={handleChange}
               onBlur={handleBlur}
             />

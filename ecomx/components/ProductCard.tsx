@@ -137,7 +137,7 @@ export default function ProductCard({
                 </motion.span>
               ) : (
                 <motion.span key="add" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  + Add to Cart
+                  {product.quoteOnly ? "View details" : "+ Add to Cart"}
                 </motion.span>
               )}
             </AnimatePresence>

@@ -173,7 +173,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onWishlist
               className={`${tw.btnPrimary} flex-1 justify-center py-4 text-[15px] ${added ? "!bg-gray-700" : ""}`}
               onClick={handleAdd}
             >
-              {added ? <><Icons.Check /> Added to Cart!</> : "Add to Cart"}
+              {added ? <><Icons.Check /> Added to Cart!</> : product.quoteOnly ? "View details" : "Add to Cart"}
             </button>
             <button
               type="button"

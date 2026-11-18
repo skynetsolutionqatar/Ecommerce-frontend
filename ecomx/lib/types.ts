@@ -74,6 +74,8 @@ export interface Product {
   taxPercent?: number;
   isFreeShipping?: boolean;
   isDigital?: boolean;
+  quoteOnly?: boolean;
+  details?: { label: string; value: string }[];
   hasVariants?: boolean;
   totalSold?: number;
   trackInventory?: boolean;

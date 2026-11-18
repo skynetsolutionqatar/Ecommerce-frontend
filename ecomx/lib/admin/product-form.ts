@@ -1,6 +1,6 @@
 import * as Yup from "yup";
 import { PRODUCT_STATUS } from "@/lib/Constant";
-import { positiveNumber, positiveNumberOptional } from "@/components/admin/utils/Validations";
+import { positiveNumberOptional } from "@/components/admin/utils/Validations";
 import { resolveRefId, resolveRefName } from "@/lib/api/populated-ref";
 import type { ApiProduct, CreateProductPayload } from "@/types/product.types";
 
@@ -35,6 +35,9 @@ export type ProductFormValues = {
   isNew: boolean;
   isBestSeller: boolean;
   isDigital: boolean;
+  quoteOnly: boolean;
+  /** One "Label: Value" per line */
+  details: string;
   hasVariants: boolean;
 };
 
@@ -69,6 +72,8 @@ export const defaultProductFormValues: ProductFormValues = {
   isNew: false,
   isBestSeller: false,
   isDigital: false,
+  quoteOnly: false,
+  details: "",
   hasVariants: false,
 };
 
@@ -84,7 +89,14 @@ export const productValidationSchema = Yup.object({
     .lowercase("Slug must be lowercase")
     .matches(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   categoryId: Yup.string().required("Category is required"),
-  price: positiveNumber,
+  price: Yup.number()
+    .typeError("Must be a number")
+    .min(0, "Cannot be negative")
+    .when("quoteOnly", {
+      is: true,
+      then: (schema) => schema.transform((v, o) => (o === "" ? 0 : v)),
+      otherwise: (schema) => schema.required("This field is required"),
+    }),
   compareAtPrice: positiveNumberOptional,
   costPrice: positiveNumberOptional,
   taxPercent: Yup.number()
@@ -203,6 +215,19 @@ export function appendImagesToField(current: string, urls: string[]): string {
   return unique.join("\n");
 }
 
+export function parseDetailsField(value: string): { label: string; value: string }[] {
+  return value
+    .split("\n")
+    .map((line) => {
+      const i = line.indexOf(":");
+      if (i < 1) return null;
+      const label = line.slice(0, i).trim();
+      const val = line.slice(i + 1).trim();
+      return label && val ? { label, value: val } : null;
+    })
+    .filter((d): d is { label: string; value: string } => d !== null);
+}
+
 function toOptionalNumber(value: number | ""): number | undefined {
   return value === "" ? undefined : Number(value);
 }
@@ -241,6 +266,8 @@ export function toProductFormValues(product?: ApiProduct): ProductFormValues {
     isNew: product.isNew ?? false,
     isBestSeller: product.isBestSeller ?? false,
     isDigital: product.isDigital ?? false,
+    quoteOnly: product.quoteOnly ?? false,
+    details: (product.details ?? []).map((d) => `${d.label}: ${d.value}`).join("\n"),
     hasVariants: product.hasVariants ?? false,
   };
 }
@@ -290,6 +317,8 @@ export function toCreateProductPayload(values: ProductFormValues): CreateProduct
     isNew: values.isNew,
     isBestSeller: values.isBestSeller,
     isDigital: values.isDigital,
+    quoteOnly: values.quoteOnly,
+    details: parseDetailsField(values.details),
     hasVariants: values.hasVariants,
   };
 }

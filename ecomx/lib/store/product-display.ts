@@ -11,6 +11,14 @@ export function buildProductSpecs(
 ): { label: string; value: string }[] {
   const specs: { label: string; value: string }[] = [];
 
+  if (product.quoteOnly) {
+    if (product.sku) specs.push({ label: "SKU", value: product.sku });
+    if (product.brand) specs.push({ label: "Brand", value: product.brand });
+    if (product.category) specs.push({ label: "Category", value: product.category });
+    for (const d of product.details ?? []) specs.push({ label: d.label, value: d.value });
+    return specs;
+  }
+
   if (product.sku) specs.push({ label: "SKU", value: product.sku });
   if (product.barcode) specs.push({ label: "Barcode", value: product.barcode });
   if (product.brand) specs.push({ label: "Brand", value: product.brand });

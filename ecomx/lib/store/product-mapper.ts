@@ -57,6 +57,8 @@ export function apiProductToStoreProduct(product: ApiProduct): Product {
     taxPercent: product.taxPercent,
     isFreeShipping: product.isFreeShipping,
     isDigital: product.isDigital,
+    quoteOnly: product.quoteOnly ?? false,
+    details: product.details ?? [],
     hasVariants: product.hasVariants,
     totalSold: product.totalSold,
     trackInventory: product.trackInventory,

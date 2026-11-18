@@ -67,10 +67,26 @@ function WishlistButton({
 function ActionButtons({
   onAdd,
   onBuy,
+  quoteOnly,
+  onView,
 }: {
   onAdd?: (e: React.MouseEvent) => void;
   onBuy?: (e: React.MouseEvent) => void;
+  quoteOnly?: boolean;
+  onView?: (e: React.MouseEvent) => void;
 }) {
+  if (quoteOnly) {
+    return (
+      <button
+        type="button"
+        onClick={onView}
+        className="flex min-h-[40px] w-full cursor-pointer items-center justify-center rounded-lg px-3 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90 sm:min-h-[36px] sm:py-2 sm:text-[11px]"
+        style={{ background: Colors.base_color }}
+      >
+        View details
+      </button>
+    );
+  }
   if (!onAdd && !onBuy) return null;
 
   const btnBase =
@@ -119,7 +135,14 @@ export default function StoreProductCard({
       : null;
   const stock = stockLabel(product);
   const categoryName = resolveApiCategoryName(product);
-  const outOfStock = (product.stock ?? 0) <= 0 || product.status !== PRODUCT_STATUS.ACTIVE;
+  const outOfStock = product.quoteOnly
+    ? product.status !== PRODUCT_STATUS.ACTIVE
+    : (product.stock ?? 0) <= 0 || product.status !== PRODUCT_STATUS.ACTIVE;
+  const priceText = product.quoteOnly
+    ? product.price > 0
+      ? `From ${formatPrice(product.price)}`
+      : "Contact for pricing"
+    : formatPrice(product.price);
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const handleWishlist = (e: React.MouseEvent) => {
@@ -129,6 +152,10 @@ export default function StoreProductCard({
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!outOfStock) onAddToCart?.(product);
+  };
+  const handleView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick(product);
   };
   const handleBuy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -169,13 +196,13 @@ export default function StoreProductCard({
             </h3>
             <p className="mt-0.5 text-[12px] md:text-[11px] text-gray-500">{product.brand ?? "—"} · {product.sku ?? product.slug}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-[15px] font-bold text-gray-900">{formatPrice(product.price)}</span>
+              <span className="text-[15px] font-bold text-gray-900">{priceText}</span>
               {compareAt && compareAt > product.price ? (
                 <span className="text-[12px] md:text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
               ) : null}
-              <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>
+              {!product.quoteOnly ? <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>
                 {stock.text}
-              </span>
+              </span> : null}
             </div>
           </div>
 
@@ -187,7 +214,7 @@ export default function StoreProductCard({
             ) : null}
             {!outOfStock ? (
               <div className="w-full min-w-0 sm:min-w-[200px] md:min-w-[240px]" onClick={stop}>
-                <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} />
+                <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} quoteOnly={product.quoteOnly} onView={handleView} />
               </div>
             ) : null}
           </div>
@@ -250,7 +277,7 @@ export default function StoreProductCard({
         <p className="mb-2 text-[12px] md:text-[11px] text-gray-500">{product.sku ?? product.slug}</p>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span className="text-[15px] font-bold text-gray-900">{formatPrice(product.price)}</span>
+          <span className="text-[15px] font-bold text-gray-900">{priceText}</span>
           {compareAt && compareAt > product.price ? (
             <span className="text-[12px] md:text-[11px] text-gray-400 line-through">{formatPrice(compareAt)}</span>
           ) : null}
@@ -258,12 +285,12 @@ export default function StoreProductCard({
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <span className="text-[12px] md:text-[11px] font-medium text-gray-500">{product.brand ?? "—"}</span>
-          <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>{stock.text}</span>
+          {!product.quoteOnly ? <span className={`rounded-full px-2 py-0.5 text-[11px] md:text-[10px] font-medium ${stock.className}`}>{stock.text}</span> : null}
         </div>
 
-        {!outOfStock && (onAddToCart || onBuyNow) ? (
+        {!outOfStock && (onAddToCart || onBuyNow || product.quoteOnly) ? (
           <div className="mt-3" onClick={stop}>
-            <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} />
+            <ActionButtons onAdd={onAddToCart ? handleAdd : undefined} onBuy={onBuyNow ? handleBuy : undefined} quoteOnly={product.quoteOnly} onView={handleView} />
           </div>
         ) : null}
       </div>

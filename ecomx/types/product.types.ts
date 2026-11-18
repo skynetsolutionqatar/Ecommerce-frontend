@@ -66,6 +66,8 @@ export interface ApiProduct {
   status: ProductStatus;
   isFeatured?: boolean;
   isDigital?: boolean;
+  quoteOnly?: boolean;
+  details?: { label: string; value: string }[];
   totalSold?: number;
   averageRating?: number;
   reviewCount?: number;
@@ -132,6 +134,8 @@ export interface CreateProductPayload {
   status?: ProductStatus;
   isFeatured?: boolean;
   isDigital?: boolean;
+  quoteOnly?: boolean;
+  details?: { label: string; value: string }[];
 }
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;

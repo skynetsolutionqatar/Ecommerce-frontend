@@ -110,16 +110,24 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
 
   const handleAddToCart = useCallback(
     (product: Product, color: string, size: string, qty = 1) => {
+      if (product.quoteOnly) {
+        router.push(ROUTES.product(product.slug));
+        return;
+      }
       void (async () => {
         const ok = await addToCart(product, color, size, qty);
         if (ok) setCartOpen(true);
       })();
     },
-    [addToCart]
+    [addToCart, router]
   );
 
   const handleBuyNow = useCallback(
     async (product: Product, color: string, size: string, qty = 1) => {
+      if (product.quoteOnly) {
+        router.push(ROUTES.product(product.slug));
+        return false;
+      }
       const ok = await buyNow(product, color, size, qty);
       if (!ok) return false;
 
@@ -163,6 +171,14 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const loggedIn = selectIsAuthenticated(useAuthStore.getState());
 
+        // Quote-only products can't go in the cart — send the user to the product page.
+        const apiForCheck = await fetchProduct(item.id);
+        if (apiForCheck.quoteOnly) {
+          setWishlistOpen(false);
+          router.push(ROUTES.product(apiForCheck.slug));
+          return;
+        }
+
         if (loggedIn) {
           const apiProduct = await moveToCart(item.id);
           if (!apiProduct) {
@@ -190,7 +206,7 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
         showError(err, "Could not move item to cart");
       }
     },
-    [addToCart, isWishlisted, moveToCart, refreshCart, removeFromWishlist]
+    [addToCart, isWishlisted, moveToCart, refreshCart, removeFromWishlist, router]
   );
 
   const value = useMemo<StoreContextValue>(
