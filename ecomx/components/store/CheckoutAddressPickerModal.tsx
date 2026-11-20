@@ -95,7 +95,7 @@ export default function CheckoutAddressPickerModal({
             <CustomerAddressForm
               defaultFullName={defaultFullName}
               defaultPhone={defaultPhone}
-              showDefaultToggle={addresses.length > 0}
+              showDefaultToggle={!addresses.some((a) => a.isDefault)}
               submitLabel="Save & use this address"
               onCancel={() => setMode("list")}
               onSubmit={async (payload) => {

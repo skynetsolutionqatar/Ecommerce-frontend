@@ -206,7 +206,8 @@ export default function CustomerAddressForm({
         mapLat,
         mapLng,
         countryName: "Qatar",
-        isDefault: showDefaultToggle ? isDefault : undefined,
+        // When toggle is hidden: keep existing default flag on edit; new addresses stay non-default.
+        isDefault: showDefaultToggle ? isDefault : Boolean(initial?.isDefault),
       });
       await onSubmit(payload);
     } catch (err) {

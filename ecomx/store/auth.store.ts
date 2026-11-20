@@ -4,6 +4,7 @@ import { STORAGE_KEYS } from "@/lib/Constant";
 import { canAccessAdminPanel } from "@/lib/config";
 import { canManageTenants } from "@/lib/admin/tenant-access";
 import { TOKEN_KEYS } from "@/lib/config";
+import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
 import type { AuthUser } from "@/types/auth.types";
 
 interface AuthState {
@@ -47,6 +48,7 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== "undefined") {
           localStorage.removeItem(TOKEN_KEYS.access);
           localStorage.removeItem(TOKEN_KEYS.refresh);
+          clearCheckoutAddress();
         }
         set({ user: null, accessToken: null, refreshToken: null, authError: null });
       },

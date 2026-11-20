@@ -286,7 +286,7 @@ export default function AccountPageClient() {
                       initial={editAddress}
                       defaultFullName={customer?.name ?? ""}
                       defaultPhone={customer?.phone ?? ""}
-                      showDefaultToggle
+                      showDefaultToggle={!addresses.some((a) => a.isDefault)}
                       onCancel={() => {
                         setAddressFormMode("none");
                         setEditAddress(null);

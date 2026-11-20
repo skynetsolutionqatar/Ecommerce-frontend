@@ -22,11 +22,16 @@ import {
   saveCheckoutProgress,
 } from "@/lib/store/checkout-address-cache";
 import {
+  buildCustomerAddressPayload,
   customerAddressToCheckoutPatch,
+  findMatchingCustomerAddress,
   formatCustomerAddressLines,
 } from "@/lib/store/customer-address-checkout";
 import CheckoutAddressPickerModal from "@/components/store/CheckoutAddressPickerModal";
-import { useCustomerAddresses } from "@/hooks/useCustomerAddresses";
+import {
+  useCustomerAddressMutations,
+  useCustomerAddresses,
+} from "@/hooks/useCustomerAddresses";
 import type { CustomerAddress } from "@/types/customer.types";
 import {
   useCheckDeliveryMutation,
@@ -158,7 +163,9 @@ export default function CheckoutPage({
   const [locating, setLocating] = useState(false);
   const [addressPickerOpen, setAddressPickerOpen] = useState(false);
   const [selectedSavedAddressId, setSelectedSavedAddressId] = useState<string | null>(null);
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
   const defaultSavedAddressAppliedRef = useRef(false);
+  const addressSyncRef = useRef(false);
   const checkoutTrackedRef = useRef(false);
 
   useEffect(() => {
@@ -168,7 +175,12 @@ export default function CheckoutPage({
   }, [cart, isLoggedIn]);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      addressSyncRef.current = false;
+      defaultSavedAddressAppliedRef.current = false;
+      setSaveAsDefault(false);
+      return;
+    }
     setSubmitError((prev) => {
       if (!prev) return prev;
       if (prev === "Please sign in to place an order.") return "";
@@ -176,12 +188,44 @@ export default function CheckoutPage({
     });
   }, [isLoggedIn]);
 
-  const { data: savedAddresses = [] } = useCustomerAddresses();
+  const {
+    data: savedAddresses = [],
+    isFetched: savedAddressesFetched,
+  } = useCustomerAddresses();
+  const { addAddress } = useCustomerAddressMutations();
 
   const selectedSavedAddress = useMemo(() => {
     if (!selectedSavedAddressId) return null;
     return savedAddresses.find((a) => a._id === selectedSavedAddressId) ?? null;
   }, [savedAddresses, selectedSavedAddressId]);
+
+  const hasDefaultAddress = useMemo(
+    () => savedAddresses.some((a) => a.isDefault),
+    [savedAddresses]
+  );
+
+  const isPendingNewCheckoutAddress = useMemo(() => {
+    if (!isLoggedIn || !savedAddressesFetched) return false;
+    if (selectedSavedAddressId) return false;
+    if (
+      !form.fullName.trim() ||
+      !form.phone.trim() ||
+      !form.line1.trim() ||
+      !hasVerifiedDeliverySelection(form)
+    ) {
+      return false;
+    }
+    return !findMatchingCustomerAddress(savedAddresses, form);
+  }, [
+    isLoggedIn,
+    savedAddressesFetched,
+    selectedSavedAddressId,
+    form,
+    savedAddresses,
+  ]);
+
+  const showSaveAsDefaultCheckbox =
+    isPendingNewCheckoutAddress && !hasDefaultAddress;
 
   const deliveryCharge =
     deliveryStatus?.deliverable === true && typeof deliveryStatus.deliveryCharge === "number"
@@ -491,14 +535,46 @@ export default function CheckoutPage({
 
   useEffect(() => {
     if (!addressLoaded || !isLoggedIn || defaultSavedAddressAppliedRef.current) return;
-    if (savedAddresses.length === 0) return;
+    if (!savedAddressesFetched) return;
 
     const progress = loadCheckoutProgress();
+    const formHasGuestDelivery =
+      formRef.current.line1.trim() &&
+      (hasVerifiedDeliverySelection(formRef.current) ||
+        locationQueryRef.current.trim() ||
+        deliveryStatusRef.current?.deliverable === true);
     const hasCachedDelivery =
       progress &&
       progress.form.line1.trim() &&
-      (hasVerifiedDeliverySelection(progress.form) || progress.locationQuery.trim());
-    if (hasCachedDelivery) {
+      (hasVerifiedDeliverySelection(progress.form) ||
+        progress.locationQuery.trim() ||
+        progress.deliveryStatus?.deliverable === true);
+
+    // Guest filled contact + delivery before login — keep it; do not overwrite with DB default.
+    if (formHasGuestDelivery || hasCachedDelivery) {
+      if (
+        !formHasGuestDelivery &&
+        hasCachedDelivery &&
+        progress &&
+        (!formRef.current.line1.trim() || !hasVerifiedDeliverySelection(formRef.current))
+      ) {
+        setForm((prev) => ({
+          ...prev,
+          ...progress.form,
+          fullName: progress.form.fullName || prev.fullName,
+          email: progress.form.email || prev.email,
+          phone: toCheckoutPhoneDigits(progress.form.phone || prev.phone),
+        }));
+        if (progress.locationQuery) setLocationQuery(progress.locationQuery);
+        if (progress.deliveryStatus) setDeliveryStatus(progress.deliveryStatus);
+        if (progress.savedAddressId) setSelectedSavedAddressId(progress.savedAddressId);
+        if (progress.step >= 1 && progress.step <= 3) setStep(progress.step);
+      }
+      defaultSavedAddressAppliedRef.current = true;
+      return;
+    }
+
+    if (savedAddresses.length === 0) {
       defaultSavedAddressAppliedRef.current = true;
       return;
     }
@@ -509,7 +585,59 @@ export default function CheckoutPage({
       applySavedAddress(defaultAddr);
     }
     defaultSavedAddressAppliedRef.current = true;
-  }, [addressLoaded, isLoggedIn, savedAddresses, applySavedAddress]);
+  }, [addressLoaded, isLoggedIn, savedAddresses, savedAddressesFetched, applySavedAddress]);
+
+  // After login, link an existing matching address. New addresses wait for checkbox + continue/place order.
+  useEffect(() => {
+    if (!addressLoaded || !isLoggedIn || !savedAddressesFetched) return;
+    if (addressSyncRef.current) return;
+    if (selectedSavedAddressId) {
+      addressSyncRef.current = true;
+      return;
+    }
+
+    const current = formRef.current;
+    const readyToSync =
+      current.fullName.trim() &&
+      current.phone.trim() &&
+      current.line1.trim() &&
+      hasVerifiedDeliverySelection(current);
+
+    if (!readyToSync) return;
+
+    const match = findMatchingCustomerAddress(savedAddresses, current);
+    if (match?._id) {
+      setSelectedSavedAddressId(match._id);
+      addressSyncRef.current = true;
+      setSaveAsDefault(false);
+      saveCheckoutProgress({
+        form: current,
+        step: stepRef.current,
+        locationQuery: locationQueryRef.current,
+        deliveryStatus: deliveryStatusRef.current,
+        savedAddressId: match._id,
+      });
+    }
+  }, [
+    addressLoaded,
+    isLoggedIn,
+    savedAddresses,
+    savedAddressesFetched,
+    form.line1,
+    form.fullName,
+    form.phone,
+    form.districtId,
+    form.areaId,
+    form.mapLat,
+    form.mapLng,
+    selectedSavedAddressId,
+  ]);
+
+  useEffect(() => {
+    if (hasDefaultAddress && saveAsDefault) {
+      setSaveAsDefault(false);
+    }
+  }, [hasDefaultAddress, saveAsDefault]);
 
   useEffect(() => {
     if (!addressLoaded) return;
@@ -670,6 +798,69 @@ export default function CheckoutPage({
     setStep(target);
   };
 
+  const ensureAddressSavedToDb = async (): Promise<string | null> => {
+    if (selectedSavedAddressId) return selectedSavedAddressId;
+
+    const current = formRef.current;
+    if (
+      !current.fullName.trim() ||
+      !current.phone.trim() ||
+      !current.line1.trim() ||
+      !hasVerifiedDeliverySelection(current)
+    ) {
+      return null;
+    }
+
+    const existing = findMatchingCustomerAddress(savedAddresses, current);
+    if (existing?._id) {
+      setSelectedSavedAddressId(existing._id);
+      addressSyncRef.current = true;
+      return existing._id;
+    }
+
+    const makeDefault = saveAsDefault && !hasDefaultAddress;
+    const payload = buildCustomerAddressPayload({
+      label: "Home",
+      fullName: current.fullName,
+      phone: current.phone,
+      line1: current.line1,
+      districtName: resolvedDistrictName || current.districtName || "",
+      areaName: resolvedAreaName || current.areaName || "",
+      districtId: current.districtId,
+      areaId: current.areaId,
+      mapLat: current.mapLat,
+      mapLng: current.mapLng,
+      countryName: selectedCountry?.name ?? "Qatar",
+      isDefault: makeDefault,
+    });
+
+    const res = await addAddress.mutateAsync(payload);
+    const list = res.data.addresses;
+    const created =
+      findMatchingCustomerAddress(list, current) ??
+      list.find(
+        (a) =>
+          a.line1 === payload.line1 &&
+          a.fullName === payload.fullName &&
+          a.phone === payload.phone
+      ) ??
+      list[list.length - 1];
+    const id = created?._id ?? null;
+    if (id) {
+      setSelectedSavedAddressId(id);
+      addressSyncRef.current = true;
+      setSaveAsDefault(false);
+      saveCheckoutProgress({
+        form: formRef.current,
+        step: stepRef.current,
+        locationQuery: locationQueryRef.current,
+        deliveryStatus: deliveryStatusRef.current,
+        savedAddressId: id,
+      });
+    }
+    return id;
+  };
+
   const handlePlaceOrder = async () => {
     setSubmitError("");
 
@@ -677,6 +868,15 @@ export default function CheckoutPage({
       setSubmitError("Your cart is empty.");
       return;
     }
+
+    // Always flush progress so contact + delivery survive the login gate / remount.
+    saveCheckoutProgress({
+      form,
+      step,
+      locationQuery,
+      deliveryStatus,
+      savedAddressId: selectedSavedAddressId,
+    });
 
     if (!isLoggedIn) {
       onLoginOpen();
@@ -692,6 +892,12 @@ export default function CheckoutPage({
 
     setPlacing(true);
     try {
+      try {
+        await ensureAddressSavedToDb();
+      } catch {
+        // Order can still proceed; address sync is best-effort for account bookkeeping.
+      }
+
       const attribution = getStoredAttribution();
       const orderNumber = await onPlaceOrder({
         deliveryAddress: {
@@ -1013,6 +1219,17 @@ export default function CheckoutPage({
                   ✓ Delivery within {deliverySettings?.maxRadiusKm ?? 20} km of our store · Free
                   installation included
                 </div>
+                {showSaveAsDefaultCheckbox ? (
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={saveAsDefault}
+                      onChange={(e) => setSaveAsDefault(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    Set as default delivery address
+                  </label>
+                ) : null}
                 <div className="flex gap-2.5">
                   <button
                     type="button"
@@ -1024,10 +1241,26 @@ export default function CheckoutPage({
                   <button
                     type="button"
                     className={`${tw.btnPrimary} flex-[2] justify-center disabled:opacity-50`}
-                    disabled={!deliveryReady || locationChecking}
-                    onClick={() => validateStep2() && setStep(3)}
+                    disabled={!deliveryReady || locationChecking || addAddress.isPending}
+                    onClick={() => {
+                      if (!validateStep2()) return;
+                      if (isLoggedIn && isPendingNewCheckoutAddress) {
+                        void ensureAddressSavedToDb()
+                          .then(() => setStep(3))
+                          .catch((err) => {
+                            showError(
+                              getApiErrorMessage(err, "Could not save address. Please try again.")
+                            );
+                          });
+                        return;
+                      }
+                      setStep(3);
+                    }}
                   >
-                    Continue to Payment <Icons.ArrowRight />
+                    {addAddress.isPending
+                      ? "Saving address..."
+                      : "Continue to Payment"}{" "}
+                    {!addAddress.isPending ? <Icons.ArrowRight /> : null}
                   </button>
                 </div>
               </div>
@@ -1050,12 +1283,32 @@ export default function CheckoutPage({
                 <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-[13px] text-gray-700">
                   ✓ No online payment required · Pay the delivery agent in QAR
                 </div>
+                {showSaveAsDefaultCheckbox ? (
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={saveAsDefault}
+                      onChange={(e) => setSaveAsDefault(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    Set as default delivery address
+                  </label>
+                ) : null}
                 {!isLoggedIn ? (
                   <p className="text-sm md:text-xs font-medium text-amber-700">
                     Sign in is required to place an order.{" "}
                     <button
                       type="button"
-                      onClick={onLoginOpen}
+                      onClick={() => {
+                        saveCheckoutProgress({
+                          form,
+                          step,
+                          locationQuery,
+                          deliveryStatus,
+                          savedAddressId: selectedSavedAddressId,
+                        });
+                        onLoginOpen();
+                      }}
                       className="font-bold underline"
                     >
                       Sign in

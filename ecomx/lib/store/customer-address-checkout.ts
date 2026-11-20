@@ -134,3 +134,48 @@ export function formatCustomerAddressLines(address: CustomerAddress): string {
   ].filter(Boolean);
   return parts.join(", ");
 }
+
+/** True when a saved address matches the current checkout delivery fields. */
+export function checkoutFormMatchesAddress(
+  address: CustomerAddress,
+  form: Pick<
+    CheckoutFormData,
+    "line1" | "fullName" | "phone" | "areaId" | "districtId" | "mapLat" | "mapLng"
+  >
+): boolean {
+  const meta = decodeAddressDeliveryMeta(address);
+  const lineMatch =
+    address.line1.trim().toLowerCase() === form.line1.trim().toLowerCase();
+  if (!lineMatch) return false;
+
+  if (form.areaId && meta.areaId && form.areaId === meta.areaId) return true;
+  if (form.districtId && meta.districtId && form.districtId === meta.districtId) {
+    return true;
+  }
+  if (
+    form.mapLat != null &&
+    form.mapLng != null &&
+    meta.mapLat != null &&
+    meta.mapLng != null &&
+    Math.abs(form.mapLat - meta.mapLat) < 0.0001 &&
+    Math.abs(form.mapLng - meta.mapLng) < 0.0001
+  ) {
+    return true;
+  }
+
+  const phoneDigits = (value: string) => value.replace(/\D/g, "");
+  return (
+    phoneDigits(address.phone) === phoneDigits(normalizeRegisterPhone(form.phone)) &&
+    address.fullName.trim().toLowerCase() === form.fullName.trim().toLowerCase()
+  );
+}
+
+export function findMatchingCustomerAddress(
+  addresses: CustomerAddress[],
+  form: Pick<
+    CheckoutFormData,
+    "line1" | "fullName" | "phone" | "areaId" | "districtId" | "mapLat" | "mapLng"
+  >
+): CustomerAddress | undefined {
+  return addresses.find((address) => checkoutFormMatchesAddress(address, form));
+}
