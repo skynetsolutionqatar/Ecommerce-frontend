@@ -13,7 +13,7 @@ const client = getClientConfig();
 export const metadata: Metadata = {
   title: `${client.name} — POS & IT Hardware Store Qatar`,
   description: "Shop POS systems, printers, scanners, and atACC ERP solutions from Skynet Solution Qatar. Qatar VAT certified. Free installation.",
-  keywords: "POS Qatar, Skynet, atACC ERP, thermal printer, barcode scanner, Doha,Qatar",
+  keywords: "POS Qatar, Skynet, atACC ERP, thermal printer, barcode scanner, Doha",
   openGraph: {
     title: `${client.name} — POS & IT Hardware`,
     description: "Qatar's trusted POS and ERP partner since 2012.",
