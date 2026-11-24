@@ -5,6 +5,9 @@ import type {
   ChangePasswordPayload,
   ForgotPasswordPayload,
   LoginPayload,
+  PhoneOtpChallenge,
+  PhoneOtpSendPayload,
+  PhoneOtpVerifyPayload,
   RegisterPayload,
   ResetPasswordPayload,
 } from "@/types/auth.types";
@@ -36,4 +39,13 @@ export const authApi = {
 
   googleLogin: (payload: { credential?: string; idToken?: string }) =>
     apiPost<AuthResponse>("/auth/google/login", payload),
+
+  sendPhoneOtp: (payload: PhoneOtpSendPayload) =>
+    apiPost<PhoneOtpChallenge>("/auth/msg91/send-otp", payload),
+
+  verifyPhoneOtp: (payload: PhoneOtpVerifyPayload) =>
+    apiPost<AuthResponse>("/auth/msg91/verify-otp", payload),
+
+  resendPhoneOtp: (payload: { reqId: string }) =>
+    apiPost<PhoneOtpChallenge>("/auth/msg91/resend-otp", payload),
 };

@@ -24,6 +24,7 @@ import {
   normalizeRegisterPhone,
 } from "@/lib/utils";
 import { selectIsAuthenticated, useAuthStore } from "@/store/auth.store";
+import { accountContactLabel, isPhoneOnlyAccountEmail } from "@/lib/auth-utils";
 import type { CustomerAddress } from "@/types/customer.types";
 import type { AuthUser } from "@/types/auth.types";
 
@@ -141,7 +142,10 @@ export default function AccountPageClient() {
         <StoreAccountLayout
           active={navActive}
           userName={customer?.name ?? authUser?.name ?? "User"}
-          userEmail={customer?.email ?? authUser?.email}
+          userEmail={accountContactLabel(
+            customer?.email ?? authUser?.email,
+            customer?.phone ?? authUser?.phone
+          )}
           avatarUrl={customer?.avatar ?? authUser?.avatar}
         >
             {activeSection === "profile" ? (
@@ -238,15 +242,29 @@ export default function AccountPageClient() {
                     </section>
 
                     <section className="px-4 py-4 sm:px-5 sm:py-5">
-                      <h2 className="mb-3 text-sm font-semibold text-gray-900">Email Address</h2>
-                      <input
-                        readOnly
-                        value={customer.email}
-                        className="w-full max-w-md rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
-                      />
-                      <p className="mt-2 text-xs text-gray-500">
-                        Email is used for order updates and cannot be changed here.
-                      </p>
+                      <h2 className="mb-3 text-sm font-semibold text-gray-900">
+                        {isPhoneOnlyAccountEmail(customer.email) ? "Sign-in" : "Email Address"}
+                      </h2>
+                      {isPhoneOnlyAccountEmail(customer.email) ? (
+                        <p className="text-sm text-gray-700">
+                          This account signs in with{" "}
+                          <span className="font-semibold text-gray-900">
+                            {customer.phone || "a mobile number"}
+                          </span>
+                          .
+                        </p>
+                      ) : (
+                        <>
+                          <input
+                            readOnly
+                            value={customer.email}
+                            className="w-full max-w-md rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
+                          />
+                          <p className="mt-2 text-xs text-gray-500">
+                            Email is used for order updates and cannot be changed here.
+                          </p>
+                        </>
+                      )}
                     </section>
                   </div>
                 )}

@@ -11,6 +11,12 @@ import {
 
 export { isAdminRole, isDeveloperRole, isOwnerRole, sanitizeRedirectPath };
 
+function readOtpPhoneCountry(): "QA" | "IN" {
+  return process.env.NEXT_PUBLIC_OTP_PHONE_COUNTRY?.trim().toUpperCase() === "IN"
+    ? "IN"
+    : "QA";
+}
+
 export const API_CONFIG = {
   // baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://api-skynet-ecommerce-store.onrender.com/api/v1",
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5050/api/v1",
@@ -24,6 +30,14 @@ export const API_CONFIG = {
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
   /** When true, /admin is restricted to platform hub roles (developer / owner). */
   developerPortal: process.env.NEXT_PUBLIC_DEVELOPER_PORTAL === "true",
+  /** Phone OTP on the storefront login modal. Set to "false" to hide it. */
+  otpLoginEnabled: process.env.NEXT_PUBLIC_OTP_LOGIN_ENABLED !== "false",
+  /** Default country in the phone OTP dropdown. */
+  otpPhoneCountry: readOtpPhoneCountry(),
+  /** Public MSG91 widget id. Required only when the widget has reCAPTCHA on. */
+  msg91WidgetId: process.env.NEXT_PUBLIC_MSG91_WIDGET_ID?.trim() ?? "",
+  /** Public MSG91 widget token (OTP → Token). Not the account auth key. */
+  msg91Token: process.env.NEXT_PUBLIC_MSG91_TOKEN?.trim() ?? "",
 } as const;
 
 /** Who may open the admin panel in this frontend deployment. */

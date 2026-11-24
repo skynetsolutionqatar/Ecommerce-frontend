@@ -177,6 +177,24 @@ export function useAuth() {
     }
   }, [clearAuthError, setAuthError]);
 
+  const confirmPhoneOtp = useCallback(async (reqId: string, otp: string) => {
+    setLoading(true);
+    clearAuthError();
+    try {
+      const res = await authApi.verifyPhoneOtp({ reqId, otp });
+      const { customer, accessToken, refreshToken } = res.data;
+      const normalized = normalizeAuthUser(customer as unknown as Record<string, unknown>);
+      setAuth(normalized, accessToken, refreshToken);
+      void linkGuestActivityToCustomer("login_linked");
+      return { user: normalized, storeUser: authUserToStoreUser(normalized) };
+    } catch (err) {
+      setAuthError(getAuthErrorMessage(err, "phoneLogin"));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [setAuth, setAuthError, clearAuthError]);
+
   const resetPassword = useCallback(async (payload: ResetPasswordPayload) => {
     setLoading(true);
     clearAuthError();
@@ -210,6 +228,7 @@ export function useAuth() {
     clearError: clearAuthError,
     login,
     loginWithGoogle,
+    confirmPhoneOtp,
     register,
     logout,
     changePassword,

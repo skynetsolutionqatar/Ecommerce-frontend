@@ -51,3 +51,16 @@ export interface ResetPasswordPayload {
   newPassword: string;
   confirmPassword: string;
 }
+
+export interface PhoneOtpSendPayload {
+  phone: string;
+}
+
+export interface PhoneOtpVerifyPayload {
+  reqId: string;
+  otp: string;
+}
+
+export interface PhoneOtpChallenge {
+  reqId: string;
+}

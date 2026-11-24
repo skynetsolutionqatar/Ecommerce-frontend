@@ -13,6 +13,8 @@ import { getResetPasswordFieldErrors } from "@/lib/auth/password-rules";
 import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
+import PhoneOtpForm from "@/components/auth/PhoneOtpForm";
+import { accountContactLabel } from "@/lib/auth-utils";
 import {
   initializeGoogleSignIn,
   isGoogleOAuthConfigured,
@@ -35,6 +37,7 @@ interface LoginModalProps {
 }
 
 type AuthMode = "login" | "register" | "forgot" | "reset";
+type LoginMethod = "email" | "phone";
 type RegisterField = "name" | "email" | "phone" | "password";
 type ResetField = "newPassword" | "confirmPassword";
 
@@ -74,8 +77,10 @@ export default function LoginModal({
   const authUser = useAuthStore((s) => s.user);
   const showAdminPanel = canAccessAdminPanel(authUser?.role);
   const googleClientId = API_CONFIG.googleClientId.trim();
+  const otpLoginEnabled = API_CONFIG.otpLoginEnabled;
 
   const [mode, setMode] = useState<AuthMode>("login");
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [success, setSuccess] = useState(false);
@@ -100,6 +105,7 @@ export default function LoginModal({
     setFieldErrors({});
     setSuccess(false);
     setMode(next);
+    if (next !== "login") setLoginMethod("email");
   };
 
   const handleGoogleCredential = useCallback(
@@ -182,6 +188,7 @@ export default function LoginModal({
       setFieldErrors({});
       setResetFieldErrors({});
       setGoogleLoading(false);
+      setLoginMethod("email");
       clearError();
     }
   }, [open, clearError, initialMode]);
@@ -189,6 +196,20 @@ export default function LoginModal({
   if (!open) return null;
 
   const displayName = form.name || user?.name || "Guest";
+  const phoneLogin = mode === "login" && otpLoginEnabled && loginMethod === "phone";
+
+  const completeSignIn = (storeUser: StoreUser) => {
+    setSuccess(true);
+    window.setTimeout(() => {
+      setSuccess(false);
+      onSuccess?.(storeUser);
+      onClose();
+      setForm({ name: "", email: "", phone: "", password: "" });
+      setAvatarPreview(undefined);
+      setLoginMethod("email");
+      switchMode("login");
+    }, 1400);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,15 +274,7 @@ export default function LoginModal({
         return;
       }
 
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        onSuccess?.(storeUser);
-        onClose();
-        setForm({ name: "", email: "", phone: "", password: "" });
-        setAvatarPreview(undefined);
-        switchMode("login");
-      }, 1400);
+      completeSignIn(storeUser);
     } catch (err) {
       const apiFieldErrors = getApiFieldErrors(err);
       if (mode === "register") {
@@ -370,8 +383,10 @@ export default function LoginModal({
   const headerSubtitle =
     user && !success
       ? "Manage your store account"
-      : mode === "login"
-        ? "Sign in to shop smarter"
+      : mode === "login" && phoneLogin
+        ? "Sign in with a one-time code"
+        : mode === "login"
+          ? "Sign in to shop smarter"
         : mode === "register"
           ? "Create your account in seconds"
           : mode === "reset"
@@ -535,7 +550,9 @@ export default function LoginModal({
                 className="mx-auto mb-4 border-2 border-gray-100 shadow-lg"
               />
               <div className="mb-1 font-display text-xl font-bold text-gray-900">{user.name}</div>
-              <div className="mb-6 text-[13px] font-medium text-gray-500">{user.email}</div>
+              <div className="mb-6 text-[13px] font-medium text-gray-500">
+                {accountContactLabel(authUser?.email || user.email, authUser?.phone)}
+              </div>
               <div className="flex flex-col gap-2.5">
                 <button type="button" className={primaryBtnClass} onClick={onClose}>
                   Continue Shopping
@@ -595,6 +612,32 @@ export default function LoginModal({
                 Request New Link
                 <ArrowRight className="h-4 w-4" />
               </button>
+            </div>
+          ) : phoneLogin ? (
+            <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
+              <AuthFormError />
+              <PhoneOtpForm onSignedIn={completeSignIn} />
+              <button
+                type="button"
+                onClick={() => {
+                  clearError();
+                  setLoginMethod("email");
+                }}
+                className="text-center text-sm font-bold text-[#0a255d] hover:underline"
+              >
+                Use email instead
+              </button>
+              <GoogleContinue
+                mode="login"
+                loading={loading}
+                googleLoading={googleLoading}
+                otpActive
+                onOtp={() => {
+                  clearError();
+                  setLoginMethod("phone");
+                }}
+                onClick={() => void handleGoogleSignIn()}
+              />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="min-w-0">
@@ -779,45 +822,22 @@ export default function LoginModal({
                   )}
                 </button>
 
-                {mode !== "forgot" && mode !== "reset" && (
-                  <>
-                    <div className="flex items-center gap-3 py-1">
-                      <div className="h-px flex-1 bg-gray-200" />
-                      <span className="text-[13px] md:text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                        or continue with
-                      </span>
-                      <div className="h-px flex-1 bg-gray-200" />
-                    </div>
-                    <div className="grid grid-cols-1 gap-2.5">
-                      <button
-                        type="button"
-                        disabled={loading || googleLoading}
-                        onClick={handleGoogleSignIn}
-                        className={googleBtnClass}
-                      >
-                        {googleLoading ? (
-                          <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-2 border-[#4285F4]/25 border-t-[#4285F4]" />
-                        ) : (
-                          <>
-                            <GoogleIcon />
-                            {mode === "login" ? "Sign in with Google" : "Continue with Google"}
-                          </>
-                        )}
-                      </button>
-                      {/* Microsoft sign-in — hidden until OAuth is implemented
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-[13px] font-bold text-gray-800 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
-                      >
-                        <span className="flex h-7 w-7 md:h-6 md:w-6 items-center justify-center rounded-full bg-[#0078D4] text-[12px] md:text-[10px] font-black text-white">
-                          M
-                        </span>
-                        Microsoft
-                      </button>
-                      */}
-                    </div>
-                  </>
-                )}
+                {mode === "login" || mode === "register" ? (
+                  <GoogleContinue
+                    mode={mode === "register" ? "register" : "login"}
+                    loading={loading}
+                    googleLoading={googleLoading}
+                    onOtp={
+                      mode === "login" && otpLoginEnabled
+                        ? () => {
+                            clearError();
+                            setLoginMethod("phone");
+                          }
+                        : undefined
+                    }
+                    onClick={() => void handleGoogleSignIn()}
+                  />
+                ) : null}
 
                 {(mode === "forgot" || mode === "reset") && (
                   <p className="text-center text-[13px] font-medium text-gray-500">
@@ -838,6 +858,93 @@ export default function LoginModal({
       </div>
       </div>
     </div>
+  );
+}
+
+const pairedSocialBtnClass =
+  "group flex min-h-[48px] min-w-0 items-center justify-center gap-2 rounded-xl border-2 bg-white px-2 py-3 text-[13px] font-bold shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 sm:px-3 sm:text-sm";
+
+function GoogleContinue({
+  mode,
+  loading,
+  googleLoading,
+  onClick,
+  onOtp,
+  otpActive = false,
+}: {
+  mode: "login" | "register";
+  loading: boolean;
+  googleLoading: boolean;
+  onClick: () => void;
+  onOtp?: () => void;
+  otpActive?: boolean;
+}) {
+  const busy = loading || googleLoading;
+  const paired = mode === "login" && typeof onOtp === "function";
+
+  return (
+    <>
+      <div className="flex items-center gap-3 py-1">
+        <div className="h-px flex-1 bg-gray-200" />
+        <span className="text-[13px] font-bold uppercase tracking-wider text-gray-400 md:text-[11px]">
+          or continue with
+        </span>
+        <div className="h-px flex-1 bg-gray-200" />
+      </div>
+      {paired ? (
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onClick}
+            aria-label="Sign in with Google"
+            className={`${pairedSocialBtnClass} border-gray-200 text-gray-800 hover:border-[#4285F4]/35 hover:bg-[#fafbff] hover:shadow-[0_8px_24px_rgba(66,133,244,0.18)]`}
+          >
+            {googleLoading ? (
+              <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-2 border-[#4285F4]/25 border-t-[#4285F4]" />
+            ) : (
+              <>
+                <GoogleIcon />
+                <span className="truncate">Google</span>
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onOtp}
+            aria-pressed={otpActive}
+            aria-label="Sign in with OTP"
+            className={`${pairedSocialBtnClass} text-[#0a255d] ${
+              otpActive
+                ? "border-[#0a255d] bg-[#0a255d]/5"
+                : "border-gray-200 hover:border-[#0a255d]/40 hover:bg-[#f7f9ff]"
+            }`}
+          >
+            <span className="text-[#0a255d]">
+              <Icons.Phone />
+            </span>
+            <span className="truncate">OTP Login</span>
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onClick}
+          className={googleBtnClass}
+        >
+          {googleLoading ? (
+            <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-2 border-[#4285F4]/25 border-t-[#4285F4]" />
+          ) : (
+            <>
+              <GoogleIcon />
+              {mode === "login" ? "Sign in with Google" : "Continue with Google"}
+            </>
+          )}
+        </button>
+      )}
+    </>
   );
 }
 

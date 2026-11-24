@@ -22,6 +22,7 @@ export const AUTH_ERROR = {
 
 function isAuthEndpoint(url?: string): boolean {
   if (!url) return false;
+  if (/\/auth\/msg91\//.test(url)) return true;
   return /\/auth\/(login|register|refresh|google\/login)(\/|$|\?)/.test(url);
 }
 
@@ -51,10 +52,15 @@ export function getAuthErrorMessage(
     | "googleLogin"
     | "changePassword"
     | "forgotPassword"
-    | "resetPassword" = "login"
+    | "resetPassword"
+    | "phoneLogin" = "login"
 ): string {
   if (typeof error === "string" && error.trim()) {
     return error.trim();
+  }
+
+  if (error instanceof Error && !(error as AxiosError).isAxiosError && error.message.trim()) {
+    return error.message.trim();
   }
 
   const axiosError = error as AxiosError<ApiErrorBody>;
@@ -73,7 +79,18 @@ export function getAuthErrorMessage(
 
     if (validationMsg) return validationMsg;
 
+    if (
+      action === "phoneLogin" &&
+      apiMessage &&
+      /not configured|captcha/i.test(apiMessage)
+    ) {
+      return "Phone sign-in is not available right now. Sign in with email or Google instead.";
+    }
+
     if (status === HTTP_STATUS.UNAUTHORIZED) {
+      if (action === "phoneLogin") {
+        return apiMessage || "That code is incorrect or has expired. Request a new one.";
+      }
       return action === "changePassword"
         ? AUTH_ERROR.changePasswordFailed
         : AUTH_ERROR.signInFailed;
@@ -90,6 +107,9 @@ export function getAuthErrorMessage(
     if (apiMessage) return apiMessage;
   }
 
+  if (action === "phoneLogin") {
+    return "Could not verify that phone number. Please try again.";
+  }
   if (action === "register") return AUTH_ERROR.registerFailed;
   if (action === "changePassword") return AUTH_ERROR.changePasswordFailed;
   if (action === "forgotPassword") return AUTH_ERROR.forgotPasswordFailed;
