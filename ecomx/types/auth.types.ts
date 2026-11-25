@@ -64,3 +64,16 @@ export interface PhoneOtpVerifyPayload {
 export interface PhoneOtpChallenge {
   reqId: string;
 }
+
+export interface EmailOtpSendPayload {
+  email: string;
+}
+
+export interface EmailOtpVerifyPayload {
+  challengeId: string;
+  otp: string;
+}
+
+export interface EmailOtpChallenge {
+  challengeId: string;
+}

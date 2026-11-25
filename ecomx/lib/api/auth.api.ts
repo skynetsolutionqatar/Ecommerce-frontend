@@ -5,6 +5,9 @@ import type {
   ChangePasswordPayload,
   ForgotPasswordPayload,
   LoginPayload,
+  EmailOtpChallenge,
+  EmailOtpSendPayload,
+  EmailOtpVerifyPayload,
   PhoneOtpChallenge,
   PhoneOtpSendPayload,
   PhoneOtpVerifyPayload,
@@ -48,4 +51,13 @@ export const authApi = {
 
   resendPhoneOtp: (payload: { reqId: string }) =>
     apiPost<PhoneOtpChallenge>("/auth/msg91/resend-otp", payload),
+
+  sendEmailOtp: (payload: EmailOtpSendPayload) =>
+    apiPost<EmailOtpChallenge>("/auth/email-otp/send", payload),
+
+  verifyEmailOtp: (payload: EmailOtpVerifyPayload) =>
+    apiPost<AuthResponse>("/auth/email-otp/verify", payload),
+
+  resendEmailOtp: (payload: { challengeId: string }) =>
+    apiPost<EmailOtpChallenge>("/auth/email-otp/resend", payload),
 };

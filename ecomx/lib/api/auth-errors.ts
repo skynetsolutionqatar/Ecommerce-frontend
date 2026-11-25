@@ -22,7 +22,7 @@ export const AUTH_ERROR = {
 
 function isAuthEndpoint(url?: string): boolean {
   if (!url) return false;
-  if (/\/auth\/msg91\//.test(url)) return true;
+  if (/\/auth\/(msg91|email-otp)\//.test(url)) return true;
   return /\/auth\/(login|register|refresh|google\/login)(\/|$|\?)/.test(url);
 }
 
@@ -53,7 +53,8 @@ export function getAuthErrorMessage(
     | "changePassword"
     | "forgotPassword"
     | "resetPassword"
-    | "phoneLogin" = "login"
+    | "phoneLogin"
+    | "emailLogin" = "login"
 ): string {
   if (typeof error === "string" && error.trim()) {
     return error.trim();
@@ -87,8 +88,16 @@ export function getAuthErrorMessage(
       return "Phone sign-in is not available right now. Sign in with email or Google instead.";
     }
 
+    if (
+      action === "emailLogin" &&
+      apiMessage &&
+      /not configured/i.test(apiMessage)
+    ) {
+      return "Email code sign-in is not available right now. Use a text message, password, or Google instead.";
+    }
+
     if (status === HTTP_STATUS.UNAUTHORIZED) {
-      if (action === "phoneLogin") {
+      if (action === "phoneLogin" || action === "emailLogin") {
         return apiMessage || "That code is incorrect or has expired. Request a new one.";
       }
       return action === "changePassword"
@@ -109,6 +118,9 @@ export function getAuthErrorMessage(
 
   if (action === "phoneLogin") {
     return "Could not verify that phone number. Please try again.";
+  }
+  if (action === "emailLogin") {
+    return "Could not verify that email. Please try again.";
   }
   if (action === "register") return AUTH_ERROR.registerFailed;
   if (action === "changePassword") return AUTH_ERROR.changePasswordFailed;

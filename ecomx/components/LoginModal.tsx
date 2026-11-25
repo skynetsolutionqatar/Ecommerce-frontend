@@ -14,6 +14,8 @@ import { getRegisterFieldError, normalizeRegisterPhone } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import PhoneOtpForm from "@/components/auth/PhoneOtpForm";
+import EmailOtpForm from "@/components/auth/EmailOtpForm";
+import OtpChannelPicker, { type OtpChannel } from "@/components/auth/OtpChannelPicker";
 import { accountContactLabel } from "@/lib/auth-utils";
 import {
   initializeGoogleSignIn,
@@ -37,7 +39,7 @@ interface LoginModalProps {
 }
 
 type AuthMode = "login" | "register" | "forgot" | "reset";
-type LoginMethod = "email" | "phone";
+type LoginMethod = "email" | "otp";
 type RegisterField = "name" | "email" | "phone" | "password";
 type ResetField = "newPassword" | "confirmPassword";
 
@@ -81,6 +83,7 @@ export default function LoginModal({
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
+  const [otpChannel, setOtpChannel] = useState<OtpChannel | null>(null);
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [success, setSuccess] = useState(false);
@@ -105,7 +108,10 @@ export default function LoginModal({
     setFieldErrors({});
     setSuccess(false);
     setMode(next);
-    if (next !== "login") setLoginMethod("email");
+    if (next !== mode) {
+      setLoginMethod("email");
+      setOtpChannel(null);
+    }
   };
 
   const handleGoogleCredential = useCallback(
@@ -189,6 +195,7 @@ export default function LoginModal({
       setResetFieldErrors({});
       setGoogleLoading(false);
       setLoginMethod("email");
+      setOtpChannel(null);
       clearError();
     }
   }, [open, clearError, initialMode]);
@@ -196,7 +203,8 @@ export default function LoginModal({
   if (!open) return null;
 
   const displayName = form.name || user?.name || "Guest";
-  const phoneLogin = mode === "login" && otpLoginEnabled && loginMethod === "phone";
+  const otpPanel =
+    otpLoginEnabled && loginMethod === "otp" && (mode === "login" || mode === "register");
 
   const completeSignIn = (storeUser: StoreUser) => {
     setSuccess(true);
@@ -207,6 +215,7 @@ export default function LoginModal({
       setForm({ name: "", email: "", phone: "", password: "" });
       setAvatarPreview(undefined);
       setLoginMethod("email");
+      setOtpChannel(null);
       switchMode("login");
     }, 1400);
   };
@@ -383,8 +392,12 @@ export default function LoginModal({
   const headerSubtitle =
     user && !success
       ? "Manage your store account"
-      : mode === "login" && phoneLogin
-        ? "Sign in with a one-time code"
+      : otpPanel
+        ? otpChannel === "email"
+          ? "Sign in with an email code"
+          : otpChannel === "sms"
+            ? "Sign in with a text code"
+            : "Choose how to get your code"
         : mode === "login"
           ? "Sign in to shop smarter"
         : mode === "register"
@@ -613,28 +626,59 @@ export default function LoginModal({
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
-          ) : phoneLogin ? (
+          ) : otpPanel ? (
             <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
               <AuthFormError />
-              <PhoneOtpForm onSignedIn={completeSignIn} />
+              {otpChannel === "sms" ? (
+                <PhoneOtpForm onSignedIn={completeSignIn} />
+              ) : otpChannel === "email" ? (
+                <EmailOtpForm
+                  onSignedIn={completeSignIn}
+                  onChangeMethod={() => {
+                    clearError();
+                    setOtpChannel(null);
+                  }}
+                />
+              ) : (
+                <OtpChannelPicker
+                  onSelect={(channel) => {
+                    clearError();
+                    setOtpChannel(channel);
+                  }}
+                />
+              )}
+              {otpChannel === "sms" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearError();
+                    setOtpChannel(null);
+                  }}
+                  className="text-center text-sm font-bold text-[#0a255d] hover:underline"
+                >
+                  Choose another method
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {
                   clearError();
+                  setOtpChannel(null);
                   setLoginMethod("email");
                 }}
                 className="text-center text-sm font-bold text-[#0a255d] hover:underline"
               >
-                Use email instead
+                Use password instead
               </button>
               <GoogleContinue
-                mode="login"
+                mode={mode === "register" ? "register" : "login"}
                 loading={loading}
                 googleLoading={googleLoading}
                 otpActive
                 onOtp={() => {
                   clearError();
-                  setLoginMethod("phone");
+                  setOtpChannel(null);
+                  setLoginMethod("otp");
                 }}
                 onClick={() => void handleGoogleSignIn()}
               />
@@ -828,10 +872,11 @@ export default function LoginModal({
                     loading={loading}
                     googleLoading={googleLoading}
                     onOtp={
-                      mode === "login" && otpLoginEnabled
+                      otpLoginEnabled && (mode === "login" || mode === "register")
                         ? () => {
                             clearError();
-                            setLoginMethod("phone");
+                            setOtpChannel(null);
+                            setLoginMethod("otp");
                           }
                         : undefined
                     }
@@ -880,7 +925,7 @@ function GoogleContinue({
   otpActive?: boolean;
 }) {
   const busy = loading || googleLoading;
-  const paired = mode === "login" && typeof onOtp === "function";
+  const paired = typeof onOtp === "function";
 
   return (
     <>
@@ -897,7 +942,7 @@ function GoogleContinue({
             type="button"
             disabled={busy}
             onClick={onClick}
-            aria-label="Sign in with Google"
+            aria-label={mode === "login" ? "Sign in with Google" : "Sign up with Google"}
             className={`${pairedSocialBtnClass} border-gray-200 text-gray-800 hover:border-[#4285F4]/35 hover:bg-[#fafbff] hover:shadow-[0_8px_24px_rgba(66,133,244,0.18)]`}
           >
             {googleLoading ? (
@@ -914,7 +959,7 @@ function GoogleContinue({
             disabled={busy}
             onClick={onOtp}
             aria-pressed={otpActive}
-            aria-label="Sign in with OTP"
+            aria-label={mode === "login" ? "Sign in with OTP" : "Sign up with OTP"}
             className={`${pairedSocialBtnClass} text-[#0a255d] ${
               otpActive
                 ? "border-[#0a255d] bg-[#0a255d]/5"
@@ -924,7 +969,7 @@ function GoogleContinue({
             <span className="text-[#0a255d]">
               <Icons.Phone />
             </span>
-            <span className="truncate">OTP Login</span>
+            <span className="truncate">{mode === "login" ? "OTP Login" : "OTP"}</span>
           </button>
         </div>
       ) : (
