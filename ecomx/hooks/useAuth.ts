@@ -195,6 +195,24 @@ export function useAuth() {
     }
   }, [setAuth, setAuthError, clearAuthError]);
 
+  const confirmWhatsAppOtp = useCallback(async (challengeId: string, otp: string) => {
+    setLoading(true);
+    clearAuthError();
+    try {
+      const res = await authApi.verifyWhatsAppOtp({ challengeId, otp });
+      const { customer, accessToken, refreshToken } = res.data;
+      const normalized = normalizeAuthUser(customer as unknown as Record<string, unknown>);
+      setAuth(normalized, accessToken, refreshToken);
+      void linkGuestActivityToCustomer("login_linked");
+      return { user: normalized, storeUser: authUserToStoreUser(normalized) };
+    } catch (err) {
+      setAuthError(getAuthErrorMessage(err, "whatsappLogin"));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [setAuth, setAuthError, clearAuthError]);
+
   const confirmPhoneOtp = useCallback(async (reqId: string, otp: string) => {
     setLoading(true);
     clearAuthError();
@@ -248,6 +266,7 @@ export function useAuth() {
     loginWithGoogle,
     confirmPhoneOtp,
     confirmEmailOtp,
+    confirmWhatsAppOtp,
     register,
     logout,
     changePassword,

@@ -287,7 +287,7 @@ Pagination: `{ total, page, limit, totalPages, hasNextPage, hasPrevPage }`.
 
 | Module | Base path(s) | Notes |
 |---|---|---|
-| `auth.api.ts` | `/auth/login`, `/auth/register`, `/auth/google/login`, `/auth/me`, `/auth/refresh`, `/auth/forgot-password`, `/auth/reset-password` | |
+| `auth.api.ts` | `/auth/login`, `/auth/register`, `/auth/google/login`, `/auth/me`, `/auth/refresh`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/msg91/*`, `/auth/email-otp/*`, `/auth/whatsapp-otp/{send,resend,verify}` | OTP forms live in `components/auth/` (`PhoneOtpForm`, `EmailOtpForm`, `WhatsAppOtpForm`, picker `OtpChannelPicker`). WhatsApp phone rules: `lib/whatsapp-otp.ts`. OTP endpoints skip token refresh (`shouldSkipAuthRefresh`). |
 | `product.api.ts` | `/products`, `/products/:id`, `/products/slug/:slug`, `/products/add`, `PATCH|DELETE /products/:id` | Admin write ops |
 | `category.api.ts` | `/categories`, `/categories/:id`, `/categories/slug/:slug`, `/categories/add`, `PATCH|DELETE /categories/:id` | |
 | `storefront.api.ts` | `/storefront/config`, `/storefront/hero`, `/storefront/featured`, `/storefront/flash-offers` | Homepage |

@@ -128,6 +128,7 @@ Tracking is anonymous; the guest ID is in `localStorage` and the session ID is i
 ### 3.10 Auth
 
 - Email + password login and registration; **Sign in with Google** (Google Identity Services; the frontend only handles the credential, the backend verifies it).
+- **One-time code sign-in** (login modal → "OTP Login" → channel picker): text message (MSG91, Qatar or India), **WhatsApp** (Meta Cloud API, Qatar mobiles only, 6-digit code, 60 s resend cooldown, expires in 5 minutes), or email. A new number or email gets an account automatically. The backend generates, stores and verifies every code; the frontend only collects the number and the code. See `spec/whatsapp-otp-spec.md`.
 - Login is prompted at checkout and on account pages. Browsing does not require login.
 - If a session expires on a store page, the session is cleared silently. On an admin page, the user is sent to login with a `redirect` back.
 

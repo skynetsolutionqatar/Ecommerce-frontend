@@ -22,7 +22,7 @@ export const AUTH_ERROR = {
 
 function isAuthEndpoint(url?: string): boolean {
   if (!url) return false;
-  if (/\/auth\/(msg91|email-otp)\//.test(url)) return true;
+  if (/\/auth\/(msg91|email-otp|whatsapp-otp)\//.test(url)) return true;
   return /\/auth\/(login|register|refresh|google\/login)(\/|$|\?)/.test(url);
 }
 
@@ -54,7 +54,8 @@ export function getAuthErrorMessage(
     | "forgotPassword"
     | "resetPassword"
     | "phoneLogin"
-    | "emailLogin" = "login"
+    | "emailLogin"
+    | "whatsappLogin" = "login"
 ): string {
   if (typeof error === "string" && error.trim()) {
     return error.trim();
@@ -96,8 +97,16 @@ export function getAuthErrorMessage(
       return "Email code sign-in is not available right now. Use a text message, password, or Google instead.";
     }
 
+    if (
+      action === "whatsappLogin" &&
+      apiMessage &&
+      /not configured/i.test(apiMessage)
+    ) {
+      return "WhatsApp sign-in is not available right now. Use a text message, email, or Google instead.";
+    }
+
     if (status === HTTP_STATUS.UNAUTHORIZED) {
-      if (action === "phoneLogin" || action === "emailLogin") {
+      if (action === "phoneLogin" || action === "emailLogin" || action === "whatsappLogin") {
         return apiMessage || "That code is incorrect or has expired. Request a new one.";
       }
       return action === "changePassword"
@@ -121,6 +130,9 @@ export function getAuthErrorMessage(
   }
   if (action === "emailLogin") {
     return "Could not verify that email. Please try again.";
+  }
+  if (action === "whatsappLogin") {
+    return "Could not verify that WhatsApp number. Please try again.";
   }
   if (action === "register") return AUTH_ERROR.registerFailed;
   if (action === "changePassword") return AUTH_ERROR.changePasswordFailed;
