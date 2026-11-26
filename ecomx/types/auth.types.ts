@@ -77,3 +77,17 @@ export interface EmailOtpVerifyPayload {
 export interface EmailOtpChallenge {
   challengeId: string;
 }
+
+export interface WhatsAppOtpSendPayload {
+  /** Digits only, `974XXXXXXXX` */
+  phone: string;
+}
+
+export interface WhatsAppOtpVerifyPayload {
+  challengeId: string;
+  otp: string;
+}
+
+export interface WhatsAppOtpChallenge {
+  challengeId: string;
+}

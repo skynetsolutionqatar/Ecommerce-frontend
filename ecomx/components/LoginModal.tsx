@@ -15,6 +15,7 @@ import { getApiErrorMessage } from "@/lib/api/errors";
 import AuthFormError from "@/components/auth/AuthFormError";
 import PhoneOtpForm from "@/components/auth/PhoneOtpForm";
 import EmailOtpForm from "@/components/auth/EmailOtpForm";
+import WhatsAppOtpForm from "@/components/auth/WhatsAppOtpForm";
 import OtpChannelPicker, { type OtpChannel } from "@/components/auth/OtpChannelPicker";
 import { accountContactLabel } from "@/lib/auth-utils";
 import {
@@ -410,7 +411,9 @@ export default function LoginModal({
           ? "Sign in with an email code"
           : otpChannel === "sms"
             ? "Sign in with a text code"
-            : "Choose how to get your code"
+            : otpChannel === "whatsapp"
+              ? "Sign in with a WhatsApp code"
+              : "Choose how to get your code"
         : mode === "login"
           ? "Sign in to shop smarter"
         : mode === "register"
@@ -647,6 +650,14 @@ export default function LoginModal({
               ) : otpChannel === "email" ? (
                 <EmailOtpForm
                   onSignedIn={completeOtpSignIn}
+                  onChangeMethod={() => {
+                    clearError();
+                    setOtpChannel(null);
+                  }}
+                />
+              ) : otpChannel === "whatsapp" ? (
+                <WhatsAppOtpForm
+                  onSignedIn={completeSignIn}
                   onChangeMethod={() => {
                     clearError();
                     setOtpChannel(null);

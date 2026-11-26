@@ -13,6 +13,9 @@ import type {
   PhoneOtpVerifyPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  WhatsAppOtpChallenge,
+  WhatsAppOtpSendPayload,
+  WhatsAppOtpVerifyPayload,
 } from "@/types/auth.types";
 
 export const authApi = {
@@ -60,4 +63,13 @@ export const authApi = {
 
   resendEmailOtp: (payload: { challengeId: string }) =>
     apiPost<EmailOtpChallenge>("/auth/email-otp/resend", payload),
+
+  sendWhatsAppOtp: (payload: WhatsAppOtpSendPayload) =>
+    apiPost<WhatsAppOtpChallenge>("/auth/whatsapp-otp/send", payload),
+
+  verifyWhatsAppOtp: (payload: WhatsAppOtpVerifyPayload) =>
+    apiPost<AuthResponse>("/auth/whatsapp-otp/verify", payload),
+
+  resendWhatsAppOtp: (payload: { challengeId: string }) =>
+    apiPost<WhatsAppOtpChallenge>("/auth/whatsapp-otp/resend", payload),
 };

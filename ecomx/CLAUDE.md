@@ -34,6 +34,7 @@ Unit tests use **Vitest** (`vitest.config.ts`, `npm test`). Test files live in `
 Existing coverage (run `npm test`):
 - `tests/unit/cart-helpers.test.ts`: quantity rules, guest cart merge and stock capping, server cart mapping.
 - `tests/unit/rules.test.ts`: redirect sanitization, order status transitions, admin access, password rules.
+- `tests/unit/whatsapp-otp.test.ts`: Qatar-only WhatsApp phone parsing, paste sanitizing, display format.
 
 Playwright (browser end-to-end) is **not** installed yet. Adding it is a dependency decision, so ask first.
 
@@ -51,6 +52,7 @@ Run these against a backend on a **non-production tenant**. Use fake customers a
 - **Guest cart:** add, change quantity (capped at stock), remove. Items survive a page refresh.
 - **Cart merge on login:** guest cart and wishlist move to the server. `skynet_guest_cart` and `skynet_guest_wishlist` are cleared, and the server cart is shown.
 - **Wishlist:** guest heart persists on refresh. Logged-in heart reverts if the API call fails.
+- **OTP sign-in:** picker shows Text message, WhatsApp, Email. WhatsApp accepts only Qatar mobiles, shows the consent line, a 60 s resend countdown, and signs in after the 6-digit code. Email and SMS still work. Full script: `spec/whatsapp-otp-e2e-testing.md`.
 - **Quote-only product:** Add to cart and Buy now open the product page and do not add to the cart.
 - **Checkout:** a deliverable location shows a delivery quote. "FREE delivery" does not show when the charge is unknown. A valid coupon applies. A cash-on-delivery order places and appears in `/orders`.
 - **Orders:** a customer can cancel from `/orders/[id]` after confirming. The invoice PDF downloads.
