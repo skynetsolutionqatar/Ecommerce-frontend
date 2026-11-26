@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import OtpVerifyCard from "@/components/auth/OtpVerifyCard";
 import { useAuth } from "@/hooks/useAuth";
 import { authApi } from "@/lib/api/auth.api";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
@@ -14,9 +15,6 @@ const inputClass =
 
 const primaryBtnClass =
   "group mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#1d4ed8] px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(10,37,93,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(10,37,93,0.55)] disabled:translate-y-0 disabled:opacity-70";
-
-const outlineBtnClass =
-  "flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-all hover:border-[#0a255d]/40 hover:bg-gray-50 hover:text-[#0a255d] disabled:opacity-60";
 
 type Step = "email" | "code";
 
@@ -39,8 +37,8 @@ export default function EmailOtpForm({
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
+  const signedInUser = useRef<StoreUser | null>(null);
   const [resendIn, setResendIn] = useState(0);
 
   const resendCooling = resendIn > 0;
@@ -70,7 +68,6 @@ export default function EmailOtpForm({
       if (!id) throw new Error("Verification did not start. Please try again.");
       setEmail(nextEmail);
       setChallengeId(id);
-      setCode("");
       setStep("code");
       setResendIn(OTP_RESEND_SECONDS);
     } catch (error) {
@@ -88,7 +85,6 @@ export default function EmailOtpForm({
       const res = await authApi.resendEmailOtp({ challengeId });
       const id = res.data?.challengeId?.trim() || challengeId;
       setChallengeId(id);
-      setCode("");
       setResendIn(OTP_RESEND_SECONDS);
     } catch (error) {
       setError(getAuthErrorMessage(error, "emailLogin"));
@@ -97,23 +93,19 @@ export default function EmailOtpForm({
     }
   };
 
-  const verifyCode = async () => {
-    const otp = code.replace(/\D/g, "").slice(0, 6);
+  const verifyCode = async (otp: string) => {
     if (!challengeId) {
       setStep("email");
-      return;
+      return false;
     }
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit verification code");
-      return;
-    }
-
     clearError();
     try {
       const result = await confirmEmailOtp(challengeId, otp);
-      onSignedIn(result.storeUser);
-    } catch {
-      // useAuth stores the message for AuthFormError
+      signedInUser.current = result.storeUser;
+      return true;
+    } catch (error) {
+      clearError();
+      throw new Error(getAuthErrorMessage(error, "emailLogin"));
     }
   };
 
@@ -121,59 +113,27 @@ export default function EmailOtpForm({
     clearError();
     setStep("email");
     setChallengeId(null);
-    setCode("");
+    signedInUser.current = null;
     setEmailError(null);
     setResendIn(0);
   };
 
   if (step === "code") {
     return (
-      <form
-        className="flex flex-col gap-3.5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void verifyCode();
-        }}
-      >
-        <p className="text-sm font-medium text-gray-600">
-          Enter the 6-digit code sent to <span className="font-bold text-gray-900">{email}</span>.
-        </p>
-        <label className="flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-wider text-gray-600 md:text-[11px]">
-          <span className="flex text-[#0a255d]">
-            <Icons.Mail />
-          </span>
-          Verification code
-        </label>
-        <input
-          value={code}
-          onChange={(event) => {
-            setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
-            clearError();
+      <div className="flex flex-col gap-3.5">
+        <OtpVerifyCard
+          length={6}
+          theme="light"
+          channel="email"
+          sentTo={email}
+          onVerify={verifyCode}
+          onSuccess={() => {
+            if (signedInUser.current) onSignedIn(signedInUser.current);
           }}
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          placeholder="000000"
-          className={`${inputClass} text-center text-lg tracking-[0.4em]`}
-          aria-label="6-digit verification code"
+          onResend={() => void resendCode()}
+          resendDisabled={sending || loading || resendIn > 0}
+          resendLabel={sending ? "Sending…" : resendIn > 0 ? `Resend in ${resendIn}s` : "Resend"}
         />
-        <button type="submit" disabled={loading || sending || code.length !== 6} className={primaryBtnClass}>
-          {loading ? (
-            <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-2 border-white/30 border-t-white" />
-          ) : (
-            <>
-              Verify and sign in
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </>
-          )}
-        </button>
-        <button
-          type="button"
-          disabled={sending || loading || resendIn > 0}
-          onClick={() => void resendCode()}
-          className={outlineBtnClass}
-        >
-          {sending ? "Sending…" : resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
-        </button>
         <button
           type="button"
           disabled={sending || loading}
@@ -182,7 +142,7 @@ export default function EmailOtpForm({
         >
           Change email
         </button>
-      </form>
+      </div>
     );
   }
 

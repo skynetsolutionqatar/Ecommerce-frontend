@@ -220,6 +220,19 @@ export default function LoginModal({
     }, 1400);
   };
 
+  /** Keep the OTP card merge + checkmark visible; auth is already set during verify. */
+  const completeOtpSignIn = (storeUser: StoreUser) => {
+    window.setTimeout(() => {
+      onSuccess?.(storeUser);
+      onClose();
+      setForm({ name: "", email: "", phone: "", password: "" });
+      setAvatarPreview(undefined);
+      setLoginMethod("email");
+      setOtpChannel(null);
+      switchMode("login");
+    }, 1500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
@@ -554,7 +567,7 @@ export default function LoginModal({
 
         {/* Body */}
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-gradient-to-b from-gray-50 to-white px-5 pb-6 pt-5 sm:px-8 sm:pb-7 sm:pt-6">
-          {user && !success ? (
+          {user && !success && !otpPanel ? (
             <div className="text-center">
               <Avatar
                 name={user.name}
@@ -630,10 +643,10 @@ export default function LoginModal({
             <div className="flex min-w-0 flex-col gap-3.5 sm:gap-4">
               <AuthFormError />
               {otpChannel === "sms" ? (
-                <PhoneOtpForm onSignedIn={completeSignIn} />
+                <PhoneOtpForm onSignedIn={completeOtpSignIn} />
               ) : otpChannel === "email" ? (
                 <EmailOtpForm
-                  onSignedIn={completeSignIn}
+                  onSignedIn={completeOtpSignIn}
                   onChangeMethod={() => {
                     clearError();
                     setOtpChannel(null);

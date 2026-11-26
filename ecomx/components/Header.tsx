@@ -204,19 +204,19 @@ export default function Header({
                 Expert Support
               </span>
             </div>
-            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[11px] text-white/85 sm:gap-3 sm:text-[12px] md:text-[11px]">
+            <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[10px] text-white/85 sm:gap-3 sm:text-[12px] md:text-[11px]">
               <button
                 type="button"
-                className="flex items-center gap-1 border-0 bg-transparent cursor-pointer transition-colors hover:text-white"
+                className="flex items-center gap-0.5 border-0 bg-transparent cursor-pointer transition-colors hover:text-white sm:gap-1"
               >
                 English ▾
               </button>
-              <span className="text-white/85" aria-hidden>
+              <span className="hidden text-white/85 min-[360px]:inline" aria-hidden>
                 |
               </span>
               <button
                 type="button"
-                className="flex items-center gap-1 border-0 bg-transparent cursor-pointer transition-colors hover:text-white"
+                className="flex items-center gap-0.5 border-0 bg-transparent cursor-pointer transition-colors hover:text-white sm:gap-1"
               >
                 QAR ▾
               </button>
@@ -233,7 +233,9 @@ export default function Header({
               : "0 1px 3px rgba(0,0,0,0.04)",
           }}
         >
-          <div className={`${tw.storeContainer} flex items-center gap-3 py-1.5 md:gap-4`}>
+          <div
+            className={`${tw.storeContainer} flex min-w-0 items-center gap-1.5 py-1.5 sm:gap-3 md:gap-4`}
+          >
             <motion.button
               type="button"
               onClick={() => goTo(ROUTES.home)}
@@ -241,16 +243,26 @@ export default function Header({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
-              <BrandLogo
-                height={68}
-                priority
-                alt={client.name}
-                imgClassName="max-w-[180px] sm:max-w-[200px]"
-              />
+              <span className="sm:hidden">
+                <BrandLogo
+                  height={36}
+                  priority
+                  alt={client.name}
+                  imgClassName="max-w-[78px]"
+                />
+              </span>
+              <span className="hidden sm:inline-flex">
+                <BrandLogo
+                  height={68}
+                  priority
+                  alt={client.name}
+                  imgClassName="max-w-[200px]"
+                />
+              </span>
             </motion.button>
 
             {/* All Categories Dropdown */}
-            <div className="relative hidden md:block shrink-0">
+            <div className="relative hidden shrink-0 md:block">
               <motion.button
                 type="button"
                 onClick={() => setCatDropOpen((v) => !v)}
@@ -317,73 +329,83 @@ export default function Header({
             <motion.button
               type="button"
               onClick={onSearchOpen}
-              className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-left transition-all hover:border-blue-400 hover:ring-1 hover:ring-blue-400 cursor-text"
+              className="flex h-8 min-w-0 flex-1 items-center gap-1 overflow-hidden rounded-md border border-gray-200 bg-white px-1.5 text-left transition-all hover:border-blue-400 hover:ring-1 hover:ring-blue-400 cursor-text sm:h-auto sm:gap-2 sm:px-3 sm:py-2"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >
-              <span className="hidden min-w-0 flex-1 items-center text-[12.5px] text-gray-400 min-[480px]:flex">
-                <span className="shrink-0">Search for </span>
-                <span
-                  className="ml-1 inline-block truncate font-medium text-gray-500 transition-opacity duration-500"
-                  style={{ opacity: visible ? 1 : 0 }}
-                >
-                  {searchHints[hintIdx]}
-                </span>
-                <span className="shrink-0">...</span>
-              </span>
-              <span className="flex-1 text-[12px] text-gray-400 min-[480px]:hidden">
-                Search...
-              </span>
               <span
-                className="hidden shrink-0 items-center justify-center rounded-md w-10 h-9 text-white sm:flex"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-white sm:h-9 sm:w-10 sm:rounded-md [&_svg]:h-3.5 [&_svg]:w-3.5 sm:[&_svg]:h-5 sm:[&_svg]:w-5"
                 style={{ background: `${Colors.base_color}` }}
               >
                 <Icons.Search />
               </span>
+              <span className="hidden min-w-0 flex-1 items-center text-[12.5px] text-gray-400 min-[400px]:flex sm:flex">
+                <span className="shrink-0 max-sm:hidden sm:inline">Search for </span>
+                <span
+                  className="ml-0.5 inline-block truncate font-medium text-gray-500 transition-opacity duration-500 sm:ml-1"
+                  style={{ opacity: visible ? 1 : 0 }}
+                >
+                  {searchHints[hintIdx]}
+                </span>
+                <span className="shrink-0 max-sm:hidden sm:inline">...</span>
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[11px] text-gray-400 min-[400px]:hidden sm:hidden">
+                Search
+              </span>
             </motion.button>
 
-            <StoreAccountMenu
-              user={user}
-              wishlistCount={wishlist.length}
-              onLoginOpen={onLoginOpen}
-              onLogout={onLogout}
-              onWishlistOpen={onWishlistOpen}
-            />
-
-            {/* Desktop Actions */}
-            <div className="flex shrink-0 items-center gap-1">
-              <motion.button
-                type="button"
-                onClick={onCartOpen}
-                className="relative flex items-center gap-1.5 rounded-md border border-gray-200 bg-transparent px-3 py-2 font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all"
-                whileTap={{ scale: 0.97 }}
-              >
-                <Icons.Bag />
-                <span className="hidden lg:inline">Cart</span>
-                <AnimatePresence>
-                  {cartCount > 0 && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 md:h-4 md:w-4 items-center justify-center rounded-full bg-red-500 text-[10px] md:text-[9px] font-black text-white"
-                    >
-                      {cartCount > 9 ? "9+" : cartCount}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={() => setMobileOpen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-200 text-gray-700 md:hidden hover:bg-gray-50 transition-all"
-                whileTap={{ scale: 0.93 }}
-                aria-label="Open menu"
-              >
-                <Icons.Menu />
-              </motion.button>
+            <div className="shrink-0 sm:hidden">
+              <StoreAccountMenu
+                user={user}
+                wishlistCount={wishlist.length}
+                onLoginOpen={onLoginOpen}
+                onLogout={onLogout}
+                onWishlistOpen={onWishlistOpen}
+                compact
+              />
             </div>
+            <div className="hidden shrink-0 sm:block">
+              <StoreAccountMenu
+                user={user}
+                wishlistCount={wishlist.length}
+                onLoginOpen={onLoginOpen}
+                onLogout={onLogout}
+                onWishlistOpen={onWishlistOpen}
+              />
+            </div>
+
+            <motion.button
+              type="button"
+              onClick={onCartOpen}
+              className="relative flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-transparent font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all sm:h-auto sm:w-auto sm:px-3 sm:py-2 [&_svg]:h-[18px] [&_svg]:w-[18px] sm:[&_svg]:h-5 sm:[&_svg]:w-5"
+              whileTap={{ scale: 0.97 }}
+              aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
+            >
+              <Icons.Bag />
+              <span className="hidden lg:inline">Cart</span>
+              <AnimatePresence>
+                {cartCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white sm:-right-1.5 sm:-top-1.5 sm:h-4 sm:w-4"
+                  >
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all md:hidden [&_svg]:h-[18px] [&_svg]:w-[18px]"
+              whileTap={{ scale: 0.93 }}
+              aria-label="Open menu"
+            >
+              <Icons.Menu />
+            </motion.button>
           </div>
         </div>
 

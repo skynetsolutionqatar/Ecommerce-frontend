@@ -18,6 +18,8 @@ interface StoreAccountMenuProps {
   onLoginOpen: () => void;
   onLogout?: () => void;
   onWishlistOpen: () => void;
+  /** Icon-only control for narrow header rows */
+  compact?: boolean;
 }
 
 type ShortcutItem = {
@@ -34,6 +36,7 @@ export default function StoreAccountMenu({
   onLoginOpen,
   onLogout,
   onWishlistOpen,
+  compact = false,
 }: StoreAccountMenuProps) {
   const router = useRouter();
   const authRole = useAuthStore((s) => s.user?.role);
@@ -122,7 +125,11 @@ export default function StoreAccountMenu({
       <motion.button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 bg-transparent px-2 py-1.5 text-left hover:bg-gray-50 md:px-3 md:py-2"
+        className={`flex cursor-pointer items-center rounded-md border border-gray-200 bg-transparent text-left hover:bg-gray-50 ${
+          compact
+            ? "h-8 w-8 shrink-0 justify-center gap-0 p-0"
+            : "gap-2 px-2 py-1.5 md:px-3 md:py-2"
+        }`}
         whileTap={{ scale: 0.98 }}
         aria-expanded={open}
         aria-haspopup="menu"
@@ -131,30 +138,38 @@ export default function StoreAccountMenu({
         {user ? (
           <Avatar
             name={user.name}
-            size={18}
+            size={compact ? 16 : 18}
             imageUrl={user.avatarUrl}
             colorSeed={user.email}
-            className="border border-gray-200 shadow-none md:h-5 md:w-5"
+            className={`border border-gray-200 shadow-none ${compact ? "h-4 w-4" : "md:h-5 md:w-5"}`}
           />
         ) : (
-          <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-gray-700 md:h-5 md:w-5">
+          <span
+            className={`flex shrink-0 items-center justify-center text-gray-700 ${
+              compact ? "h-4 w-4 [&_svg]:h-4 [&_svg]:w-4" : "h-[18px] w-[18px] md:h-5 md:w-5"
+            }`}
+          >
             <Icons.User />
           </span>
         )}
-        <span className="hidden min-w-0 flex-col leading-tight min-[480px]:flex">
-          <span className="text-[10px] text-gray-500 md:text-[11px]">Hello</span>
-          <span
-            className="truncate text-[12px] font-semibold md:text-[13px]"
-            style={{ color: user ? "#111827" : Colors.base_color }}
-          >
-            {user ? firstName || user.name : "Sign in"}
-          </span>
-        </span>
-        <ChevronDown
-          className={`h-3 w-3 shrink-0 text-gray-500 transition-transform sm:h-3.5 sm:w-3.5 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
+        {compact ? null : (
+          <>
+            <span className="hidden min-w-0 flex-col leading-tight min-[480px]:flex">
+              <span className="text-[10px] text-gray-500 md:text-[11px]">Hello</span>
+              <span
+                className="truncate text-[12px] font-semibold md:text-[13px]"
+                style={{ color: user ? "#111827" : Colors.base_color }}
+              >
+                {user ? firstName || user.name : "Sign in"}
+              </span>
+            </span>
+            <ChevronDown
+              className={`h-3 w-3 shrink-0 text-gray-500 transition-transform sm:h-3.5 sm:w-3.5 ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </>
+        )}
       </motion.button>
 
       <AnimatePresence>
