@@ -657,7 +657,7 @@ export default function LoginModal({
                 />
               ) : otpChannel === "whatsapp" ? (
                 <WhatsAppOtpForm
-                  onSignedIn={completeSignIn}
+                  onSignedIn={completeOtpSignIn}
                   onChangeMethod={() => {
                     clearError();
                     setOtpChannel(null);

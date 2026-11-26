@@ -99,7 +99,7 @@ export default function OtpVerifyCard({
   resendLabel?: string;
   resendDisabled?: boolean;
   minLoadingMs?: number;
-  channel?: "phone" | "email";
+  channel?: "phone" | "email" | "whatsapp";
   sentTo?: string;
 }) {
   const [code, setCode] = useState("");
@@ -209,7 +209,8 @@ export default function OtpVerifyCard({
   const verifying = status === "verifying";
   const error = status === "error";
   const mid = (length - 1) / 2;
-  const subject = channel === "email" ? "email" : "number";
+  const subject =
+    channel === "email" ? "email" : channel === "whatsapp" ? "WhatsApp number" : "number";
 
   const title = done ? "Verified successfully" : error ? "Incorrect code" : `Verify your ${subject}`;
   const sentLine = sentTo ? ` to ${sentTo}` : "";

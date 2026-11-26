@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, MessageCircle } from "lucide-react";
+import OtpVerifyCard from "@/components/auth/OtpVerifyCard";
 import { useAuth } from "@/hooks/useAuth";
 import { authApi } from "@/lib/api/auth.api";
 import { getAuthErrorMessage } from "@/lib/api/auth-errors";
@@ -21,9 +22,6 @@ const inputClass =
 
 const primaryBtnClass =
   "group mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#061a3d] via-[#0a255d] to-[#1d4ed8] px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(10,37,93,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(10,37,93,0.55)] disabled:translate-y-0 disabled:opacity-70";
-
-const outlineBtnClass =
-  "flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-all hover:border-[#0a255d]/40 hover:bg-gray-50 hover:text-[#0a255d] disabled:opacity-60";
 
 const labelClass =
   "flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-wider text-gray-600 md:text-[11px]";
@@ -47,9 +45,9 @@ export default function WhatsAppOtpForm({
   const [phone, setPhone] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [code, setCode] = useState("");
   const [sending, setSending] = useState(false);
   const [resendIn, setResendIn] = useState(0);
+  const signedInUser = useRef<StoreUser | null>(null);
 
   const resendCooling = resendIn > 0;
 
@@ -78,7 +76,7 @@ export default function WhatsAppOtpForm({
       if (!id) throw new Error("Verification did not start. Please try again.");
       setPhone(nextPhone);
       setChallengeId(id);
-      setCode("");
+      signedInUser.current = null;
       setStep("code");
       setResendIn(WHATSAPP_RESEND_SECONDS);
     } catch (error) {
@@ -95,7 +93,6 @@ export default function WhatsAppOtpForm({
     try {
       const res = await authApi.resendWhatsAppOtp({ challengeId });
       setChallengeId(res.data?.challengeId?.trim() || challengeId);
-      setCode("");
       setResendIn(WHATSAPP_RESEND_SECONDS);
     } catch (error) {
       setError(getAuthErrorMessage(error, "whatsappLogin"));
@@ -104,23 +101,19 @@ export default function WhatsAppOtpForm({
     }
   };
 
-  const verifyCode = async () => {
-    const otp = code.replace(/\D/g, "").slice(0, 6);
+  const verifyCode = async (otp: string) => {
     if (!challengeId) {
       setStep("phone");
-      return;
+      return false;
     }
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit verification code");
-      return;
-    }
-
     clearError();
     try {
       const result = await confirmWhatsAppOtp(challengeId, otp);
-      onSignedIn(result.storeUser);
-    } catch {
-      // useAuth stores the message for AuthFormError
+      signedInUser.current = result.storeUser;
+      return true;
+    } catch (error) {
+      clearError();
+      throw new Error(getAuthErrorMessage(error, "whatsappLogin"));
     }
   };
 
@@ -128,61 +121,31 @@ export default function WhatsAppOtpForm({
     clearError();
     setStep("phone");
     setChallengeId(null);
-    setCode("");
+    signedInUser.current = null;
     setPhoneError(null);
     setResendIn(0);
   };
 
   if (step === "code") {
+    const sentTo = phone ? formatWhatsAppPhone(phone) : "";
     return (
-      <form
-        className="flex flex-col gap-3.5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void verifyCode();
-        }}
-      >
-        <p className="text-sm font-medium text-gray-600">
-          Enter the 6-digit code we sent on WhatsApp to{" "}
-          <span className="whitespace-nowrap font-bold text-gray-900">
-            {phone ? formatWhatsAppPhone(phone) : ""}
-          </span>
-          . It expires in {WHATSAPP_OTP_TTL_MINUTES} minutes.
+      <div className="flex flex-col gap-3.5">
+        <p className="text-center text-[13px] font-medium text-gray-500">
+          Code expires in {WHATSAPP_OTP_TTL_MINUTES} minutes.
         </p>
-        <label htmlFor="whatsapp-otp-code" className={labelClass}>
-          <MessageCircle className="h-4 w-4 text-[#0a255d]" aria-hidden />
-          Verification code
-        </label>
-        <input
-          id="whatsapp-otp-code"
-          value={code}
-          onChange={(event) => {
-            setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
-            clearError();
+        <OtpVerifyCard
+          length={6}
+          theme="light"
+          channel="whatsapp"
+          sentTo={sentTo}
+          onVerify={verifyCode}
+          onSuccess={() => {
+            if (signedInUser.current) onSignedIn(signedInUser.current);
           }}
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          placeholder="000000"
-          className={`${inputClass} text-center text-lg tracking-[0.4em]`}
+          onResend={() => void resendCode()}
+          resendDisabled={sending || loading || resendIn > 0}
+          resendLabel={sending ? "Sending…" : resendIn > 0 ? `Resend in ${resendIn}s` : "Resend"}
         />
-        <button type="submit" disabled={loading || sending || code.length !== 6} className={primaryBtnClass}>
-          {loading ? (
-            spinner
-          ) : (
-            <>
-              Verify and sign in
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </>
-          )}
-        </button>
-        <button
-          type="button"
-          disabled={sending || loading || resendIn > 0}
-          onClick={() => void resendCode()}
-          className={outlineBtnClass}
-        >
-          {sending ? "Sending…" : resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
-        </button>
         <button
           type="button"
           disabled={sending || loading}
@@ -191,7 +154,7 @@ export default function WhatsAppOtpForm({
         >
           Change number
         </button>
-      </form>
+      </div>
     );
   }
 
