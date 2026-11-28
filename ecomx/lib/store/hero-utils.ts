@@ -222,9 +222,9 @@ export const HERO_MOBILE_IMAGE_AREA =
 
 import { productImageClass } from "./product-image-utils";
 
-/** Hero image sizing — explicit mobile height; desktop fills the right column frame. */
+/** Full-width hero image. Height follows the file so the banner has no empty bands and is not cropped. */
 export function getHeroImageClass(): string {
-  return "h-full w-auto max-h-full max-w-full object-contain object-center";
+  return "block h-auto w-full max-w-none object-contain object-center";
 }
 
 /** Hero image frame — no multiply here (transform + nested multiply breaks backdrop blending). */

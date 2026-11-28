@@ -1,10 +1,17 @@
-import { Urbanist } from "next/font/google";
+import { Nunito, Urbanist } from "next/font/google";
 
 /** Matches skynet.com — used across storefront, auth, and admin. */
 export const urbanist = Urbanist({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-urbanist",
+  display: "swap",
+});
+
+/** Rounded face for the homepage spotlight only — closer to a retail poster than Urbanist. */
+export const spotlightFont = Nunito({
+  subsets: ["latin"],
+  weight: ["700", "800"],
   display: "swap",
 });
 

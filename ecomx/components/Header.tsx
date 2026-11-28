@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Truck, Lock, ShieldCheck, Headphones } from "lucide-react";
 import * as Icons from "./Icons";
@@ -13,11 +13,13 @@ import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
 import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
+import { shouldHideHeaderOnAccount, shouldHideStoreHeaderOnMobile } from "@/lib/store/mobile-chrome";
 import { useAuthStore } from "@/store/auth.store";
 import { usePublicDeliverySettings } from "@/hooks/useDeliverySettings";
 import { getDeliveryPromoText } from "@/lib/store/delivery-promo";
 import { useCategories, STORE_CATEGORY_QUERY } from "@/hooks/useCategories";
 import { CategoryIcons, resolveCategoryIcon } from "@/lib/store/category-icons";
+import { CATEGORY_LIST_BACKGROUND, CATEGORY_LIST_INK } from "@/lib/store/category-banner-style";
 import type { ApiCategory } from "@/types/category.types";
 
 interface HeaderProps {
@@ -32,7 +34,7 @@ interface HeaderProps {
   onCategorySelect?: (category: ApiCategory) => void;
 }
 
-const CATEGORY_STRIP_HEIGHT = 56;
+const CATEGORY_STRIP_HEIGHT = 46;
 const SCROLL_TOP_THRESHOLD = 24;
 const SCROLL_DIRECTION_DELTA = 16;
 
@@ -45,7 +47,7 @@ const MOBILE_NAV_LINKS = [
 ];
 
 const mobileCategoryChipClass =
-  "flex w-full min-w-0 flex-col items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-1 py-1.5 text-center text-[10px] font-medium leading-tight text-gray-700";
+  "flex w-full min-w-0 flex-col items-center gap-0.5 rounded-lg border border-[#7f1d1d]/25 bg-[#7f1d1d]/10 px-1 py-1.5 text-center text-[10px] font-medium leading-tight text-current";
 
 export default function Header({
   cart,
@@ -59,6 +61,15 @@ export default function Header({
   onCategorySelect,
 }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? ROUTES.home;
+  const path = pathname ?? ROUTES.home;
+  const hideOnMobileHome = shouldHideStoreHeaderOnMobile(path);
+  const hideOnAccount = shouldHideHeaderOnAccount(path);
+  const headerVisibilityClass = hideOnAccount
+    ? "max-lg:hidden"
+    : hideOnMobileHome
+      ? "max-md:hidden"
+      : "";
   const authRole = useAuthStore((s) => s.user?.role);
   const showAdminPanel = canAccessAdminPanel(authRole);
   const { client } = useClientTheme();
@@ -177,10 +188,13 @@ export default function Header({
 
   return (
     <>
-      <div ref={headerRef} className="fixed left-0 right-0 top-0 z-[150]">
+      <div
+        ref={headerRef}
+        className={`fixed left-0 right-0 top-0 z-[150] ${headerVisibilityClass}`}
+      >
         {/* ── Top Promo Bar ── */}
         <div
-          className="overflow-hidden py-1"
+          className="hidden overflow-hidden py-1 md:block"
           style={{ background: `${Colors.base_color}` }}
         >
           <div
@@ -354,17 +368,7 @@ export default function Header({
               </span>
             </motion.button>
 
-            <div className="shrink-0 sm:hidden">
-              <StoreAccountMenu
-                user={user}
-                wishlistCount={wishlist.length}
-                onLoginOpen={onLoginOpen}
-                onLogout={onLogout}
-                onWishlistOpen={onWishlistOpen}
-                compact
-              />
-            </div>
-            <div className="hidden shrink-0 sm:block">
+            <div className="hidden shrink-0 md:block">
               <StoreAccountMenu
                 user={user}
                 wishlistCount={wishlist.length}
@@ -377,7 +381,7 @@ export default function Header({
             <motion.button
               type="button"
               onClick={onCartOpen}
-              className="relative flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-transparent font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all sm:h-auto sm:w-auto sm:px-3 sm:py-2 [&_svg]:h-[18px] [&_svg]:w-[18px] sm:[&_svg]:h-5 sm:[&_svg]:w-5"
+              className="relative hidden h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-transparent font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all md:flex md:h-auto md:w-auto md:px-3 md:py-2 [&_svg]:h-[18px] [&_svg]:w-[18px] md:[&_svg]:h-5 md:[&_svg]:w-5"
               whileTap={{ scale: 0.97 }}
               aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
             >
@@ -397,21 +401,13 @@ export default function Header({
               </AnimatePresence>
             </motion.button>
 
-            <motion.button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all md:hidden [&_svg]:h-[18px] [&_svg]:w-[18px]"
-              whileTap={{ scale: 0.93 }}
-              aria-label="Open menu"
-            >
-              <Icons.Menu />
-            </motion.button>
           </div>
         </div>
 
         {/* ── Category icon strip ── */}
         <motion.div
-          className="overflow-hidden border-b border-gray-200 bg-white"
+          className="hidden overflow-hidden border-b md:block"
+          style={{ background: CATEGORY_LIST_BACKGROUND, color: CATEGORY_LIST_INK, borderColor: "#f59e0b" }}
           initial={false}
           animate={{
             height: catVisible ? CATEGORY_STRIP_HEIGHT : 0,
@@ -421,10 +417,10 @@ export default function Header({
         >
           <div className={`${tw.storeContainer} w-full min-w-0`}>
             <div
-              className={`grid w-full min-w-0 auto-cols-[minmax(4.5rem,1fr)] grid-flow-col items-stretch gap-2 overflow-x-auto scroll-smooth py-1.5 sm:gap-3 md:gap-4 lg:gap-5 md:overflow-x-visible ${tw.scrollbarHide}`}
+              className={`grid w-full min-w-0 auto-cols-[minmax(0,1fr)] grid-flow-col items-stretch gap-1 overflow-x-auto scroll-smooth py-2 sm:gap-2 md:overflow-x-visible ${tw.scrollbarHide}`}
             >
               {categoriesLoading ? (
-                <span className="col-span-full px-3 py-2 text-[11px] text-gray-400">
+                <span className="col-span-full px-3 py-2 text-[11px] opacity-80">
                   Loading categories...
                 </span>
               ) : categories.length > 0 ? (
@@ -434,12 +430,14 @@ export default function Header({
                       key={cat._id}
                       type="button"
                       onClick={() => handleCategoryClick(cat)}
-                      className="group flex min-w-0 w-full flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95"
+                      className="group flex min-w-0 w-full items-center justify-center border-0 bg-transparent px-1.5 py-1 cursor-pointer text-current transition-transform hover:-translate-y-px hover:bg-[#7f1d1d]/10 active:scale-95"
                     >
-                      <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                      {/* Category icons hidden in the header strip; labels carry the name.
+                      <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center">
                         {resolveCategoryIcon(cat.name)}
                       </span>
-                      <span className="w-full min-w-0 truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
+                      */}
+                      <span className="w-full min-w-0 truncate text-center font-label text-sm font-semibold leading-tight">
                         {cat.name}
                       </span>
                     </button>
@@ -447,12 +445,14 @@ export default function Header({
                   <button
                     type="button"
                     onClick={() => goTo(ROUTES.shop)}
-                    className="group flex min-w-0 w-full flex-col items-center justify-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer transition-transform hover:-translate-y-px active:scale-95"
+                    className="group flex min-w-0 w-full items-center justify-center border-0 bg-transparent px-1.5 py-1 cursor-pointer transition-transform hover:-translate-y-px hover:bg-[#7f1d1d]/10 active:scale-95"
                   >
-                    <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center text-gray-600 transition-colors group-hover:text-blue-600">
+                    {/*
+                    <span className="flex h-6 w-6 md:h-5 md:w-5 shrink-0 items-center justify-center">
                       {CategoryIcons.More}
                     </span>
-                    <span className="w-full min-w-0 truncate text-center font-label text-[11px] font-medium leading-tight text-gray-600 transition-colors group-hover:text-blue-600 md:text-[9px]">
+                    */}
+                    <span className="w-full min-w-0 truncate text-center font-label text-sm font-semibold leading-tight">
                       More Categories
                     </span>
                   </button>
@@ -461,12 +461,14 @@ export default function Header({
                 <button
                   type="button"
                   onClick={() => goTo(ROUTES.shop)}
-                  className="group col-span-full flex w-full flex-col items-center gap-0.5 border-0 bg-transparent px-1 py-1 cursor-pointer"
+                  className="group col-span-full flex w-full items-center justify-center border-0 bg-transparent px-1 py-1 cursor-pointer"
                 >
-                  <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center text-gray-600">
+                  {/*
+                  <span className="flex h-6 w-6 md:h-5 md:w-5 items-center justify-center">
                     {CategoryIcons.More}
                   </span>
-                  <span className="font-label text-[11px] md:text-[9px] text-gray-600">
+                  */}
+                  <span className="font-label text-sm font-semibold">
                     Shop All
                   </span>
                 </button>
@@ -528,9 +530,12 @@ export default function Header({
               </div>
 
               {categories.length > 0 && (
-                <div className="border-b border-gray-100 p-3">
+                <div
+                  className="border-b p-3"
+                  style={{ background: CATEGORY_LIST_BACKGROUND, color: CATEGORY_LIST_INK, borderColor: "#f59e0b" }}
+                >
                   <p
-                    className={`mb-1.5 px-0.5 ${type.eyebrow} text-[10px] text-gray-400`}
+                    className={`mb-1.5 px-0.5 ${type.eyebrow} text-[10px] opacity-80`}
                   >
                     CATEGORIES
                   </p>
@@ -542,7 +547,7 @@ export default function Header({
                         onClick={() => handleCategoryClick(cat)}
                         className={mobileCategoryChipClass}
                       >
-                        <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-500 [&_svg]:h-3.5 [&_svg]:w-3.5">
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center [&_svg]:h-3.5 [&_svg]:w-3.5">
                           {resolveCategoryIcon(cat.name)}
                         </span>
                         <span className="line-clamp-2 w-full min-w-0">{cat.name}</span>
@@ -554,9 +559,9 @@ export default function Header({
                         goTo(ROUTES.shop);
                         setMobileOpen(false);
                       }}
-                      className="col-span-3 flex w-full min-w-0 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-[10px] font-medium text-gray-700"
+                      className="col-span-3 flex w-full min-w-0 items-center justify-center gap-1.5 rounded-lg border border-[#7f1d1d]/25 bg-[#7f1d1d]/10 px-2 py-1.5 text-[10px] font-medium text-current"
                     >
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-500 [&_svg]:h-3.5 [&_svg]:w-3.5">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center [&_svg]:h-3.5 [&_svg]:w-3.5">
                         {CategoryIcons.More}
                       </span>
                       <span className="truncate">More Categories</span>

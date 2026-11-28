@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import MobileAccountTab from "@/components/store/mobile/MobileAccountTab";
+import { MOBILE_SAFE_TOP, shouldHideHeaderOnAccount } from "@/lib/store/mobile-chrome";
 import { useState } from "react";
 import * as Icons from "@/components/Icons";
 import AccountChangePasswordSection from "@/components/store/AccountChangePasswordSection";
@@ -38,15 +40,20 @@ function resolveAccountSection(sectionParam: string | null): AccountSection {
 
 export default function AccountPageClient() {
   const router = useRouter();
+  const pathname = usePathname() ?? "/account";
   const searchParams = useSearchParams();
+  const accountAppChrome = shouldHideHeaderOnAccount(pathname);
+  const accountTopPad = accountAppChrome ? `${MOBILE_SAFE_TOP} lg:pt-[var(--page-top)]` : tw.pageTopOffset;
   const queryClient = useQueryClient();
-  const { setLoginOpen } = useStore();
+  const { setLoginOpen, wishlist, logout, setWishlistOpen } = useStore();
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const isLoggedIn = useAuthStore(selectIsAuthenticated);
   const setUser = useAuthStore((s) => s.setUser);
   const authUser = useAuthStore((s) => s.user);
 
   const activeSection = resolveAccountSection(searchParams.get("section"));
+  const isAccountHub = searchParams.get("section") == null;
+  const wishlistCount = wishlist.length;
 
   const { data: customer, isLoading: profileLoading } = useQuery({
     queryKey: CUSTOMER_PROFILE_KEY,
@@ -69,18 +76,40 @@ export default function AccountPageClient() {
   const [addressFormMode, setAddressFormMode] = useState<"none" | "add" | "edit">("none");
   const [editAddress, setEditAddress] = useState<CustomerAddress | null>(null);
 
-  if (!isHydrated) {
-    return <p className={`${tw.pageTopOffset} py-16 text-center text-sm text-muted`}>Loading...</p>;
+  if (!isHydrated && !isAccountHub) {
+    return <p className={`${accountTopPad} py-16 text-center text-sm text-muted`}>Loading...</p>;
   }
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn && !isAccountHub) {
     return (
-      <div className={`${tw.pageTopOffset} mx-auto max-w-lg px-4 py-16 text-center`}>
+      <div className={`${accountTopPad} mx-auto max-w-lg px-4 py-16 text-center`}>
         <p className="mb-4 text-sm text-muted">Sign in to view your account.</p>
         <button type="button" onClick={() => setLoginOpen(true)} className={tw.btnPrimary}>
           Sign In
         </button>
       </div>
+    );
+  }
+
+  if (!isLoggedIn && isAccountHub) {
+    return (
+      <>
+        <MobileAccountTab
+          user={authUser}
+          wishlistCount={wishlistCount}
+          onLoginOpen={() => setLoginOpen(true)}
+          onLogout={logout}
+          onWishlistOpen={() => setWishlistOpen(true)}
+        />
+        <div className={`${tw.pageTopOffset} hidden min-h-[50vh] items-center justify-center lg:flex`}>
+          <div className="mx-auto max-w-lg px-4 text-center">
+            <p className="mb-4 text-sm text-muted">Sign in to view your account.</p>
+            <button type="button" onClick={() => setLoginOpen(true)} className={tw.btnPrimary}>
+              Sign In
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -133,7 +162,21 @@ export default function AccountPageClient() {
   const navActive: AccountSection = activeSection;
 
   return (
-    <div className={`${tw.pageTopOffset} min-h-screen bg-[#f1f3f6] pb-16`}>
+    <>
+      {isAccountHub ? (
+        <MobileAccountTab
+          user={authUser}
+          wishlistCount={wishlistCount}
+          onLoginOpen={() => setLoginOpen(true)}
+          onLogout={logout}
+          onWishlistOpen={() => setWishlistOpen(true)}
+        />
+      ) : null}
+      <div
+        className={`${accountTopPad} min-h-screen bg-[#f1f3f6] pb-16 ${
+          isAccountHub ? "hidden lg:block" : ""
+        }`}
+      >
       <div className="mx-auto max-w-[1200px] px-4 pt-2 sm:px-6">
         <button type="button" onClick={() => router.back()} className={`${tw.storeBackLink} mb-4`}>
           <Icons.ChevronLeft /> Back
@@ -412,5 +455,6 @@ export default function AccountPageClient() {
         </StoreAccountLayout>
       </div>
     </div>
+    </>
   );
 }

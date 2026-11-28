@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import StoreImage from "./StoreImage";
-import { tw, type } from "@/lib/theme";
+import { type } from "@/lib/theme";
 import {
   formatHeroTitle,
   getSlideAccent,
   getEyebrowBadgeStyle,
   getHeroImageClass,
-  HERO_IMAGE_INNER,
   HERO_SLIDE_MIN_H,
   HERO_MOBILE_IMAGE_AREA,
   HERO_MOBILE_IMAGE_FRAME,
@@ -17,13 +16,11 @@ import {
   getHeroAuroraGradient,
   getHeroBeamGradient,
   buildHeroSlides,
-  heroSlideThumbSrc,
   resolveHeroContentImage,
   heroPosterHasDualAssets,
   resolveHeroPosterDesktopImage,
   resolveHeroPosterMobileImage,
   HERO_TRUST_BADGES,
-  HERO_SLIDE_LABELS,
   type HeroAccent,
 } from "@/lib/store/hero-utils";
 import {
@@ -33,7 +30,6 @@ import {
   useMotionTemplate,
   useSpring,
   useTransform,
-  AnimatePresence,
   MotionConfig,
   type MotionValue,
   type Transition,
@@ -284,73 +280,6 @@ function HeroTrustBadges({ isActive, accent }: { isActive: boolean; accent: Hero
   );
 }
 
-function HeroSlideTimer({
-  displayIndex,
-  slideCount,
-  progress,
-  accent,
-  onSeek,
-}: {
-  displayIndex: number;
-  slideCount: number;
-  progress: MotionValue<number>;
-  accent: HeroAccent;
-  onSeek: (index: number) => void;
-}) {
-  return (
-    <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-      <div className="hidden sm:block">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={displayIndex}
-            className="block font-mono text-[10px] font-medium tracking-widest text-slate-400"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.2 }}
-          >
-            {String(displayIndex + 1).padStart(2, "0")} / {String(slideCount).padStart(2, "0")}
-          </motion.span>
-        </AnimatePresence>
-      </div>
-      <div className="flex items-center gap-1">
-        {Array.from({ length: slideCount }, (_, i) => {
-          const active = i === displayIndex;
-          return (
-            <motion.button
-              key={`prog-${i}`}
-              type="button"
-              aria-label={`Go to slide ${i + 1}`}
-              onClick={() => onSeek(i)}
-              className="group relative h-[3px] cursor-pointer overflow-hidden rounded-full bg-slate-200/90"
-              animate={{ width: active ? 48 : 12 }}
-              transition={SPRING_SNAPPY}
-              whileHover={{ scaleY: 1.8 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {active ? (
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: `linear-gradient(90deg, ${accent.color}, ${accent.neon})`,
-                    scaleX: progress,
-                    originX: 0,
-                  }}
-                />
-              ) : (
-                <div
-                  className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  style={{ background: `${accent.color}50` }}
-                />
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function SlideTitle({ text, animateIn }: { text: string; animateIn: boolean }) {
   const lines = formatHeroTitle(text, 18).split("\n").slice(0, 2);
 
@@ -405,7 +334,7 @@ function HeroSlidePanel({
       <button
         type="button"
         onClick={() => onPrimaryAction(slide)}
-        className="group relative flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-0 p-0 text-left md:rounded-3xl"
+        className="group relative block w-full min-w-0 shrink-0 basis-full cursor-pointer overflow-hidden rounded-2xl border-0 p-0 text-left md:rounded-3xl"
         style={{ backgroundColor: posterBg }}
         aria-label={posterLabel}
       >
@@ -419,8 +348,8 @@ function HeroSlidePanel({
               priority={isActive}
               blend={false}
               fit="limit"
-              className="block h-full w-full object-contain object-center sm:hidden"
-              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              className="block h-auto w-full object-contain object-center sm:hidden"
+              style={{ objectFit: "contain", width: "100%", height: "auto" }}
             />
             <StoreImage
               src={posterDesktop}
@@ -430,8 +359,8 @@ function HeroSlidePanel({
               priority={isActive}
               blend={false}
               fit="limit"
-              className="hidden h-full w-full object-contain object-center sm:block"
-              style={{ objectFit: "contain", width: "100%", height: "100%" }}
+              className="hidden h-auto w-full object-contain object-center sm:block"
+              style={{ objectFit: "contain", width: "100%", height: "auto" }}
             />
           </>
         ) : (
@@ -443,8 +372,8 @@ function HeroSlidePanel({
             priority={isActive}
             blend={false}
             fit="limit"
-            className="block h-full w-full object-contain object-center"
-            style={{ objectFit: "contain", width: "100%", height: "100%" }}
+            className="block h-auto w-full object-contain object-center"
+            style={{ objectFit: "contain", width: "100%", height: "auto" }}
           />
         )}
         <span className="sr-only">{slide.cta}</span>
@@ -454,9 +383,9 @@ function HeroSlidePanel({
 
   return (
     <div
-      className={`${HERO_SLIDE_MIN_H} relative flex h-full w-full min-w-0 shrink-0 basis-full flex-col overflow-hidden sm:block`}
+      className="relative w-full min-w-0 shrink-0 basis-full overflow-hidden"
     >
-      <div className="relative z-10 min-w-0 shrink-0 px-3 pb-0 pt-2 sm:absolute sm:inset-0 sm:flex sm:max-w-[52%] sm:items-center sm:px-5 sm:py-6 sm:pb-1 sm:pt-3 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
+      <div className="absolute inset-y-0 left-0 z-10 flex min-w-0 items-center px-3 py-3 sm:max-w-[52%] sm:px-5 sm:py-6 md:px-8 md:py-8 lg:max-w-[48%] lg:px-10">
         <motion.div
           className="w-full min-w-0 max-w-[380px]"
           variants={contentStagger}
@@ -573,23 +502,21 @@ function HeroSlidePanel({
       </div>
 
       <motion.div
-        className={`pointer-events-none relative z-[2] mt-auto flex shrink-0 items-center justify-center px-3 pb-2 pt-0 sm:mt-0 sm:justify-center sm:px-6 sm:pb-0 sm:pt-0 sm:pl-[38%] sm:pr-[6%] md:pl-[36%] md:pr-[8%] lg:pl-[34%] lg:pr-[10%] ${HERO_MOBILE_IMAGE_AREA}`}
+        className="pointer-events-none relative z-[2] w-full"
         variants={productEnter}
         initial={false}
         animate={isActive ? "show" : "idle"}
       >
-        <div className={`${HERO_IMAGE_INNER} flex items-center justify-center ${HERO_MOBILE_IMAGE_FRAME}`}>
-          <StoreImage
-            src={contentImg}
-            alt={formatHeroTitle(slide.title).replace("\n", " ")}
-            width={520}
-            height={460}
-            priority={isActive}
-            blend={false}
-            className={getHeroImageClass()}
-            style={{ background: "transparent", maxHeight: "100%", width: "auto", height: "100%" }}
-          />
-        </div>
+        <StoreImage
+          src={contentImg}
+          alt={formatHeroTitle(slide.title).replace("\n", " ")}
+          width={1600}
+          height={640}
+          priority={isActive}
+          blend={false}
+          className={getHeroImageClass()}
+          style={{ background: "transparent", width: "100%", height: "auto" }}
+        />
       </motion.div>
 
       <HeroTrustBadges isActive={isActive} accent={ac} />
@@ -597,10 +524,10 @@ function HeroSlidePanel({
   );
 }
 
-function HeroSkeleton() {
+function HeroSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`${HERO_SLIDE_MIN_H} relative flex w-full flex-col overflow-hidden rounded-2xl bg-[#f8fafc] sm:block md:rounded-3xl`}
+      className={`${HERO_SLIDE_MIN_H} relative flex w-full flex-col overflow-hidden rounded-2xl bg-[#f8fafc] sm:block md:rounded-3xl ${className}`}
       style={{ boxShadow: "0 2px 24px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05)" }}
     >
       <div
@@ -626,6 +553,9 @@ interface HeroSectionProps {
   isLoading?: boolean;
   onSlideAction?: (slide: HeroSlide) => void;
   onViewAll?: () => void;
+  /** Omit outer vertical padding when nested in `HeroSectionSplit` (parent supplies it). */
+  embedded?: boolean;
+  className?: string;
 }
 
 export default function HeroSection({
@@ -633,6 +563,8 @@ export default function HeroSection({
   isLoading = false,
   onSlideAction,
   onViewAll,
+  embedded = false,
+  className = "",
 }: HeroSectionProps) {
   const slides = useMemo(() => buildHeroSlides(apiSlides), [apiSlides]);
   const slideCount = slides.length > 0 ? slides.length : DEFAULT_SLIDE_COUNT;
@@ -681,17 +613,11 @@ export default function HeroSection({
   const my = useMotionValue(0);
   const spotX = useMotionValue(-500);
   const spotY = useMotionValue(-500);
-  const progress = useMotionValue(0);
   const parallaxX = useTransform(mx, (v) => v * 8);
   const parallaxY = useTransform(my, (v) => v * 8);
   const smoothSpotX = useTransform(spotX, (v) => v);
   const smoothSpotY = useTransform(spotY, (v) => v);
   const heroSpotlight = useMotionTemplate`radial-gradient(340px circle at ${smoothSpotX}px ${smoothSpotY}px, ${accent.neon}1f, transparent 72%)`;
-
-  const goTo = useCallback((index: number) => {
-    setInstant(false);
-    setTrackIndex(index);
-  }, []);
 
   const next = useCallback(() => {
     setInstant(false);
@@ -737,24 +663,21 @@ export default function HeroSection({
     return () => window.clearTimeout(id);
   }, [trackIndex, handleTrackComplete]);
 
-  /** Fresh countdown for each slide; pausing keeps whatever time is left. */
+  /** Fresh wait for each slide; pausing keeps whatever time is left. */
   useEffect(() => {
-    progress.set(0);
     remainingRef.current = AUTO_MS;
-  }, [trackIndex, progress]);
+  }, [trackIndex]);
 
   useEffect(() => {
     if (!autoPlayActive) return;
     const duration = remainingRef.current;
     const startedAt = Date.now();
-    const controls = animate(progress, 1, { duration: duration / 1000, ease: "linear" });
     const timer = window.setTimeout(next, duration);
     return () => {
-      controls.stop();
       window.clearTimeout(timer);
       remainingRef.current = Math.max(0, duration - (Date.now() - startedAt));
     };
-  }, [trackIndex, autoPlayActive, next, progress]);
+  }, [trackIndex, autoPlayActive, next]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -776,10 +699,13 @@ export default function HeroSection({
     [onSlideAction, onViewAll]
   );
 
+  const outerPad = embedded ? "" : "pb-2 pt-1";
+  const outerShell = [outerPad, className].filter(Boolean).join(" ");
+
   if (isLoading) {
     return (
-      <div className="pb-2 pt-1">
-        <HeroSkeleton />
+      <div className={outerShell || undefined}>
+        <HeroSkeleton className={embedded ? "h-full min-h-0" : undefined} />
       </div>
     );
   }
@@ -793,13 +719,15 @@ export default function HeroSection({
      */
     <MotionConfig reducedMotion="user">
       <motion.div
-        className="pb-2 pt-1"
+        className={outerShell || undefined}
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
       >
         {/* Animated gradient border */}
-        <div className={`relative overflow-hidden rounded-[18px] p-[1.5px] md:rounded-[26px] ${bgPaused ? "hero-bg-paused" : ""}`}>
+        <div
+          className={`relative w-full overflow-hidden rounded-[18px] p-[1.5px] md:rounded-[26px] ${bgPaused ? "hero-bg-paused" : ""}`}
+        >
           <div
             className="hero-bg-animate absolute left-1/2 top-1/2 aspect-square w-[160%] opacity-55 will-change-transform"
             style={{
@@ -811,7 +739,7 @@ export default function HeroSection({
           />
 
           <motion.div
-            className="group relative flex w-full flex-col overflow-hidden rounded-[17px] md:rounded-[25px]"
+            className="group relative w-full overflow-hidden rounded-[17px] md:rounded-[25px]"
             animate={{
               boxShadow: `0 18px 50px -12px ${accent.glow}, 0 2px 8px rgba(15,23,42,0.06)`,
             }}
@@ -857,7 +785,7 @@ export default function HeroSection({
               ) : null}
             </AnimatePresence> */}
 
-            <div className={`hero-slide-viewport relative min-h-0 flex-1 overflow-hidden ${HERO_SLIDE_MIN_H}`}>
+            <div className="hero-slide-viewport relative w-full overflow-hidden">
               {/* One shared background — avoids 5× duplicated blur animations while sliding */}
               <div
                 className={`pointer-events-none absolute inset-0 z-0 ${bgPaused ? "hero-bg-paused" : ""}`}
@@ -875,7 +803,7 @@ export default function HeroSection({
               </div>
 
               <motion.div
-                className="hero-slide-track relative z-10 flex h-full min-h-[inherit] w-full min-w-0 cursor-grab touch-pan-y active:cursor-grabbing"
+                className="hero-slide-track relative z-10 flex w-full min-w-0 cursor-grab items-start touch-pan-y active:cursor-grabbing"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.1}
@@ -893,7 +821,7 @@ export default function HeroSection({
                   return (
                   <div
                     key={`track-${s.id}-${i}`}
-                    className="flex h-full min-h-[inherit] w-full min-w-0 shrink-0 basis-full"
+                    className="w-full min-w-0 shrink-0 basis-full"
                   >
                     <HeroSlidePanel
                       slide={s}
@@ -908,75 +836,6 @@ export default function HeroSection({
               </motion.div>
             </div>
 
-            <div className="relative z-20 flex shrink-0 items-center justify-between gap-2 border-t border-white/60 bg-white/40 px-2.5 py-2 backdrop-blur-xl sm:gap-3 sm:px-5 sm:py-2.5 md:px-7">
-              <div className={`flex min-w-0 items-center gap-1.5 overflow-x-auto sm:gap-2 ${tw.scrollbarHide}`}>
-                {slides.map((sl, i) => {
-                  const ta = getSlideAccent(i, sl.slideKind);
-                  const active = i === displayIndex;
-                  const label =
-                    sl.offerLabel?.trim() ||
-                    HERO_SLIDE_LABELS[i] ||
-                    `Slide ${i + 1}`;
-                  return (
-                    <motion.button
-                      key={`thumb-${i}`}
-                      type="button"
-                      onClick={() => goTo(i)}
-                      aria-label={`${label}: ${formatHeroTitle(sl.title).replace("\n", " ")}`}
-                      aria-current={active ? "true" : undefined}
-                      className="group relative flex shrink-0 cursor-pointer flex-col items-center gap-1"
-                      whileHover={{ y: -3 }}
-                      whileTap={{ scale: 0.94 }}
-                      transition={SPRING_SNAPPY}
-                    >
-                      <motion.div
-                        className="relative overflow-hidden rounded-[10px] border-2 bg-transparent"
-                        animate={{
-                          width: active ? 44 : 28,
-                          height: 28,
-                          borderColor: active ? ta.color : "rgba(15,23,42,0.08)",
-                          boxShadow: active ? `0 6px 18px ${ta.glow}` : "0 0 0 rgba(0,0,0,0)",
-                        }}
-                        transition={SPRING_SNAPPY}
-                      >
-                        <StoreImage
-                          src={heroSlideThumbSrc(sl) || sl.img}
-                          alt=""
-                          width={44}
-                          height={28}
-                          blend={false}
-                          fit="limit"
-                          className="h-full w-full object-contain p-0.5"
-                        />
-                        {active ? (
-                          <motion.div
-                            className="absolute inset-x-0 bottom-0 h-[3px]"
-                            layoutId="thumb-active-bar"
-                            style={{ background: `linear-gradient(90deg, ${ta.color}, ${ta.neon})` }}
-                            transition={SPRING_SNAPPY}
-                          />
-                        ) : null}
-                      </motion.div>
-                      <motion.span
-                        className="hidden font-label text-[8px] font-semibold uppercase tracking-wider sm:block"
-                        animate={{ color: active ? ta.dark : "#94a3b8", opacity: active ? 1 : 0.65 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {label}
-                      </motion.span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              <HeroSlideTimer
-                displayIndex={displayIndex}
-                slideCount={slideCount}
-                progress={progress}
-                accent={accent}
-                onSeek={goTo}
-              />
-            </div>
           </motion.div>
         </div>
       </motion.div>

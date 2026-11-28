@@ -162,6 +162,12 @@ export default function ShopPage({
     setSearch(searchParams.get("search") ?? "");
   }, [searchParams]);
 
+  useEffect(() => {
+    if (searchParams.get("deals") !== "1") return;
+    setFilters((prev) => (prev.hasDiscount ? prev : { ...prev, hasDiscount: true }));
+    setAppliedFilters((prev) => (prev.hasDiscount ? prev : { ...prev, hasDiscount: true }));
+  }, [searchParams]);
+
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearch(value);
