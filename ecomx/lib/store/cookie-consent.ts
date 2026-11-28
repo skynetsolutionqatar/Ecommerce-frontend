@@ -187,8 +187,9 @@ export function isCookieConsentAnswered(snapshot: CookieConsentSnapshot): boolea
   return snapshot !== null && snapshot !== "pending";
 }
 
+/** Show until we have a saved decision (includes pre-hydrate `pending` so the bar is not stuck hidden). */
 export function shouldShowCookieConsentBanner(snapshot: CookieConsentSnapshot): boolean {
-  return snapshot === null;
+  return !isCookieConsentAnswered(snapshot);
 }
 
 export function saveCookieConsent(
@@ -246,12 +247,16 @@ export function subscribeCookieConsent(listener: () => void): () => void {
 
   if (typeof window !== "undefined") {
     const hydrate = () => {
-      if (consentClientHydrated) return;
+      if (consentClientHydrated) {
+        listener();
+        return;
+      }
       consentClientHydrated = true;
       invalidateSnapshotCache();
       listener();
     };
     queueMicrotask(hydrate);
+    requestAnimationFrame(hydrate);
 
     window.addEventListener("storage", onStorage);
     return () => {

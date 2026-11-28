@@ -111,10 +111,10 @@ async function writeInvoice(order: ApiOrder, outPath: string) {
   const buffer = Buffer.from(await blob.arrayBuffer());
   fs.writeFileSync(outPath, buffer);
   const pageCount = countPdfPages(buffer);
-  console.log(`PDF written: ${outPath}`);
-  console.log(
-    `  Items page 1: ${firstPage.length}/${order.items.length}, continuation chunks: [${continuations.map((c) => c.length).join(", ")}], pages: ${pageCount}`,
-  );
+  // console.log(`PDF written: ${outPath}`);
+  // console.log(
+  //   `  Items page 1: ${firstPage.length}/${order.items.length}, continuation chunks: [${continuations.map((c) => c.length).join(", ")}], pages: ${pageCount}`,
+  // );
   return pageCount;
 }
 

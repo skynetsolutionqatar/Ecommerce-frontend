@@ -71,5 +71,5 @@ for (const file of files) {
   }
   await knockOutBackground(input, output);
   const meta = await sharp(output).metadata();
-  console.log(`${base}-cutout.png ${meta.width}x${meta.height}`);
+  // console.log(`${base}-cutout.png ${meta.width}x${meta.height}`);
 }

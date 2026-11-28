@@ -848,7 +848,7 @@ function run(file) {
     console.error(`FAIL: ${errors.length} validation error(s)${cap}`);
     return 1;
   }
-  console.log(`PASS: ${ledger.length} coverage units valid`);
+  // console.log(`PASS: ${ledger.length} coverage units valid`);
   return 0;
 }
 

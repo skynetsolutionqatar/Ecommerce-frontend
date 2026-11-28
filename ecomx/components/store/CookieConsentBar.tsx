@@ -24,7 +24,7 @@ export default function CookieConsentBar({
     <section
       role="region"
       aria-label="Cookie consent"
-      className="cookie-consent-bar pointer-events-auto fixed inset-x-0 bottom-0 z-[220] flex justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 md:px-4 md:pb-4"
+      className="cookie-consent-bar pointer-events-auto fixed inset-x-0 bottom-0 z-[600] flex justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 md:px-4 md:pb-4"
     >
       <div className="flex w-full max-w-5xl flex-col gap-3 rounded-2xl border border-[#0c3070] bg-[#0a255d] p-4 shadow-[0_12px_40px_rgba(10,37,93,0.45)] sm:flex-row sm:items-center sm:gap-4 sm:p-5">
         <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">

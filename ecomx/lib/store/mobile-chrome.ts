@@ -1,4 +1,4 @@
-/** Mobile web app shell — matches ecommerce-mobile-app tab bar footprint (no PWA). */
+/** Mobile web app shell — matches ecommerce-mobile-app tab bar footprint; installable PWA for standalone chrome. */
 export const MOBILE_TAB_BAR_HEIGHT_PX = 88;
 export const MOBILE_TAB_DEALS_OVERHANG_PX = 26;
 

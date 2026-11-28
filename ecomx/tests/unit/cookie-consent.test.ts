@@ -52,9 +52,10 @@ describe("cookie consent", () => {
     cookieDoc.jar.clear();
   });
 
-  it("hides banner until client hydration completes", () => {
+  it("shows banner while consent state is pending or unanswered", () => {
     expect(getCookieConsentSnapshot()).toBe("pending");
-    expect(shouldShowCookieConsentBanner("pending")).toBe(false);
+    expect(shouldShowCookieConsentBanner("pending")).toBe(true);
+    expect(shouldShowCookieConsentBanner(null)).toBe(true);
   });
 
   it("persists accept and reject choices", () => {

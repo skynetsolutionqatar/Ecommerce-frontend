@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { COOKIE_PREFERENCES_OPEN_EVENT } from "@/lib/store/cookie-consent";
 import CookieConsentBar from "@/components/store/CookieConsentBar";
 import CookiePreferencesModal from "@/components/store/CookiePreferencesModal";
@@ -41,8 +42,9 @@ export default function CookieConsentHost() {
   }, []);
 
   if (!showBar && !prefsOpen) return null;
+  if (typeof document === "undefined") return null;
 
-  return (
+  const layer = (
     <>
       {showBar ? (
         <CookieConsentBar
@@ -74,4 +76,6 @@ export default function CookieConsentHost() {
       />
     </>
   );
+
+  return createPortal(layer, document.body);
 }

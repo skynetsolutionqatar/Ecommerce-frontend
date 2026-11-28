@@ -752,7 +752,7 @@ function run(file) {
     console.error(`FAIL: ${errors.length} validation error(s)${cap}`);
     return 1;
   }
-  console.log(`PASS: ${findings.length} findings valid`);
+  // console.log(`PASS: ${findings.length} findings valid`);
   return 0;
 }
 

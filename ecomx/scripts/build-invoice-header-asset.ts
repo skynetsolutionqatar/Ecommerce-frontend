@@ -55,9 +55,9 @@ async function main() {
   const outMeta = await sharp(output).metadata();
   const dpi = Math.round((outMeta.width ?? 0) / (DISPLAY_WIDTH_PT / 72));
 
-  console.log(`Source: ${meta.width}x${meta.height}`);
-  console.log(`Output: ${output}`);
-  console.log(`Size:   ${outMeta.width}x${outMeta.height}px (~${dpi} DPI at 595x96pt)`);
+  // console.log(`Source: ${meta.width}x${meta.height}`);
+  // console.log(`Output: ${output}`);
+  // console.log(`Size:   ${outMeta.width}x${outMeta.height}px (~${dpi} DPI at 595x96pt)`);
 }
 
 main().catch((err) => {

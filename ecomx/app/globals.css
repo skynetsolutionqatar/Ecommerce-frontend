@@ -339,13 +339,28 @@ html:not(:has(.admin-shell)) {
  */
 @media (max-width: 767px) {
   html:has(.store-shell--mobile-web) {
-    min-height: 100dvh;
+    min-height: calc(100dvh + 2px);
     -webkit-text-size-adjust: 100%;
   }
 
   body:has(.store-shell--mobile-web) {
-    min-height: 100dvh;
+    min-height: calc(100dvh + 2px);
     -webkit-overflow-scrolling: touch;
+  }
+
+  html.store-display-browser:has(.store-shell--mobile-web),
+  html.store-display-browser:has(.store-shell--mobile-web) body {
+    /* Allows a tiny scroll so mobile browsers can collapse the URL bar. */
+    overflow-y: auto;
+  }
+
+  html.store-display-standalone:has(.store-shell--mobile-web) {
+    /* PWA / Add to Home Screen — no browser chrome; safe areas only. */
+    min-height: 100dvh;
+  }
+
+  html.store-display-standalone:has(.store-shell--mobile-web) body {
+    min-height: 100dvh;
   }
 
   .store-shell--mobile-web {
