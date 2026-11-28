@@ -141,6 +141,11 @@ export default function Footer() {
                   {pageLabel("cancellation-policy", "Cancellation Policy")}
                 </Link>
               </li>
+              <li>
+                <Link href={pageHref("cookie-policy")} className={linkClass}>
+                  {pageLabel("cookie-policy", "Cookie Policy")}
+                </Link>
+              </li>
             </ul>
           </div>
 

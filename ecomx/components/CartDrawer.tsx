@@ -4,10 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { fmt } from "@/lib/data";
 import { ROUTES } from "@/lib/routes";
 import { Colors, tw } from "@/lib/theme";
-import type { CartItem } from "@/lib/types";
+import type { CartItem, WishlistItem } from "@/lib/types";
 import { productImageSurfaceClass } from "@/lib/store/product-image-utils";
+import MobileCartScreen from "@/components/store/mobile/MobileCartScreen";
 import StoreImage from "./StoreImage";
 import * as Icons from "./Icons";
+import type { ApiProduct } from "@/types/product.types";
 
 interface CartDrawerProps {
   cart: CartItem[];
@@ -17,6 +19,12 @@ interface CartDrawerProps {
   onRemove: (id: string) => void;
   /** When set, used instead of `router.push(/shop)` for Continue Shopping / Browse Shop */
   onGoToShop?: () => void;
+  /** Phone cart only. Tablet and desktop keep the side drawer. */
+  onRefresh?: () => void;
+  isWishlisted?: (productId: string) => boolean;
+  onToggleWishlist?: (item: WishlistItem) => void;
+  onAddProduct?: (product: ApiProduct) => void;
+  onOpenProduct?: (product: ApiProduct) => void;
 }
 
 const closeBtnClass =
@@ -35,6 +43,11 @@ export default function CartDrawer({
   onUpdate,
   onRemove,
   onGoToShop,
+  onRefresh,
+  isWishlisted,
+  onToggleWishlist,
+  onAddProduct,
+  onOpenProduct,
 }: CartDrawerProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -60,7 +73,22 @@ export default function CartDrawer({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[300]">
+    <>
+    <div className="md:hidden">
+      <MobileCartScreen
+        cart={cart}
+        onClose={onClose}
+        onUpdate={onUpdate}
+        onRemove={onRemove}
+        onGoToShop={onGoToShop}
+        onRefresh={onRefresh}
+        isWishlisted={isWishlisted}
+        onToggleWishlist={onToggleWishlist}
+        onAddProduct={onAddProduct}
+        onOpenProduct={onOpenProduct}
+      />
+    </div>
+    <div className="fixed inset-0 z-[300] hidden md:block">
       <div onClick={onClose} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
       <div className="absolute top-0 right-0 bottom-0 flex w-full max-w-[420px] flex-col bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.15)] animate-slide-in-right">
@@ -228,5 +256,6 @@ export default function CartDrawer({
         ) : null}
       </div>
     </div>
+    </>
   );
 }

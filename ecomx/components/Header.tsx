@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Truck, Lock, ShieldCheck, Headphones } from "lucide-react";
 import * as Icons from "./Icons";
@@ -13,6 +13,7 @@ import { useClientTheme } from "./ThemeProvider";
 import { Colors, type, tw } from "@/lib/theme";
 import { ADMIN_ROUTES, canAccessAdminPanel } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
+import { shouldHideHeaderOnAccount, shouldHideStoreHeaderOnMobile } from "@/lib/store/mobile-chrome";
 import { useAuthStore } from "@/store/auth.store";
 import { usePublicDeliverySettings } from "@/hooks/useDeliverySettings";
 import { getDeliveryPromoText } from "@/lib/store/delivery-promo";
@@ -59,6 +60,14 @@ export default function Header({
   onCategorySelect,
 }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? ROUTES.home;
+  const hideOnMobileHome = shouldHideStoreHeaderOnMobile(pathname);
+  const hideOnAccount = shouldHideHeaderOnAccount(pathname);
+  const headerVisibilityClass = hideOnAccount
+    ? "max-lg:hidden"
+    : hideOnMobileHome
+      ? "max-md:hidden"
+      : "";
   const authRole = useAuthStore((s) => s.user?.role);
   const showAdminPanel = canAccessAdminPanel(authRole);
   const { client } = useClientTheme();
@@ -177,10 +186,13 @@ export default function Header({
 
   return (
     <>
-      <div ref={headerRef} className="fixed left-0 right-0 top-0 z-[150]">
+      <div
+        ref={headerRef}
+        className={`fixed left-0 right-0 top-0 z-[150] ${headerVisibilityClass}`}
+      >
         {/* ── Top Promo Bar ── */}
         <div
-          className="overflow-hidden py-1"
+          className="hidden overflow-hidden py-1 md:block"
           style={{ background: `${Colors.base_color}` }}
         >
           <div
@@ -354,17 +366,7 @@ export default function Header({
               </span>
             </motion.button>
 
-            <div className="shrink-0 sm:hidden">
-              <StoreAccountMenu
-                user={user}
-                wishlistCount={wishlist.length}
-                onLoginOpen={onLoginOpen}
-                onLogout={onLogout}
-                onWishlistOpen={onWishlistOpen}
-                compact
-              />
-            </div>
-            <div className="hidden shrink-0 sm:block">
+            <div className="hidden shrink-0 md:block">
               <StoreAccountMenu
                 user={user}
                 wishlistCount={wishlist.length}
@@ -377,7 +379,7 @@ export default function Header({
             <motion.button
               type="button"
               onClick={onCartOpen}
-              className="relative flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-transparent font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all sm:h-auto sm:w-auto sm:px-3 sm:py-2 [&_svg]:h-[18px] [&_svg]:w-[18px] sm:[&_svg]:h-5 sm:[&_svg]:w-5"
+              className="relative hidden h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-transparent font-label text-[12px] font-medium text-gray-700 hover:bg-gray-50 transition-all md:flex md:h-auto md:w-auto md:px-3 md:py-2 [&_svg]:h-[18px] [&_svg]:w-[18px] md:[&_svg]:h-5 md:[&_svg]:w-5"
               whileTap={{ scale: 0.97 }}
               aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
             >
@@ -397,21 +399,12 @@ export default function Header({
               </AnimatePresence>
             </motion.button>
 
-            <motion.button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all md:hidden [&_svg]:h-[18px] [&_svg]:w-[18px]"
-              whileTap={{ scale: 0.93 }}
-              aria-label="Open menu"
-            >
-              <Icons.Menu />
-            </motion.button>
           </div>
         </div>
 
         {/* ── Category icon strip ── */}
         <motion.div
-          className="overflow-hidden border-b border-gray-200 bg-white"
+          className="hidden overflow-hidden border-b border-gray-200 bg-white md:block"
           initial={false}
           animate={{
             height: catVisible ? CATEGORY_STRIP_HEIGHT : 0,

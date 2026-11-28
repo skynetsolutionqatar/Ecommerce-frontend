@@ -332,3 +332,49 @@ html:not(:has(.admin-shell)) {
 .store-shell .bg-bg-soft {
   background-color: var(--color-bg-soft);
 }
+
+/*
+ * Mobile web app shell (not PWA): fixed bottom tabs like ecommerce-mobile-app.
+ * Document scroll + 100dvh helps mobile browsers collapse the URL bar on scroll-down.
+ */
+@media (max-width: 767px) {
+  html:has(.store-shell--mobile-web) {
+    min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body:has(.store-shell--mobile-web) {
+    min-height: 100dvh;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .store-shell--mobile-web {
+    --mobile-tab-bar-space: calc(88px + max(10px, env(safe-area-inset-bottom)));
+    min-height: 100dvh;
+  }
+
+  .store-shell--mobile-web .store-mobile-main {
+    padding-bottom: var(--mobile-tab-bar-space);
+  }
+
+  .store-shell--mobile-web .store-mobile-main:has(.mobile-account-tab) {
+    padding-top: 0;
+  }
+
+  .store-shell--mobile-web .store-mobile-main:has(.mobile-checkout) {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .store-shell--mobile-web .mobile-store-tab-bar {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .store-shell--mobile-web .cookie-consent-bar {
+    bottom: var(--mobile-tab-bar-space);
+  }
+
+  html:has(.store-shell--mobile-web) {
+    --mobile-home-header-height: 168px;
+  }
+}

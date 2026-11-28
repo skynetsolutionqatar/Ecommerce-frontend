@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import ThemeProvider from "@/components/ThemeProvider";
 import QueryProvider from "@/components/QueryProvider";
 import AuthInitializer from "@/components/AuthInitializer";
@@ -9,6 +9,13 @@ import { themeToCssProperties } from "@/lib/theme-css";
 import "./globals.css";
 
 const client = getClientConfig();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a255d",
+};
 
 export const metadata: Metadata = {
   title: `${client.name} — POS & IT Hardware Store Qatar`,
@@ -34,7 +41,7 @@ export default function RootLayout({
       style={themeToCssProperties(client.theme)}
     >
       <body
-        className={`${urbanist.className} flex min-h-full flex-col overflow-x-hidden font-sans antialiased`}
+        className={`${urbanist.className} flex min-h-full min-h-[100dvh] flex-col overflow-x-hidden font-sans antialiased`}
         style={{ background: "#f1f3f6" }}
       >
         <QueryProvider>

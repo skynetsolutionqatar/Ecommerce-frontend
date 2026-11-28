@@ -25,6 +25,7 @@ export function apiCartToCartItems(cart?: ApiCart | null): CartItem[] {
       img: item.thumbnail ?? populated?.thumbnail ?? populated?.images?.[0] ?? "",
       qty: item.quantity,
       stock: populated?.stock,
+      slug: item.slug ?? populated?.slug,
     };
   });
 }
@@ -46,6 +47,7 @@ export function productToGuestCartItem(
     size,
     qty,
     stock: product.stock,
+    slug: product.slug,
   };
 }
 

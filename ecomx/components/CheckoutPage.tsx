@@ -28,6 +28,7 @@ import {
   formatCustomerAddressLines,
 } from "@/lib/store/customer-address-checkout";
 import CheckoutAddressPickerModal from "@/components/store/CheckoutAddressPickerModal";
+import MobileCheckoutView from "@/components/store/mobile/MobileCheckoutView";
 import {
   useCustomerAddressMutations,
   useCustomerAddresses,
@@ -45,6 +46,7 @@ import LocationAreaSearchInput, {
   formatAreaSearchLabel,
 } from "@/components/store/LocationAreaSearchInput";
 import {
+  formatPrice,
   isValidQatarPhone,
   normalizeRegisterPhone,
   sanitizeQatarPhoneInput,
@@ -931,19 +933,91 @@ export default function CheckoutPage({
 
   if (cart.length === 0) {
     return (
-      <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-20`}>
-        <div className="mx-auto max-w-[900px] px-3 py-16 text-center sm:px-5 md:px-8">
-          <p className="mb-4 text-sm text-muted">Your cart is empty.</p>
-          <button type="button" onClick={onBack} className={tw.btnPrimary}>
-            Continue Shopping
-          </button>
+      <>
+        <div className="mobile-checkout flex min-h-[100dvh] flex-col bg-[#f1f3f6] px-4 md:hidden">
+          <h1 className="pt-[max(16px,env(safe-area-inset-top))] text-[18px] font-extrabold text-gray-900">Checkout</h1>
+          <div className="flex flex-1 flex-col items-center justify-center pb-16 text-center">
+            <p className="text-lg font-extrabold text-gray-900">Nothing to check out</p>
+            <p className="mt-1 text-sm text-gray-500">Your cart is empty.</p>
+            <button type="button" onClick={onBack} className="mt-4 h-12 w-full max-w-sm rounded-lg border-0 bg-[#0a255d] text-base font-bold text-white">
+              Start shopping
+            </button>
+          </div>
         </div>
-      </div>
+        <div className={`${tw.pageTopOffset} hidden min-h-screen ${tw.sectionBg} pb-20 md:block`}>
+          <div className="mx-auto max-w-[900px] px-3 py-16 text-center sm:px-5 md:px-8">
+            <p className="mb-4 text-sm text-muted">Your cart is empty.</p>
+            <button type="button" onClick={onBack} className={tw.btnPrimary}>
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 
+  const mobileDeliveryLabel = !deliveryStatus?.deliverable
+    ? "Set your area"
+    : deliveryCharge > 0
+      ? formatPrice(deliveryCharge)
+      : "Free";
+
   return (
-    <div className={`${tw.pageTopOffset} min-h-screen ${tw.sectionBg} pb-20`}>
+    <>
+    <div className="md:hidden">
+      <MobileCheckoutView
+        cartCount={cart.reduce((sum, item) => sum + item.qty, 0)}
+        cart={cart}
+        subtotal={sub}
+        deliveryLabel={mobileDeliveryLabel}
+        toPay={orderTotal}
+        onBack={onBack}
+        isLoggedIn={isLoggedIn}
+        onSignIn={() => {
+          saveCheckoutProgress({
+            form,
+            step,
+            locationQuery,
+            deliveryStatus,
+            savedAddressId: selectedSavedAddressId,
+          });
+          onLoginOpen();
+        }}
+        onChangeAddress={() => setAddressPickerOpen(true)}
+        fullName={form.fullName}
+        email={form.email}
+        phone={form.phone}
+        line1={form.line1}
+        locationQuery={locationQuery}
+        errors={errors}
+        onFullName={(value) => setField("fullName", value)}
+        onEmail={(value) => setField("email", value)}
+        onPhone={(value) => setField("phone", value)}
+        onLine1={(value) => setField("line1", value)}
+        onLocationChange={handleLocationQueryChange}
+        onLocationSelect={handleAreaSelect}
+        onLocationBlur={handleLocationBlur}
+        locationChecking={locationChecking}
+        deliveryMessage={deliveryStatus?.message}
+        deliveryOk={deliveryStatus?.deliverable === true}
+        showMap={showMap}
+        onToggleMap={() => setShowMap((open) => !open)}
+        locating={locating}
+        onUseMyLocation={() => void handleUseMyLocation()}
+        mapLat={form.mapLat}
+        mapLng={form.mapLng}
+        countryId={form.countryId}
+        deliverySettings={deliverySettings}
+        onMapPick={handleMapPick}
+        showSaveDefault={showSaveAsDefaultCheckbox}
+        saveAsDefault={saveAsDefault}
+        onSaveDefault={setSaveAsDefault}
+        placing={placing}
+        submitError={submitError}
+        onPlaceOrder={() => void handlePlaceOrder()}
+      />
+    </div>
+    <div className={`${tw.pageTopOffset} hidden min-h-screen ${tw.sectionBg} pb-20 md:block`}>
       <div className="mx-auto max-w-[900px] px-3 pt-2 sm:px-5 md:px-8 lg:px-[50px]">
         <button
           type="button"
@@ -1435,6 +1509,7 @@ export default function CheckoutPage({
           </div>
         </div>
       </div>
+    </div>
 
       <CheckoutAddressPickerModal
         open={addressPickerOpen && isLoggedIn}
@@ -1444,6 +1519,6 @@ export default function CheckoutPage({
         onClose={() => setAddressPickerOpen(false)}
         onSelect={applySavedAddress}
       />
-    </div>
+    </>
   );
 }

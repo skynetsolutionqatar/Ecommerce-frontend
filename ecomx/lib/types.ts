@@ -95,6 +95,7 @@ export interface CartItem {
   size?: string;
   qty: number;
   stock?: number;
+  slug?: string;
 }
 
 export interface WishlistItem {

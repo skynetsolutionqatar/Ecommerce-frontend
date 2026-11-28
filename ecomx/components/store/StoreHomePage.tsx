@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import HeroSection from "@/components/HeroSection";
 import FlashSaleSection from "@/components/FlashSaleSection";
 import LazyMount from "@/components/LazyMount";
 import { useStore } from "@/components/StoreProvider";
+import MobileStoreHomeFeed from "@/components/store/mobile/MobileStoreHomeFeed";
 import { useProducts } from "@/hooks/useProducts";
+import { usePublicDeliverySettings } from "@/hooks/useDeliverySettings";
 import { useStorefront } from "@/hooks/useStorefront";
 import { PRODUCT_STATUS } from "@/lib/Constant";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
@@ -23,9 +25,10 @@ const NewsletterSection = dynamic(() => import("@/components/NewsletterSection")
 
 export default function StoreHomePage() {
   const router = useRouter();
-  const { openProduct, goToShop, toggleWishlist, isWishlisted } = useStore();
+  const { openProduct, goToShop, toggleWishlist, isWishlisted, setSearchOpen } = useStore();
 
-  const { heroSlides, isLoading: heroLoading } = useStorefront();
+  const { heroSlides, flashOffers, isLoading: heroLoading } = useStorefront();
+  const { data: deliverySettings } = usePublicDeliverySettings();
 
   const { data: dealData, isLoading: dealsLoading } = useProducts({
     status: PRODUCT_STATUS.ACTIVE,
@@ -68,6 +71,16 @@ export default function StoreHomePage() {
   const newArrivalProducts =
     newArrivals.length > 0 ? newArrivals : fallbackProducts.slice(4, 24);
 
+  const hotDealProducts = useMemo(() => {
+    const fromStorefront = flashOffers.slice(0, 8);
+    if (fromStorefront.length > 0) return fromStorefront;
+    const fromSale = deals.slice(0, 8);
+    if (fromSale.length > 0) return fromSale;
+    return bestSellerProducts.slice(0, 8);
+  }, [bestSellerProducts, deals, flashOffers]);
+
+  const hotDealsLoading = hotDealProducts.length === 0 && (heroLoading || dealsLoading);
+
   const handleProductClick = useCallback(
     (product: ApiProduct) => {
       openProduct(apiProductToStoreProduct(product));
@@ -92,7 +105,29 @@ export default function StoreHomePage() {
   }, []);
 
   return (
-    <div className={`${tw.pageTopOffset} min-h-screen`} style={{ background: "#f1f3f6" }}>
+    <>
+      <MobileStoreHomeFeed
+        heroSlides={heroSlides}
+        heroLoading={heroLoading}
+        onHeroSlideAction={handleHeroSlideAction}
+        hotDeals={hotDealProducts}
+        hotDealsLoading={hotDealsLoading}
+        catalogDeals={deals}
+        bestSellerProducts={bestSellerProducts}
+        bestLoading={bestLoading || (bestSellers.length === 0 && fallbackLoading)}
+        newArrivalProducts={newArrivalProducts}
+        newLoading={newLoading || (newArrivals.length === 0 && fallbackLoading)}
+        deliverySettings={deliverySettings}
+        onSearchOpen={() => setSearchOpen(true)}
+        onCategorySelect={(categoryId) => goToShop(categoryId)}
+        onShopAll={() => goToShop()}
+        onProductClick={handleProductClick}
+        onGoToShop={() => goToShop()}
+        onWishlistToggle={toggleWishlist}
+        isWishlisted={isWishlisted}
+      />
+
+    <div className={`${tw.pageTopOffset} hidden min-h-screen md:block`} style={{ background: "#f1f3f6" }}>
       <div className={tw.storeContainer}>
         <div className="mb-2">
           <HeroSection
@@ -223,5 +258,6 @@ export default function StoreHomePage() {
         </LazyMount>
       </div>
     </div>
+    </>
   );
 }

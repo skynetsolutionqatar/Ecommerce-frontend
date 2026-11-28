@@ -4,10 +4,16 @@ import { Suspense, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileConfirmDialog from "@/components/store/mobile/MobileConfirmDialog";
+import MobileStoreTabBar from "@/components/store/MobileStoreTabBar";
 import { useStore } from "@/components/StoreProvider";
+import { shouldShowMobileTabBar } from "@/lib/store/mobile-chrome";
+import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
+import type { ApiProduct } from "@/types/product.types";
+import { usePathname } from "next/navigation";
 import type { ApiCategory } from "@/types/category.types";
 
-const SearchModal = dynamic(() => import("@/components/SearchModal"), { ssr: false });
+const StoreSearch = dynamic(() => import("@/components/StoreSearch"), { ssr: false });
 const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
 const CartDrawer = dynamic(() => import("@/components/CartDrawer"), { ssr: false });
 const WishlistDrawer = dynamic(() => import("@/components/WishlistDrawer"), { ssr: false });
@@ -28,6 +34,10 @@ export default function StoreShell({ children }: { children: ReactNode }) {
     logout,
     openProduct,
     goToShop,
+    addToCart,
+    refreshCart,
+    isWishlisted,
+    toggleWishlist,
     updateCart,
     removeFromCart,
     removeFromWishlist,
@@ -38,8 +48,12 @@ export default function StoreShell({ children }: { children: ReactNode }) {
     goToShop(category._id);
   };
 
+  const pathname = usePathname() ?? "/";
+  const showMobileTabBar = shouldShowMobileTabBar(pathname);
+  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
   return (
-    <div className="store-shell flex min-h-0 w-full flex-1 flex-col">
+    <div className="store-shell store-shell--mobile-web flex min-h-0 w-full flex-1 flex-col">
       <Header
         cart={cart}
         wishlist={wishlist}
@@ -52,12 +66,26 @@ export default function StoreShell({ children }: { children: ReactNode }) {
         onCategorySelect={handleCategorySelect}
       />
 
-      <main>{children}</main>
-      <Footer />
+      <main className="store-mobile-main min-h-0 flex-1">{children}</main>
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+
+      {showMobileTabBar ? (
+        <Suspense fallback={null}>
+          <MobileStoreTabBar
+            cartCount={cartCount}
+            cartOpen={cartOpen}
+            onCartOpen={() => setCartOpen(true)}
+            user={user}
+            onLoginOpen={() => setLoginOpen(true)}
+          />
+        </Suspense>
+      ) : null}
 
       {searchOpen ? (
         <Suspense fallback={null}>
-          <SearchModal
+          <StoreSearch
             open={searchOpen}
             onClose={() => setSearchOpen(false)}
             onProductSelect={(product) => {
@@ -92,6 +120,17 @@ export default function StoreShell({ children }: { children: ReactNode }) {
             onGoToShop={() => goToShop()}
             onUpdate={updateCart}
             onRemove={removeFromCart}
+            onRefresh={() => void refreshCart()}
+            isWishlisted={isWishlisted}
+            onToggleWishlist={toggleWishlist}
+            onAddProduct={(product: ApiProduct) => {
+              const mapped = apiProductToStoreProduct(product);
+              addToCart(mapped, mapped.colors[0]?.name ?? "", mapped.sizes[0] ?? "");
+            }}
+            onOpenProduct={(product: ApiProduct) => {
+              setCartOpen(false);
+              openProduct(apiProductToStoreProduct(product));
+            }}
           />
         </Suspense>
       ) : null}
@@ -107,6 +146,8 @@ export default function StoreShell({ children }: { children: ReactNode }) {
           />
         </Suspense>
       ) : null}
+
+      <MobileConfirmDialog />
     </div>
   );
 }

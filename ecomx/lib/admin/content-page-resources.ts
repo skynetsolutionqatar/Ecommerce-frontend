@@ -1,7 +1,11 @@
 import { ADMIN_ROUTES } from "@/lib/config";
 import { ROUTES } from "@/lib/routes";
 
-export type FixedContentPageKey = "faq" | "terms-and-conditions" | "cancellation-policy";
+export type FixedContentPageKey =
+  | "faq"
+  | "terms-and-conditions"
+  | "cancellation-policy"
+  | "cookie-policy";
 
 export type FixedContentPageResource = {
   key: FixedContentPageKey;
@@ -44,6 +48,16 @@ export const FIXED_CONTENT_PAGE_RESOURCES: FixedContentPageResource[] = [
     title: "Cancellation Policy",
     description: "Order cancellation policy linked from the footer",
     saveLabel: "Save Policy",
+  },
+  {
+    key: "cookie-policy",
+    slug: "cookie-policy",
+    adminRoute: ADMIN_ROUTES.cookiePolicy,
+    storeRoute: ROUTES.cookiePolicy,
+    menuLabel: "Cookie Policy",
+    title: "Cookie Notice",
+    description: "Cookie notice linked from the consent bar and footer",
+    saveLabel: "Save Cookie Policy",
   },
 ];
 

@@ -13,7 +13,9 @@ import { trackGuestActivityIfAnonymous } from "@/lib/store/guest-activity-helper
 import { useRouter } from "next/navigation";
 import { fetchProduct } from "@/lib/api/product.api";
 import { showError } from "@/lib/toast";
+import { confirmRemoval } from "@/lib/store/confirm-dialog";
 import { clearCheckoutAddress } from "@/lib/store/checkout-address-cache";
+import { isPhoneViewport } from "@/lib/store/mobile-chrome";
 import { authUserToStoreUser } from "@/lib/auth-utils";
 import { apiProductToStoreProduct } from "@/lib/store/product-mapper";
 import { ROUTES, shopUrl } from "@/lib/routes";
@@ -147,23 +149,64 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
 
   const handleRemoveFromCart = useCallback(
     (id: string) => {
-      void removeFromCart(id);
+      const run = () => {
+        void removeFromCart(id);
+      };
+      if (!isPhoneViewport()) {
+        run();
+        return;
+      }
+      const label = cart.find((entry) => entry.id === id)?.name?.trim() || "this item";
+      confirmRemoval({
+        title: "Remove from cart?",
+        message: `"${label}" will be removed from your cart. You can add it again anytime from the shop.`,
+        cancelLabel: "Keep in cart",
+        confirmLabel: "Remove",
+        onConfirm: run,
+      });
     },
-    [removeFromCart]
+    [cart, removeFromCart]
   );
 
   const handleToggleWishlist = useCallback(
     (item: WishlistItem) => {
-      void toggleWishlist(item);
+      if (!isWishlisted(item.id) || !isPhoneViewport()) {
+        void toggleWishlist(item);
+        return;
+      }
+      const label = item.name.trim() || "This item";
+      confirmRemoval({
+        title: "Remove from wishlist?",
+        message: `"${label}" will be removed from your saved items.`,
+        cancelLabel: "Keep saved",
+        confirmLabel: "Remove",
+        onConfirm: () => {
+          void toggleWishlist(item);
+        },
+      });
     },
-    [toggleWishlist]
+    [isWishlisted, toggleWishlist]
   );
 
   const handleRemoveFromWishlist = useCallback(
     (productId: string) => {
-      void removeFromWishlist(productId);
+      const run = () => {
+        void removeFromWishlist(productId);
+      };
+      if (!isPhoneViewport()) {
+        run();
+        return;
+      }
+      const label = wishlist.find((entry) => entry.id === productId)?.name?.trim() || "This item";
+      confirmRemoval({
+        title: "Remove from wishlist?",
+        message: `"${label}" will be removed from your saved items.`,
+        cancelLabel: "Keep saved",
+        confirmLabel: "Remove",
+        onConfirm: run,
+      });
     },
-    [removeFromWishlist]
+    [removeFromWishlist, wishlist]
   );
 
   const addWishlistToCart = useCallback(

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import * as Icons from "@/components/Icons";
 import { useContentPageBySlug } from "@/hooks/useContentPages";
+import CookiePreferencesManageButton from "@/components/store/CookiePreferencesManageButton";
+import { COOKIE_POLICY_FALLBACK_BODY, COOKIE_POLICY_SLUG } from "@/lib/store/cookie-policy-content";
 import { ROUTES } from "@/lib/routes";
 import { tw, type } from "@/lib/theme";
 
@@ -63,6 +65,21 @@ export default function ContentPageView({ slug }: { slug: string }) {
     );
   }
 
+  if ((isError || !page) && slug === COOKIE_POLICY_SLUG) {
+    return (
+      <ContentPageShell>
+        <div className={`${tw.card} px-6 py-8 sm:px-8 sm:py-10`}>
+          <div className={`mb-2 ${type.eyebrow} text-[13px] text-muted md:text-[11px]`}>Information</div>
+          <h1 className="font-display text-[28px] font-bold leading-tight text-primary sm:text-[32px]">
+            Cookie Notice
+          </h1>
+          <div className="mt-8 flex flex-col gap-1">{renderBody(COOKIE_POLICY_FALLBACK_BODY)}</div>
+          <CookiePreferencesManageButton />
+        </div>
+      </ContentPageShell>
+    );
+  }
+
   if (isError || !page) {
     return (
       <ContentPageShell>
@@ -84,6 +101,7 @@ export default function ContentPageView({ slug }: { slug: string }) {
           {page.title}
         </h1>
         <div className="mt-8 flex flex-col gap-1">{renderBody(page.body)}</div>
+        {slug === COOKIE_POLICY_SLUG ? <CookiePreferencesManageButton /> : null}
       </div>
     </ContentPageShell>
   );
